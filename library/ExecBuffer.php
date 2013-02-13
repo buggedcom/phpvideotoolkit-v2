@@ -24,7 +24,7 @@
 	{
 		static $executed_commands = array();
 		
-		protected $_programme;
+		protected $_program;
 		
 		protected $_temp_directory;
 		
@@ -32,10 +32,14 @@
 		protected $_post_input_commands;
 		protected $_input;
 		
-		public function __construct($programme, $temp_directory)
+		public function __construct($program, $temp_directory)
 		{
-			$this->_programme = $programme;
-			// TODO check exists and throw exception
+			$program_path = strpos($program, DIRECTORY_SEPARATOR) === 0 ? $program : $this->_which($program);
+			if($program_path === false)
+			{
+				throw new Exception('Unable to locate '.$program.'.');
+			}
+			$this->_program = $program_path;
 			
 			$this->_temp_directory = $temp_directory;
 			// TODO check writable and throw exception
@@ -44,6 +48,84 @@
 			$this->_post_input_commands = array();
 			$this->_input = null;
 		}
+		
+	    /**
+	     * The "which" command (show the full path of a command).
+		 * This function heavily borrows from Pear::System::which
+	     *
+	     * @param string $program The command to search for
+	     * @param mixed  $fallback Value to return if $program is not found
+	     *
+	     * @return mixed A string with the full path or false if not found
+	     * @static
+	     * @author Stig Bakken <ssb@php.net>
+	     * @author Oliver Lillie
+	     */
+	    protected function _which($program, $fallback = false)
+	    {
+// 			enforce API
+	        if(is_string($program) === false || empty($program) === true)
+			{
+	            return $fallback;
+	        }
+
+// 			full path given
+	        if(basename($program) !== $program)
+			{
+	           	$path_elements = array(dirname($program));
+	            $program = basename($program);
+	        }
+			else
+			{
+// 				Honor safe mode
+	            if(!ini_get('safe_mode') || !($path = ini_get('safe_mode_exec_dir')))
+				{
+	                $path = getenv('PATH');
+	                if(!$path)
+					{
+	                    $path = getenv('Path'); // some OSes are just stupid enough to do this
+	                }
+	            }
+				
+//				if we have no path to guess with, throw exception.
+				if(empty($path) === true)
+				{
+					throw new Exception('Unable to guess environment paths. Please set the absolute path to the program "'.$program.'"');
+				}
+				
+	            $path_elements = explode(PATH_SEPARATOR, $path);
+	        }
+
+	        if(substr(PHP_OS, 0, 3) === 'WIN')
+			{
+				$env_pathext = getenv('PATHEXT');
+	            $exe_suffixes = empty($env_pathext) === false ? explode(PATH_SEPARATOR, $env_pathext) : array('.exe','.bat','.cmd','.com');
+// 				allow passing a command.exe param
+	            if(strpos($program, '.') !== false)
+				{
+	                array_unshift($exe_suffixes, '');
+	            }
+	        }
+			else
+			{
+	            $exe_suffixes = array('');
+	        }
+			
+//			loop and fine path.
+	        foreach($exe_suffixes as $suff)
+			{
+	            foreach($path_elements as $dir)
+				{
+	                $file = $dir.DIRECTORY_SEPARATOR.$program.$suff;
+	                if(@is_executable($file) === true)
+					{
+	                    return $file;
+	                }
+	            }
+	        }
+			
+	        return $fallback;
+	    }
 		
 		/**
 		 * Adds a command to be bundled into command line call to be 
@@ -169,18 +251,18 @@
 		/**
 		 * Prepares the command for execution
 		 *
-		 * @access protected
+		 * @access public
 		 * @return string
 		 */
-		protected function _buildExecutableCommandString()
+		public function getExecutableString()
 		{
 			$command_string = $this->_combineCommands();
 			
-	        if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' || !preg_match('/\s/', $path))
+	        if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' || preg_match('/\s/', $path) === 0)
 	        {
-	            return $this->_programme.' '.$command_string;
+	            return $this->_program.' '.$command_string;
 	        }
-	        return 'start /D "'.$this->_programme.'" /B '.$command_string;
+	        return 'start /D "'.$this->_program.'" /B '.$command_string;
 		}
 		
 		/**
@@ -195,7 +277,7 @@
 		public function execute()
 		{
 //			build the executable string.
-			$executable_string = $this->_buildExecutableCommandString();
+			$executable_string = $this->getExecutableString();
 			
 //			try processing the command straight into the buffer.
 //			this works on some systems but not on others.   
@@ -229,7 +311,7 @@
 				// TODO throw exception here.
 				$buffer = array();
 			}
-			
+
 //			save for future reference and debugging
 			self::$executed_commands[$executable_string] = $buffer;
 			
