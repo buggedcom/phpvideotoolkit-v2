@@ -18,8 +18,14 @@
 		if($namespace === 'PHPVideoToolkit')
 		{
 			$class = array_pop($parts);
-			$path = dirname(__FILE__).DIRECTORY_SEPARATOR.'library'.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, $parts).$class.'.php';
-	
-			require_once $path;
+			$path = dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, $parts).$class.'.php';
+			if(is_file($path) === true)
+			{
+				require_once $path;
+			}
+			else
+			{
+				trigger_error('Class \''.$class_name.'\' not found in <b>'.__FILE__.'<\b> on line <b>23</b>.', E_ERROR);
+			}
 		}
 	});

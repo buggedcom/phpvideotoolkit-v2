@@ -1,0 +1,20 @@
+{
+    "name": "buggedcom/phpvideotoolkit",
+    "description": "PHPVideoToolkit is a set of classes aimed to provide a modular, object oriented and accessible interface for interacting with videos and audio through the FFmpeg program.",
+    "license": "GPL-3.0+,MIT",
+    "authors": [
+        {
+            "name": "Oliver Lillie",
+            "email": "ollie@buggedcom.co.uk"
+        },
+	],
+    "require": {
+        "php": ">=5.3.0",
+        "another-vendor/package": "1.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "PHPVideoToolkit": "lib/"
+        }
+    }
+}
