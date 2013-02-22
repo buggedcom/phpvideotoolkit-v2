@@ -33,6 +33,8 @@
 		protected $_post_ouput_commands;
 		protected $_input;
 		protected $_output;
+		protected $_non_blocking;
+		protected $_progress_handler;
 		
 		public function __construct($program, $temp_directory)
 		{
@@ -65,6 +67,8 @@
 			$this->_post_input_commands = array();
 			$this->_post_ouput_commands = array();
 			$this->_input = null;
+			$this->_non_blocking = false;
+			$this->_progress_handler = null;
 		}
 		
 	    /**
@@ -154,7 +158,7 @@
 		 */
 		public function setInput($input)
 		{
-			$this->_input = escapeshellarg($input);
+			$this->_input = $input;
 			return $this;
 		}
 
@@ -167,7 +171,7 @@
 		 */
 		public function setOutput($output)
 		{
-			$this->_output = escapeshellarg($output);
+			$this->_output = $output;
 			return $this;
 		}
 
@@ -373,7 +377,7 @@
 //			add in the input
 			if(empty($this->_input) === false)
 			{
-				$command_string .= '-i '.$this->_input.' ';
+				$command_string .= '-i '.escapeshellarg($this->_input).' ';
 			}
 			
 //			build the post input commands
@@ -382,7 +386,7 @@
 //			add in the output
 			if(empty($this->_output) === false)
 			{
-				$command_string .= $this->_output;
+				$command_string .= escapeshellarg($this->_output);
 			}
 			
 //			build the post output commands
@@ -406,6 +410,21 @@
 			return trim($command.(empty($argument) === false ? ' '.$argument : ''));
 		}
 
+		public function setNonBlocking($non_blocking_status=true)
+		{
+			if(is_bool($non_blocking_status) === false)
+			{
+				throw new Exception('$non_blocking_status must be a boolean value.');
+			}
+			
+			$this->_non_blocking = $non_blocking_status;
+		}
+		
+		public function getNonBlocking()
+		{
+			return $this->_non_blocking;
+		}
+		
 		/**
 		 * Prepares the command for execution
 		 *
@@ -414,13 +433,46 @@
 		 */
 		public function getExecutableString()
 		{
-			$command_string = $this->_combineCommands();
+//			if we have a progress handler, we may need to add commands to the exec chain.
+			if($this->_progress_handler !== null)
+			{
+				$this->_progress_handler->setProgressExecCommands($this);
+			}
 			
+//			now combine all the commands we have,
+			$command_string = $this->_combineCommands();
 	        if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' || preg_match('/\s/', $path) === 0)
 	        {
-	            return $this->_program.' '.$command_string;
+	            $command_string = $this->_program.' '.$command_string;
 	        }
-	        return 'start /D "'.$this->_program.'" /B '.$command_string;
+			else
+			{
+		        $command_string = 'start /D "'.$this->_program.'" /B '.$command_string;
+			}
+			
+			if($this->_non_blocking === true)
+			{
+				$command_string .= ' > /dev/null 2>&1 &';
+			}
+			
+//			if we have a progress handler we may need to post process the command string
+			if($this->_progress_handler !== null)
+			{
+				$this->_progress_handler->postProcessExecCommandsString($this, $command_string);
+			}
+			
+			return $command_string;
+		}
+		
+		protected function _getTemporaryOutputFile()
+		{
+			$tempfile = Factory::tempFile();
+			return $tempfile->file(null, 'txt');
+		}
+		
+		public function setProgressHandler(ProgressHandlerAbstract $progress_handler=null)
+		{
+			$this->_progress_handler = $progress_handler;
 		}
 		
 		/**
@@ -432,23 +484,32 @@
 		 * @param string $tmp_dir 
 		 * @return void
 		 */
-		public function execute()
+		public function execute($i=false)
 		{
 //			build the executable string.
 			$executable_string = $this->getExecutableString();
 			
+//			if we have a progress handler, start it now.
+			if($this->_progress_handler !== null)
+			{
+				$this->_progress_handler->getReadyToExecute($this, $executable_string);
+			}
 //			try processing the command straight into the buffer.
 //			this works on some systems but not on others.   
-			// TODO check this is needed. does this process it twice?
-			exec($executable_string.' 2>&1', $buffer, $err); 
+			exec($executable_string, $buffer, $err); 
+			
+//			if we have a progress handler, start it now.
+			if($this->_progress_handler !== null)
+			{
+				$this->_progress_handler->startHandler();
+			}
 			if($err !== 127)
 			{ 
 				if(isset($buffer[0]) === false)
 				{   
 //					create a temp file to store the buffered read.
-					$tempfile = new TempFile($this->_temp_directory);
-					$output_file = $tempfile->file(null, 'txt');
-					
+					$output_file = $this->_getTemporaryOutputFile();
+						
 //					ouput the buffer into the temporary output file so that we can read it back into PHP.
 					exec($executable_string.' &>'.$output_file, $buffer, $err);
 					

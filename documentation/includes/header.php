@@ -97,6 +97,7 @@
 						<li<?php echo $current_page === 'examples.overlay-audio.php' ? ' class="active"' : ''; ?>><a href="./examples.overlay-audio.php">Overlay Audio</a></li>
 						<li<?php echo $current_page === 'examples.join-videos.php' ? ' class="active"' : ''; ?>><a href="./examples.join-videos.php">Join Videos</a></li>
 						<li<?php echo $current_page === 'examples.transcoding-without-blocking-PHP.php' ? ' class="active"' : ''; ?>><a href="./examples.transcoding-without-blocking-PHP.php">Transcoding without Blocking PHP</a></li>
+						<li<?php echo $current_page === 'examples.transcoding-with-progress-handlers.php' ? ' class="active"' : ''; ?>><a href="./examples.transcoding-with-progress-handlers.php">Transcoding with Progress Handlers</a></li>
 						<li<?php echo $current_page === 'examples.transcoding-with-url-pinging.php' ? ' class="active"' : ''; ?>><a href="./examples.transcoding-with-url-pinging.php">Transcoding with Url Pinging</a></li>
 						<li<?php echo $current_page === 'examples.queuing-transcoding.php' ? ' class="active"' : ''; ?>><a href="./examples.queuing-transcoding.php">Queuing Transcoding</a></li>
 					</ul>

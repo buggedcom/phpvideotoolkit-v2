@@ -159,14 +159,57 @@
 			return $this->_media_file_path;
 		}
 		
-		public function setMetaData($key, $value)
+		/**
+		 * Sets global meta data on the media. That being said "global" does not mean it sets the
+		 * meta data on the media streams, rather just the meta data on the container.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $key 
+		 * @param string $value 
+		 * @return void
+		 */
+		public function setMetaData($key, $value=null)
 		{
+			if(is_array($key) === true)
+			{
+				foreach ($key as $k => $v)
+				{
+					$this->setMetaData($k, $v);
+				}
+				return $this;
+			}
+			
 			if(empty($key) === true)
 			{
 				throw new Exception('Empty metadata key. Metadata keys must be at least one character long.');
 			}
 			
 			$this->_metadata[$key] = $value;
+			return $this;
+		}
+		
+		/**
+		 * Removes all the global meta data. That being said "global" does not mean it removes the
+		 * meta data from the media streams, rather just the meta data on the container.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function purgeMetaData()
+		{
+			$this->_metadata = array();
+
+			$meta = $this->readGlobalMetaData();
+			if(empty($meta) === false)
+			{
+				foreach ($meta as $key => $ignored)
+				{
+					$this->setMetaData($key, '');
+				}
+			}
+			
 			return $this;
 		}
 		
@@ -332,7 +375,7 @@
 			}
 			
 			$this->_split_options = array();
-			$duration = $this->getDuration();
+			$duration = $this->readDuration();
 			
 //			check the split by
 			if(empty($split_by) === true)
@@ -439,33 +482,51 @@
 		}
 		
 		/**
-		 * Saves any changes to the media file to the given save path.
-		 * IMPORTANT! This save blocks PHP execution, meaning that once called, the PHP interpretter
-		 * will NOT continue untill the video/audio/media file(s) have been transcoded.
+		 * Gets the final length of the output based upon the extraction/split commands
+		 * If the output is bing split, then an array will be returned, otherwise a float.
+		 * IMPORTANT! The duration(s) returned are based of various configurable options
+		 * and the resulting output by ffmpeg may vary slightly.
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @param Format $output_format 
-		 * @param string $save_path 
-		 * @param string $overwrite 
-		 * @return mixed Returns a new Media object on a successfull completion, otherwise returns false.
-		 *	The last error message is set to Media->last_error_message. A full list of error messages is 
-		 *	available through Media->error_messages.
+		 * @return mixed
 		 */
-		public function save($save_path, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, Processor &$processor=null)
+		public function getFinalDuration()
 		{
-//			pre process all of the common functionality and pre process the output format.
-			$this->_savePreProcess($output_format, $save_path, $overwrite, $processor);
+			$duration = $this->readDuration();
+			$duration_seconds = $duration->total_seconds;
 			
-//			add the commands from the output format to the exec buffer
-//			NOTE; this cannot be done in _savePreProcess as it must be done after, to ensure all the subclass
-//			_savePreProcess functionality and main media class functionality is properly executed.
-			$this->_saveAddOutputFormatCommands($output_format);
-
-//			generate a processing address within the temp directory
-			$this->_exec->setOutput($this->_processing_path);
-
-			Trace::vars($this->_exec->getExecutableString());
+//			as extractSegment must always be called before split therefore we process the segment options first
+			if(empty($this->_extract_segment) === false)
+			{
+				if(empty($this->_extract_segment['length']) === false)
+				{
+					$duration_seconds = $this->_extract_segment['length'];
+				}
+				else
+				{
+					if(empty($this->_extract_segment['preseek']) === false)
+					{
+						$duration_seconds -= $this->_extract_segment['preseek']->total_seconds;
+					}
+					if(empty($this->_extract_segment['seek']) === false)
+					{
+						$duration_seconds -= $this->_extract_segment['preseek']->total_seconds;
+					}
+				}
+				
+				$duration = new Timecode($duration_seconds, Timecode::INPUT_FORMAT_SECONDS);
+			}
+			
+//			do we have any split options?
+			if(empty($this->_split_options) === false)
+			{
+				// segment_time, a single time in seconds
+				// segment_times, multiple times in seconds
+				// segment_frames, frames
+			}
+			
+			return $duration;
 		}
 		
 		/**
@@ -514,6 +575,45 @@
 		}
 		
 		/**
+		 * Saves any changes to the media file to the given save path.
+		 * IMPORTANT! This save blocks PHP execution, meaning that once called, the PHP interpretter
+		 * will NOT continue untill the video/audio/media file(s) have been transcoded.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $save_path 
+		 * @param Format $output_format 
+		 * @param string $overwrite 
+		 * @param ProgressHandlerAbstract $progress_handler
+		 * @return mixed Returns a new Media object on a successfull completion, otherwise returns false.
+		 *	The last error message is set to Media->last_error_message. A full list of error messages is 
+		 *	available through Media->error_messages.
+		 */
+		public function save($save_path, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
+		{
+//			pre process all of the common functionality and pre process the output format.
+			$this->_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
+
+//			set the progress handler 
+			if($progress_handler !== null)
+			{
+				$progress_handler->setTotalDuration($this->getFinalDuration());
+				$this->_exec->setProgressHandler($progress_handler);
+			}
+
+//			add the commands from the output format to the exec buffer
+//			NOTE; this cannot be done in _savePreProcess as it must be done after, to ensure all the subclass
+//			_savePreProcess functionality and main media class functionality is properly executed.
+			$this->_saveAddOutputFormatCommands($output_format);
+
+//			set the processing output path
+			$this->_exec->setOutput($this->_processing_path);
+			
+//			do the business that we came for
+			$this->_exec->execute(true);
+		}
+		
+		/**
 	 	 * Saves any changes to the media file to the given save path.
 	 	 * IMPORTANT! This save does NOT block PHP execution, meaning that once called, the PHP interpretter
 	 	 * will IMMEDIATELY continue. PHP will continue, in all likelyhood, exit before the ffmpeg has
@@ -524,28 +624,33 @@
 	 	 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @param Format $output_format 
 		 * @param string $save_path 
+		 * @param Format $output_format 
 		 * @param string $overwrite 
-		 * @param Processor $processor
 		 * @return boolean If the command is sent without error then true is returned, otherwise false.
 		 *	The last error message is set to Media->last_error_message. A full list of error messages is 
 		 *	available through Media->error_messages.
 		 */
-		public function saveNonBlocking(Format $output_format, $save_path, $overwrite=self::OVERWRITE_FAIL, Processor &$processor=null)
+		public function saveNonBlocking($save_path, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
 		{
-//			pre process all of the common functionality and pre process the output format.
-			$this->_savePreProcess($output_format, $save_path, $overwrite, $processor);
+//			set the non blocking of the exec process
+			$this->_exec->setNonBlocking(true);
 			
-//			add the commands from the output format to the exec buffer
-//			NOTE; this cannot be done in _savePreProcess as it must be done after, to ensure all the subclass
-//			_savePreProcess functionality and main media class functionality is properly executed.
-			$this->_saveAddOutputFormatCommands($output_format);
-
-//			generate a processing address within the temp directory
-			$this->_exec->setOutput($this->_processing_path);
-
-			Trace::vars($this->_exec->getExecutableString());
+//			set the progress handler 
+			if($progress_handler !== null)
+			{
+//				because only certain types of handlers are compatible with non blocking saves we need to check for compatibility.
+				if($progress_handler->getNonBlockingCompatibilityStatus() === false)
+				{
+					throw new Exception('The progress handler given is not compatible with a non blocking save.');
+				}
+				
+				$progress_handler->setTotalDuration($this->getFinalDuration());
+				$this->_exec->setProgressHandler($progress_handler);
+			}
+			
+			
+			$this->save($save_path, $output_format, $overwrite, $progress_handler);
 		}
 		
 		/**
@@ -563,10 +668,10 @@
 		 * @param Processor $processor
 		 * @return string
 		 */
-		public function getExecutionCommand(Format $output_format, $save_path, $overwrite=self::OVERWRITE_FAIL, Processor &$processor=null)
+		public function getExecutionCommand($save_path, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL)
 		{
 //			pre process all of the common functionality and pre process the output format.
-			$this->_savePreProcess($output_format, $save_path, $overwrite, $processor);
+			$this->_savePreProcess($output_format, $save_path, $overwrite);
 			
 //			add the commands from the output format to the exec buffer
 //			NOTE; this cannot be done in _savePreProcess as it must be done after, to ensure all the subclass
@@ -588,14 +693,14 @@
 		 * @param Format $output_format 
 		 * @param string $save_path 
 		 * @param string $overwrite 
-		 * @param Processor $processor 
+		 * @param ProgressHandlerAbstract $progress_handler 
 		 * @return void
 		 */
-		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, Processor &$processor=null)
+		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
 		{
 //			do some processing on the input format
 			// $this->_processInputFormat();
-			
+
 //			do some pre processing of the output format
 			$this->_processOutputFormat($output_format, $save_path);
 			

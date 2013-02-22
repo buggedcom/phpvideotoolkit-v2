@@ -33,16 +33,17 @@
 		 */
 		public function isAvailable($read_from_cache=true)
 		{
-			static $available = null;
-			if($read_from_cache === true && $available !== null)
+			$cache_key = 'ffmpeg_available';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-				return $available;
+				return $data;
 			}
 
 			$raw_data = $this->getRawFfmpegData($read_from_cache);
-			$available = strpos($raw_data, 'not found') === false && strpos($raw_data, 'No such file or directory') === false;
+			$data = strpos($raw_data, 'not found') === false && strpos($raw_data, 'No such file or directory') === false;
 			
-			return $available;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -55,8 +56,8 @@
 		 */
 		public function getRawFfmpegData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_raw_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
 				return $data;
 			}
@@ -64,7 +65,9 @@
 			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
 			$data = $exec->execute();
 
-			return $data = implode("\n", $data);
+			$data = implode("\n", $data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -77,8 +80,8 @@
 		 */
 		public function getRawFormatData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_raw_formats_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
 				return $data;
 			}
@@ -87,7 +90,9 @@
 			$data = $exec->addCommand('-formats')
 						 ->execute();
 
-			return $data = implode("\n", $data);
+			$data = implode("\n", $data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 	}

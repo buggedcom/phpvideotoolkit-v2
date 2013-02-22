@@ -72,8 +72,8 @@
 		 */
 		public function getRawPixelFormatsData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/raw_pixel_formats_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -83,7 +83,9 @@
 			$exec->addCommand('-pix_fmts');
 			$data = $exec->execute();
 			
-			return implode("\n", $data);
+			$data = implode("\n", $data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -96,8 +98,8 @@
 		 */
 		public function getRawCommandsData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/raw_commands_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -106,7 +108,9 @@
 			$exec->addCommand('-h', 'long');
 			$data = $exec->execute();
 			
-			return implode("\n", $data);
+			$data = implode("\n", $data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 
 		/**
@@ -119,8 +123,8 @@
 		 */
 		public function getFfmpegData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/ffmpeg_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -152,6 +156,7 @@
 				}
 			}
 			
+			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
 		
@@ -165,10 +170,10 @@
 		 */
 		public function getVersion($read_from_cache=true)
 		{
-			static $version_data = null;
-			if($read_from_cache === true && $version_data !== null)
+			$cache_key = 'ffmpeg_parser/ffmpeg_version';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
-				return $version_data;
+				return $data;
 			}
 			
 			$version = null;
@@ -239,12 +244,20 @@
 				}
 			}
 			
-			// TODO throw new exception telling them to send the data to a github issue.
-
-			return $version_data = array(
+//			if both version and build are not available throw a new exception to get the user to provide their ffmpeg data to github so we can start building up different formats of ffmpeg output.
+			if($version === null && $build === null)
+			{
+				throw new Exception('Unable to determine your FFmpeg version or build. Please create an issue at the github repository for PHPVideoToolkit 2; https://github.com/buggedcom/phpvideotoolkit-v2/issues. Please add the following data to the ticket:<br />
+<br />				
+<code>'.$this->getRawFfmpegData($read_from_cache).'</code>');
+			}
+			
+			$data = array(
 				'build' => $build,
 				'version' => $version, 
 			);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -257,8 +270,8 @@
 		 */
 		public function getInformation($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/parsed_information';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -272,6 +285,7 @@
 			$data['pixel_formats'] 			= $this->getPixelFormats($read_from_cache);
 			//$data['commands'] 				= $this->getCommands();
 			
+			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
 		
@@ -286,16 +300,18 @@
 		 */
 		public function hasFfmpegPhpSupport($read_from_cache=true)
 		{
-			static $available = null;
-			if($read_from_cache === true && $available !== null)
+			$cache_key = 'ffmpeg_parser/ffmpeg_php_available';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-				return $available;
+				return $data;
 			}
 			
 //			check to see if the module is loaded.
 			if(extension_loaded('ffmpeg') === true)
 			{
-				return $available = 'module';
+				$data = 'module';
+				$this->_cacheSet($cache_key, $data);
+				return $data;
 			}
 			
 //			check to see if an adapter exists
@@ -304,10 +320,14 @@
 			   && is_file($base_dir.'/emulators/ffmpeg-php/ffmpeg_frame.php') === true
 			   && is_file($base_dir.'/emulators/ffmpeg-php/ffmpeg_animated_gif.php') === true)
 			{
-				$available = 'emulated';
+				$data = 'emulated';
+				$this->_cacheSet($cache_key, $data);
+				return $data;
 			}
 			
-			return $available = false;
+			$data = false;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -320,8 +340,8 @@
 		 */
 		public function getFormats($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/parsed_formats';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -344,6 +364,7 @@
 		        }
 			}
 			
+			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
 		
@@ -360,10 +381,15 @@
 		 */
 		public function getCodecs($component=null, $read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			if(in_array($component, array('video', 'audio', 'subtitle', null)) === false)
 			{
-				return $data;
+				throw new Exception('Unrecognised codec component specified.');
+			}
+			
+			$cache_key = 'ffmpeg_parser/parsed_codecs';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
+			{
+				return $component === null ? $data : (isset($data[$component]) === true ? $data[$component] : false);
 			}
 			
 //			get the raw format information
@@ -430,6 +456,8 @@
 				}
 			}
 			
+			$this->_cacheSet($cache_key, $data);
+			
 //			are we to only return a specific component of the data?
 			if($component !== null)
 			{
@@ -454,8 +482,8 @@
 		 */
 		public function getBitstreamFilters($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/parsed_bitstream_filters';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -476,6 +504,7 @@
 				});
 		    }
 			
+			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
 		
@@ -491,9 +520,10 @@
 		 */
 		public function getFilters($just_filter_names=true, $read_from_cache=true)
 		{
-			static $data = null;
 			$component = $just_filter_names === true ? 'filters' : 'verbose';
-			if($read_from_cache === true && empty($data) === false)
+			
+			$cache_key = 'ffmpeg_parser/parsed_filters';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $component === 'verbose' ? $data : array_keys($data);
 			}
@@ -527,6 +557,8 @@
 				}
 		    }
 			
+			$this->_cacheSet($cache_key, $data);
+
 			return $component === 'verbose' ? $data : array_keys($data);
 		}
 		
@@ -540,8 +572,8 @@
 		 */
 		public function getProtocols($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/parsed_protocols';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -618,6 +650,7 @@
 				}
 			}
 			
+			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
 		
@@ -631,8 +664,8 @@
 		 */
 		public function getPixelFormats($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/parsed_pixel_formats';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -694,6 +727,7 @@
 				}
 		    }
 			
+			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
 		
@@ -707,8 +741,8 @@
 		 */
 		public function getCommands($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser/parsed_commands';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -739,6 +773,7 @@
 				}
 			}
 			
+			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
 		

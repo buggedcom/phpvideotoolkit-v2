@@ -50,9 +50,9 @@
 			return $this->_getDefaultFormat($type, 'AudioFormat');
 		}
 		
-		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, Processor &$processor=null)
+		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
 		{
-			parent::_savePreProcess($output_format, $save_path, $overwrite, $processor);
+			parent::_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
 			
 //			if we are splitting the output
 			if(empty($this->_split_options) === false)

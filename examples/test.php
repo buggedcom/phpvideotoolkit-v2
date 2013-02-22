@@ -7,17 +7,14 @@
 	
 	require_once '../autoloader.php';
 	
+//	require '../vendor/autoload.php';
+	// $stash = new Stash\Pool();
+	// print_r($stash);
+	// exit;
+	
 	try
 	{
-		\PHPVideoToolkit\Factory::setDefaultVars('/tmp', '/opt/local/bin');
-	
-		// $video_format = \PHPVideoToolkit\Factory::videoFormat('input');
-		// $video_format->setFormat('flv');
-		// \PHPVideoToolkit\Trace::vars($video_format);
-		 	
-		// $data_parser = \PHPVideoToolkit\Factory::ffmpegParser();
-		// $data = $data_parser->getFormats();
-		// \PHPVideoToolkit\Trace::vars($data);
+		\PHPVideoToolkit\Factory::setDefaultVars('./tmp', '/opt/local/bin');
 
 		$output_format = \PHPVideoToolkit\Factory::videoFormat('output')
 			->setStrictness('experimental')
@@ -27,21 +24,29 @@
 			->setVideoFrameRate(30)
 			//->setVideoPadding(50, 0, 50, 0)
 			->setVideoRotation(true);
+		
+		ob_start();
+		$progress_handler = new \PHPVideoToolkit\ProgressHandlerOutput(function($data)
+		{
+			\PHPVideoToolkit\Trace::vars($data);
+			ob_flush();
+		});
 
- 		$video = \PHPVideoToolkit\Factory::video('./output/test-1360859158.mp4');
+ 		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
 		$video
-			->setMetaData('title', 'Hello')
-			->setMetaData('description', 'What the "chuff", this is \' a quote.')
-			->extractSegment(
-				null,
-				new \PHPVideoToolkit\Timecode(2, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS)
-			)
-//			->split(5, 0.5)
-			->save('./output/test-'.time().'.mp4', $output_format, \PHPVideoToolkit\Video::OVERWRITE_EXISTING);
+			//->purgeMetaData()
+			//->setMetaData('title', 'Hello')
+			//->setMetaData('description', 'What the "chuff", this is \' a quote.')
+			 ->extractSegment(
+ 				//null,
+ 				//new \PHPVideoToolkit\Timecode(90, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS)
+ 			)
+			//->split(60, 0.5)
+			->save('./output/test-'.time().'.mp4', $output_format, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
 			
 			
-			\PHPVideoToolkit\Trace::vars($video->readInformation());
-			\PHPVideoToolkit\Trace::vars($video->readRawInformation());
+			//\PHPVideoToolkit\Trace::vars($video->readInformation());
+			//\PHPVideoToolkit\Trace::vars($video->readRawInformation());
 // 				
 // 		//\PHPVideoToolkit\Trace::vars($video);
 // 		

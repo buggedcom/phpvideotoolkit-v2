@@ -64,7 +64,7 @@
                     {
                         if(is_file($file) === true)
                         {
-                            @unlink($file);
+                         //   @unlink($file);
                         }
                     }
                 }
@@ -81,9 +81,9 @@
         public function name($extension=false, $postfix=false)
         {   
             $extension = $extension === false ? '' : '.'.$extension;
-            if(self::$_sid === false)
+            if($this->_sid === false)
             {
-                self::$_sid = uniqid('');
+                $this->_sid = uniqid('');
             }   
             $id = '_temp_'.$this->_sid.'_'.$this->_time;
             

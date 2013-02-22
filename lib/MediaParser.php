@@ -36,7 +36,11 @@
 		 */
 		public function getFileInformation($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_information';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
+			{
+				return $data;
+			}
 			
 // 			check to see if the info has already been generated
 		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
@@ -56,8 +60,8 @@
 				'metadata' 	=> $this->getFileGlobalMetadata($file_path, $read_from_cache),
 			);
 
-// 			cache info and return
-		    return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -71,13 +75,11 @@
 		 */
 		public function getFileDuration($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_duration';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -89,7 +91,8 @@
 				$data = new Timecode($matches[1], Timecode::INPUT_FORMAT_TIMECODE, '%hh:%mm:%ss.%ms');
 			}
 
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -103,13 +106,11 @@
 		 */
 		public function getFileGlobalMetadata($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_global_meta';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -127,7 +128,8 @@
 				}
 			}
 
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -141,13 +143,11 @@
 		 */
 		public function getFileBitrate($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_bitrate';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -159,7 +159,8 @@
 				$data = strtoupper($value) === 'N/A' ? -1 : (int) $matches[1];
 			}
 
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -173,13 +174,11 @@
 		 */
 		public function getFileStart($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_start';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -191,7 +190,8 @@
 				$data = new Timecode($value, Timecode::INPUT_FORMAT_SECONDS);
 			}
 
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -205,13 +205,11 @@
 		 */
 		public function getFileType($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_type';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -239,7 +237,8 @@
 				$data = null;
 			}
 
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -253,13 +252,11 @@
 		 */
 		public function getFileVideoComponent($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_video_component';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -407,7 +404,8 @@
 				}
 			}
 			
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -421,13 +419,11 @@
 		 */
 		public function getFileAudioComponent($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_audio_component';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -552,7 +548,8 @@
 				}
 			}
 			
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -566,13 +563,11 @@
 		 */
 		public function getFileHasAudio($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_has_audio';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -584,7 +579,8 @@
 				$data = true;
 			}
 			
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -598,13 +594,11 @@
 		 */
 		public function getFileHasVideo($file_path, $read_from_cache=true)
 		{
-			static $file_data = array();
-			
-// 			check to see if the info has already been generated
-		    if($read_from_cache === true && isset($file_data[$file_path]) === true)
+			$cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_has_video';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
-		      	return $file_data[$file_path];
-		    }
+				return $data;
+			}
 			
 //			get the raw data
 			$raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
@@ -616,7 +610,8 @@
 				$data = true;
 			}
 			
-			return $file_data[$file_path] = $data;
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -633,14 +628,11 @@
 //			convert to realpath
 			$real_file_path = $this->_checkMediaFilePath($file_path);
 
-			static $file_info = array();
-			
-// 			check to see if the info has already been generated
-			$hash = md5_file($real_file_path).'_'.filemtime($real_file_path);
-		    if($read_from_cache === true && isset($file_info[$hash]) === true)
+			$cache_key = 'media_parser/'.md5($real_file_path).'_raw_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
 			{
-		      	return $file_info[$hash];
-		    }
+				return $data;
+			}
 
 // 			execute the ffmpeg lookup
 			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
@@ -652,9 +644,10 @@
 		    if(empty($raw_data) === true)
 			{
 				// TODO possible error/exception here.
-				return $file_info[$hash] = false;
 		    }
 			
-			return $file_info[$hash] = implode("\n", $raw_data);
+			$data = implode("\n", $raw_data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 	}

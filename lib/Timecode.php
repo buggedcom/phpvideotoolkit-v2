@@ -51,7 +51,7 @@
 		 * @param string $timecode_format 
 		 * @param Media $media 
 		 */
-		public function __construct($input_value, $value_format, $timecode_format=null, Media $media=null)
+		public function __construct($input_value, $value_format, $timecode_format='%hh:%mm:%ss.%ms', Media $media=null)
 		{
 			$this->_milliseconds = 0;
 			$this->_seconds = 0;

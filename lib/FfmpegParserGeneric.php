@@ -35,8 +35,8 @@
 		 */
 		public function getRawCodecData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser_generic/raw_codec_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -45,7 +45,9 @@
 			$exec->addCommand('-codecs');
 			$data = $exec->execute();
 			
-			return implode("\n", $data);
+			$data = implode("\n", $data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -58,8 +60,8 @@
 		 */
 		public function getRawFiltersData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser_generic/raw_filters_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -68,7 +70,9 @@
 			$exec->addCommand('-filters');
 			$data = $exec->execute();
 			
-			return implode("\n", $data);
+			$data = implode("\n", $data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -81,8 +85,8 @@
 		 */
 		public function getRawBitstreamFiltersData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser_generic/raw_bitstream_filters_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -91,7 +95,9 @@
 			$exec->addCommand('-bsfs');
 			$data = $exec->execute();
 			
-			return implode("\n", $data);
+			$data = implode("\n", $data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 		/**
@@ -104,8 +110,8 @@
 		 */
 		public function getRawProtocolsData($read_from_cache=true)
 		{
-			static $data = null;
-			if($read_from_cache === true && empty($data) === false)
+			$cache_key = 'ffmpeg_parser_generic/raw_protocols_data';
+			if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
 			{
 				return $data;
 			}
@@ -114,7 +120,9 @@
 			$exec->addCommand('-protocols');
 			$data = $exec->execute();
 			
-			return implode("\n", $data);
+			$data = implode("\n", $data);
+			$this->_cacheSet($cache_key, $data);
+			return $data;
 		}
 		
 	}

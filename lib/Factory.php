@@ -28,8 +28,10 @@
 		static $temp_directory = '/tmp';
 		
 		public static function setDefaultVars($temp_directory='/tmp', $default_program_path='/usr/bin', $program='ffmpeg', $probe_program='ffprobe')
-		{
-			if(is_dir($temp_directory) === false)
+		{			
+			$temp_directory = realpath($temp_directory);
+			
+			if($temp_directory === false || is_dir($temp_directory) === false)
 			{
 				throw new Exception('The temp directory does not exist or is not a directory.');
 			}
@@ -55,6 +57,11 @@
 			self::$temp_directory = $temp_directory;
 		}
 		
+		public static function tempFile()
+		{
+			return new TempFile(self::$temp_directory);
+		}
+		
 		public static function videoFormat($input_output_type)
 		{
 			return new VideoFormat($input_output_type, self::$program_directory.DIRECTORY_SEPARATOR.self::$program, self::$temp_directory);
@@ -68,6 +75,16 @@
 		public static function ffmpegParser()
 		{
 			return new FfmpegParser(self::$program_directory.DIRECTORY_SEPARATOR.self::$program, self::$temp_directory);
+		}
+		
+		public static function mediaParser()
+		{
+			return new MediaParser(self::$program_directory.DIRECTORY_SEPARATOR.self::$program, self::$temp_directory);
+		}
+		
+		public static function mediaProbeParser()
+		{
+			return new MediaProbeParser(self::$program_directory.DIRECTORY_SEPARATOR.self::$probe_program, self::$temp_directory);
 		}
 		
 		public static function media($media_file_path, Format $media_input_format=null)

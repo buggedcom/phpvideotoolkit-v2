@@ -71,9 +71,9 @@
 			return $this;
 		}
 		
-		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, Processor &$processor=null)
+		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
 		{
-			parent::_savePreProcess($output_format, $save_path, $overwrite, $processor);
+			parent::_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
 			
 //			if we are splitting the output
 			if(empty($this->_split_options) === false)
@@ -82,14 +82,18 @@
 			
 //				if we are splitting we need to add certain commands to make it work.
 //				for video, we need to ensure that both audio and video codecs are set.
-				if($this->hasAudio() === true && empty($options['audio_codec']) === true)
+				if($this->readHasAudio() === true && empty($options['audio_codec']) === true)
 				{
-					//$data = $this->readAudioComponent();
-					$this->_exec->addCommand('-acodec', 'copy');
+					$data = $this->readAudioComponent(); 
+					// TODO checks for empty name
+					// TODO check for encode availability
+					$this->_exec->addCommand('-acodec', $data['codec']['name']);
 				}
 				if(empty($options['video_codec']) === true)
 				{
-					//$data = $this->readVideoComponent();
+					$data = $this->readVideoComponent();
+					// TODO checks for empty name
+					// TODO check for encode availability
 					$this->_exec->addCommand('-vcodec', $data['codec']['name']);
 				}
 			}
@@ -388,3 +392,4 @@
 			return $video_data['frame_rate'];
 		}
 	}
+
