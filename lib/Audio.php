@@ -25,15 +25,15 @@
 	 */
 	class Audio extends Media
 	{
-		public function __construct($audio_file_path, AudioFormat $audio_input_format=null, $ffmpeg_path, $ffprobe_path, $temp_directory)
+		public function __construct($audio_file_path, AudioFormat $audio_input_format=null, $ffmpeg_path, $temp_directory)
 		{
-			parent::__contruct($audio_file_path, $audio_input_format, $ffmpeg_path, $ffprobe_path, $temp_directory);
+			parent::__contruct($audio_file_path, $audio_input_format, $ffmpeg_path, $temp_directory);
 			
 //			validate this media file is an audio file
 			$type = $this->readType();
 			if($type !== 'audio')
 			{
-				throw new Exception('You cannot use an \\PHPVideoToolkit\\Audio for "'.$file_path.'" as the file is not an audio file. It is reported to be a '.$type);
+				throw new Exception('You cannot use an \\PHPVideoToolkit\\Audio for "'.$audio_file_path.'" as the file is not an audio file. It is reported to be a '.$type);
 			}
 		}
 		
@@ -63,7 +63,7 @@
 //				for video, we need to ensure that just the audio codec is set.
 				if(empty($options['audio_codec']) === true)
 				{
-					$this->_exec->addCommand('-acodec', 'copy');
+					$this->_process->addCommand('-acodec', 'copy');
 				}
 			}
 		}

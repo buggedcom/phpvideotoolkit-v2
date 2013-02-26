@@ -85,8 +85,8 @@
             {
                 $this->_sid = uniqid('');
             }   
-            $id = '_temp_'.$this->_sid.'_'.$this->_time;
-            
+
+            $id = '_temp_'.$this->_time.'_'.$this->_sid;
             if($postfix !== false)
             {
                 $id .= $postfix;

@@ -51,11 +51,11 @@
 		
 		private $_post_process_callbacks;
 		
-		protected $_exec;
+		protected $_process;
 
-		public function __construct($media_file_path, VideoFormat $video_input_format=null, $ffmpeg_path, $ffprobe_path, $temp_directory)
+		public function __construct($media_file_path, VideoFormat $video_input_format=null, $ffmpeg_path, $temp_directory)
 		{
-			parent::__construct($ffmpeg_path, $ffprobe_path, $temp_directory);
+			parent::__construct($ffmpeg_path, $temp_directory);
 			
 //			validate the file exists and is readable.
 			if($media_file_path !== null)
@@ -102,7 +102,7 @@
 				'user' => array(),
 			);
 			
-			$this->_exec = Factory::exec($ffmpeg_path);
+			$this->_process = new FfmpegProcessProgressable($ffmpeg_path, $temp_directory);
 		}
 
 		/**
@@ -482,6 +482,18 @@
 		}
 		
 		/**
+		 * Returns the exec buffer object by reference.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function &getExecProcess()
+		{
+			return $this->_process;
+		}
+		
+		/**
 		 * Gets the final length of the output based upon the extraction/split commands
 		 * If the output is bing split, then an array will be returned, otherwise a float.
 		 * IMPORTANT! The duration(s) returned are based of various configurable options
@@ -593,24 +605,24 @@
 		{
 //			pre process all of the common functionality and pre process the output format.
 			$this->_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
-
+			
 //			set the progress handler 
 			if($progress_handler !== null)
 			{
 				$progress_handler->setTotalDuration($this->getFinalDuration());
-				$this->_exec->setProgressHandler($progress_handler);
+				$this->_process->attachProgressHandler($progress_handler);
 			}
-
+			
 //			add the commands from the output format to the exec buffer
 //			NOTE; this cannot be done in _savePreProcess as it must be done after, to ensure all the subclass
 //			_savePreProcess functionality and main media class functionality is properly executed.
 			$this->_saveAddOutputFormatCommands($output_format);
 
 //			set the processing output path
-			$this->_exec->setOutput($this->_processing_path);
+			$this->_process->setOutput($this->_processing_path);
 			
 //			do the business that we came for
-			$this->_exec->execute(true);
+			$this->_process->execute();
 		}
 		
 		/**
@@ -634,7 +646,7 @@
 		public function saveNonBlocking($save_path, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
 		{
 //			set the non blocking of the exec process
-			$this->_exec->setNonBlocking(true);
+			$this->_process->setBlocking(false);
 			
 //			set the progress handler 
 			if($progress_handler !== null)
@@ -642,13 +654,9 @@
 //				because only certain types of handlers are compatible with non blocking saves we need to check for compatibility.
 				if($progress_handler->getNonBlockingCompatibilityStatus() === false)
 				{
-					throw new Exception('The progress handler given is not compatible with a non blocking save.');
+					throw new Exception('The progress handler given is not compatible with a non blocking save. This typically means that you have supplied a callback function in the constructor of the progress handler. Any progress handler with a supplied callback blocks PHP. Instead you should call $handler->probe() after the saveNonBlocking function call to get the progress of the encode.');
 				}
-				
-				$progress_handler->setTotalDuration($this->getFinalDuration());
-				$this->_exec->setProgressHandler($progress_handler);
 			}
-			
 			
 			$this->save($save_path, $output_format, $overwrite, $progress_handler);
 		}
@@ -679,9 +687,9 @@
 			$this->_saveAddOutputFormatCommands($output_format);
 
 //			generate a processing address within the temp directory
-			$this->_exec->setOutput($this->_processing_path);
+			$this->_process->setOutput($this->_processing_path);
 
-			Trace::vars($this->_exec->getExecutableString());
+			Trace::vars($this->_process->getExecutableString());
 		}
 		
 		/**
@@ -744,7 +752,7 @@
 			$save_path = $save_dir.DIRECTORY_SEPARATOR.$basename;
 			
 //			set the input files.
-			$this->_exec->setInput($this->_media_file_path);
+			$this->_process->setInput($this->_media_file_path);
 			
 //			process the overwrite status
 			switch($overwrite)
@@ -754,7 +762,7 @@
 					break;
 					
 		    	case self::OVERWRITE_EXISTING :
-					$this->_exec->addCommand('-y');
+					$this->_process->addCommand('-y');
 					break;
 					
 //				insert a unique id into the save path
@@ -773,15 +781,15 @@
 			{
 				if(empty($this->_extract_segment['preseek']) === false)
 				{
-					$this->_exec->addPreInputCommand('-ss', $this->_extract_segment['preseek']->getTimecode('%hh:%mm:%ss.%ms', false));
+					$this->_process->addPreInputCommand('-ss', $this->_extract_segment['preseek']->getTimecode('%hh:%mm:%ss.%ms', false));
 				}
 				if(empty($this->_extract_segment['seek']) === false)
 				{
-					$this->_exec->addCommand('-ss', $this->_extract_segment['seek']->getTimecode('%hh:%mm:%ss.%ms', false));
+					$this->_process->addCommand('-ss', $this->_extract_segment['seek']->getTimecode('%hh:%mm:%ss.%ms', false));
 				}
 				if(empty($this->_extract_segment['length']) === false)
 				{
-					$this->_exec->addCommand('-t', $this->_extract_segment['length']);
+					$this->_process->addCommand('-t', $this->_extract_segment['length']);
 				}
 			}
 			
@@ -801,16 +809,16 @@
 //				one of those is -map 0. Also note that video and audio objects additionally set their own
 //				codecs if not supplied, in their related class function _savePreProcess
 				// TODO this may need to be changed dependant on the number of mappings.
-				$this->_exec->addCommand('-map', '0');
+				$this->_process->addCommand('-map', '0');
 				
 				 // -acodec copy 
 				 // -vcodec copy 
 				
 //				we must do this via add command rather than setFormat as it rejects the segment format.
-				$this->_exec->addCommand('-f', 'segment');
+				$this->_process->addCommand('-f', 'segment');
 				foreach ($this->_split_options as $command => $arg)
 				{
-					$this->_exec->addCommand('-'.$command, $arg);
+					$this->_process->addCommand('-'.$command, $arg);
 				}
 
 //				get the output commands and augment with the final output options.
@@ -819,7 +827,7 @@
 //				set the split format if an output format has already been set.
 				if(empty($options['format']) === false)
 				{
-					$this->_exec->addCommand('-segment_format', $options['format']);
+					$this->_process->addCommand('-segment_format', $options['format']);
 				}
 			}
 			
@@ -829,7 +837,7 @@
 				$meta_string = array();
 				foreach ($this->_metadata as $key => $value)
 				{
-					$this->_exec->addCommand('-metadata:g', $key.'="'.$value.'"', true);
+					$this->_process->addCommand('-metadata:g', $key.'="'.$value.'"', true);
 				}
 			}
 
@@ -871,7 +879,7 @@
 		protected function _saveAddOutputFormatCommands(Format $output_format)
 		{
 			$commands = $output_format->getCommandsHash();
-			$this->_exec->addCommands($commands);
+			$this->_process->addCommands($commands);
 		}
 		
 		protected function _generateRandomString()

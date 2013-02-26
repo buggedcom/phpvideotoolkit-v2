@@ -78,12 +78,12 @@
 				return $data;
 			}
 			
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
-			$exec->addCommand('-pix_fmt', 'list');
-			$exec->addCommand('-pix_fmts');
-			$data = $exec->execute();
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$data = $exec->addCommand('-pix_fmt', 'list')
+				 		 ->addCommand('-pix_fmts')
+						 ->execute()
+						 ->getBuffer();
 			
-			$data = implode("\n", $data);
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
@@ -104,11 +104,11 @@
 				return $data;
 			}
 			
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
-			$exec->addCommand('-h', 'long');
-			$data = $exec->execute();
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$data = $exec->addCommand('-h', 'long')
+						 ->execute()
+						 ->getBuffer();
 			
-			$data = implode("\n", $data);
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
@@ -231,14 +231,15 @@
 //			get the version from -version
 			if($version === null)
 			{
-				$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
+				$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
 				$data = $exec->addCommand('-version')
-					 		 ->execute();
-				if(preg_match('/FFmpeg version ([0-9\.]+)/i', $data[0], $matches) > 0)
+					 		 ->execute()
+							 ->getBuffer();
+				if(preg_match('/FFmpeg version ([0-9\.]+)/i', $data, $matches) > 0)
 				{
 					$version = $matches[1];
 				}
-				else if(preg_match('/FFmpeg ([0-9]+\.[0-9]+\.[0-9]+)/i', $data[0], $matches) > 0)
+				else if(preg_match('/FFmpeg ([0-9]+\.[0-9]+\.[0-9]+)/i', $data, $matches) > 0)
 				{
 					$version = $matches[1];
 				}

@@ -642,11 +642,12 @@
 			}
 
 // 			execute the ffmpeg lookup
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
 			$raw_data = $exec->setInput($real_file_path)
 							 ->addCommand('-show_streams')
 							 ->addCommand('-show_format')
-							 ->execute();
+							 ->execute()
+							 ->getBuffer();
 			
 // 			check that some data has been obtained
 			$data = array();
@@ -655,7 +656,6 @@
 				// TODO possible error/exception here.
 		    }
 			
-			$data = implode("\n", $data);
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}

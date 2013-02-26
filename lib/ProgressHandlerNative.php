@@ -22,7 +22,7 @@
 	{
 		protected $_is_non_blocking_comaptible = true;
 
-		public function __construct($callback=null, $callback_period_seconds=1)
+		public function __construct($callback=null)
 		{
 //			check that the "-progress" function is available.
 			$parser = Factory::ffmpegParser();
@@ -32,15 +32,17 @@
 				throw new Exception('Your version of FFmpeg cannot support the Native progress handler. Please use ProgressHandlerOutput instead.');
 			}
 
-			parent::__construct($callback, $callback_period_seconds);
+			parent::__construct($callback);
+			
+			$this->_progress_file = null;
 		}
 		
-		protected function _readOutputFile()
+		protected function _getRawData()
 		{
 //			there is a problem reading from the chunking file, so we must copy and then read, then delete the copy
 //			in order to succesfully read the data.
-			$copy = $this->_output_file.'.'.time().'.txt';
-			copy($this->_output_file, $copy);
+			$copy = $this->_progress_file.'.'.time().'.txt';
+			copy($this->_progress_file, $copy);
 			$data = file_get_contents($copy);
 			@unlink($copy);
 			return $data;
@@ -74,14 +76,20 @@
 					$return_data['fps'] = $parts[$last_key]['fps'];
 					$return_data['size'] = $parts[$last_key]['total_size'];
 					$return_data['time'] = new Timecode($parts[$last_key]['out_time'], Timecode::INPUT_FORMAT_TIMECODE);
-					$return_data['time_expired'] = (time()+microtime())-$this->_start_time;
 					$return_data['percentage'] = ($return_data['time']->total_seconds/$this->_total_duration->total_seconds)*100;
 					$return_data['dup'] = $parts[$last_key]['dup_frames'];
 					$return_data['drop'] = $parts[$last_key]['drop_frames'];
 					
-					if($parts[$last_key]['progress'] === 'end' && $return_data['percentage'] < 99.5)
+					if($parts[$last_key]['progress'] === 'end')
 					{
-						$return_data['interrupted'] = true;
+						if($return_data['percentage'] < 99.5)
+						{
+							$return_data['interrupted'] = true;
+						}
+						else
+						{
+							$return_data['percentage'] = 100;
+						}
 					}
 				}
 					
@@ -95,27 +103,11 @@
 			}
 		}
 		 
-		protected function _checkOutputForErrors(&$return_data, $raw_data)
+		public function attachFfmpegProcess(FfmpegProcess $process)
 		{
-			
-		}
+			parent::attachFfmpegProcess($process);
 
-		public function setProgressExecCommands(ExecBuffer &$exec)
-		{
-			$exec->addCommand('-progress', $this->getOutputFile());
+			$this->_progress_file = tempnam($this->_temp_directory, 'phpvideotoolkit_progress');
+			$this->_ffmpeg_process->addCommand('-progress', $this->_progress_file);
 		}
-		
-		public function postProcessExecCommandsString(ExecBuffer &$exec, &$command_string)
-		{
-			if($exec->getNonBlocking() === false)
-			{
-				$command_string .= ' > /dev/null 2>&1 &';
-			}
-		}
-
-		public function getReadyToExecute(ExecBuffer &$exec, &$command_string)
-		{
-			Trace::vars($command_string);
-		}
-		
 	 }

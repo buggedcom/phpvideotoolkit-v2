@@ -22,34 +22,57 @@
 	 */
 	class ExecBuffer
 	{
-		static $executed_commands = array();
-		
-		protected $_program;
-		
+		protected $_failure_tracking;
+		protected $_blocking;
+		protected $_output;
 		protected $_temp_directory;
 		
-		protected $_pre_input_commands;
-		protected $_post_input_commands;
-		protected $_post_ouput_commands;
-		protected $_input;
-		protected $_output;
-		protected $_non_blocking;
-		protected $_progress_handler;
-		
-		public function __construct($program, $temp_directory)
-		{
-			$program_path = strpos($program, DIRECTORY_SEPARATOR) === 0 ? $program : $this->_which($program);
-			if($program_path === false)
-			{
-				throw new Exception('Unable to locate '.$program.'.');
-			}
-			else if(is_executable($program_path) === false)
-			{
-				throw new Exception($program.' is not executable.');
-			}
-			$this->_program = $program_path;
+		protected $_executed_command;
+		protected $_command;
+		protected $_buffer;
+		protected $_error_code;
 			
-			if(is_dir($temp_directory) === false)
+		protected $_running;
+		protected $_start_time;
+		protected $_end_time;
+		protected $_callback_period_interval;
+		
+		protected $_boundary;
+		protected $_failure_boundary;
+		protected $_completion_boundary;
+		protected $_error_code_boundary;
+		
+		protected $_tmp_files;
+		
+		const DEV_NULL = '/dev/null';
+		const TEMP = -1;
+		
+		public function __construct($exec_command_string, $temp_directory=null)
+		{
+			$this->_failure_tracking = true;
+			$this->_blocking = true;
+			$this->_output = self::TEMP;
+			$this->_buffer = null;
+			$this->_error_code = null;
+			
+			$this->_running = false;
+			$this->_start_time = null;
+			$this->_end_time = null;
+			$this->_callback_period_interval = 1;
+			
+			$this->_tmp_files = array();
+			
+			$id = uniqid(rand(99999, 999999).'-').'-'.md5(__FILE__);
+			$this->_boundary = $id;
+			$this->_error_code_boundary = '<e-'.$id.'>';
+			$this->_failure_boundary = '<f-'.$id.'>';
+			$this->_completion_boundary = '<c-'.$id.'>';
+			
+			if($temp_directory === null)
+			{
+				$temp_directory = sys_get_temp_dir();
+			}
+			else if(is_dir($temp_directory) === false)
 			{
 				throw new Exception('The temp directory does not exist or is not a directory.');
 			}
@@ -62,482 +85,548 @@
 				throw new Exception('The temp directory is not writeable.');
 			}
 			$this->_temp_directory = $temp_directory;
-
-			$this->_pre_input_commands = array();
-			$this->_post_input_commands = array();
-			$this->_post_ouput_commands = array();
-			$this->_input = null;
-			$this->_non_blocking = false;
-			$this->_progress_handler = null;
-		}
-		
-	    /**
-	     * The "which" command (show the full path of a command).
-		 * This function heavily borrows from Pear::System::which
-	     *
-	     * @param string $program The command to search for
-	     * @param mixed  $fallback Value to return if $program is not found
-	     *
-	     * @return mixed A string with the full path or false if not found
-	     * @static
-	     * @author Stig Bakken <ssb@php.net>
-	     * @author Oliver Lillie
-	     */
-	    protected function _which($program, $fallback = false)
-	    {
-// 			enforce API
-	        if(is_string($program) === false || empty($program) === true)
-			{
-	            return $fallback;
-	        }
-
-// 			full path given
-	        if(basename($program) !== $program)
-			{
-	           	$path_elements = array(dirname($program));
-	            $program = basename($program);
-	        }
-			else
-			{
-// 				Honor safe mode
-	            if(!ini_get('safe_mode') || !($path = ini_get('safe_mode_exec_dir')))
-				{
-	                $path = getenv('PATH');
-	                if(!$path)
-					{
-	                    $path = getenv('Path'); // some OSes are just stupid enough to do this
-	                }
-	            }
-				
-//				if we have no path to guess with, throw exception.
-				if(empty($path) === true)
-				{
-					throw new Exception('Unable to guess environment paths. Please set the absolute path to the program "'.$program.'"');
-				}
-				
-	            $path_elements = explode(PATH_SEPARATOR, $path);
-	        }
-
-	        if(substr(PHP_OS, 0, 3) === 'WIN')
-			{
-				$env_pathext = getenv('PATHEXT');
-	            $exe_suffixes = empty($env_pathext) === false ? explode(PATH_SEPARATOR, $env_pathext) : array('.exe','.bat','.cmd','.com');
-// 				allow passing a command.exe param
-	            if(strpos($program, '.') !== false)
-				{
-	                array_unshift($exe_suffixes, '');
-	            }
-	        }
-			else
-			{
-	            $exe_suffixes = array('');
-	        }
 			
-//			loop and fine path.
-	        foreach($exe_suffixes as $suff)
-			{
-	            foreach($path_elements as $dir)
-				{
-	                $file = $dir.DIRECTORY_SEPARATOR.$program.$suff;
-	                if(@is_executable($file) === true)
-					{
-	                    return $file;
-	                }
-	            }
-	        }
-			
-	        return $fallback;
-	    }
-		
-		/**
-		 * Sets the input.
-		 *
-		 * @access public
-		 * @param string $input
-		 * @return self
-		 */
-		public function setInput($input)
-		{
-			$this->_input = $input;
-			return $this;
-		}
-
-		/**
-		 * Sets the output.
-		 *
-		 * @access public
-		 * @param string $output
-		 * @return self
-		 */
-		public function setOutput($output)
-		{
-			$this->_output = $output;
-			return $this;
-		}
-
-		/**
-		 * Adds a command to be bundled into command line call to be 
-		 * added to the command line call before the input file is added.
-		 *
-		 * @access public
-		 * @param string $command
-		 * @param mixed $argument
-		 * @return self
-		 */
-		public function addPreInputCommand($command, $argument=false, $allow_command_repetition=false)
-		{
-			$argument = $argument === false ? false : escapeshellarg($argument);
-			
-			if(isset($this->_pre_input_commands[$command]) === true)
-			{
-				if($allow_command_repetition === false)
-				{
-					throw new Exception('The command "'.$command.'" has already been given and it cannot be repeated. If you wish to allow a repeating command, set $allow_command_repetition to true.');
-				}
-				else if(is_array($this->_pre_input_commands[$command]) === false)
-				{
-					$this->_pre_input_commands[$command] = array($this->_pre_input_commands[$command]);
-				}
-				array_push($this->_pre_input_commands[$command], $argument);
-			}
-			else
-			{
-				$this->_pre_input_commands[$command] = $argument;
-			}
-			
-			return $this;
-		}
-
-		/**
-		 * Adds a command to be bundled into command line call to be 
-		 * added to the command line call after the input file is added.
-		 *
-		 * @access public
-		 * @param string $command
-		 * @param mixed $argument
-		 * @return self
-		 */
-		public function addCommand($command, $argument=false, $allow_command_repetition=false)
-		{
-			$argument = $argument === false ? false : escapeshellarg($argument);
-			
-			if(isset($this->_post_input_commands[$command]) === true)
-			{
-				if($allow_command_repetition === false)
-				{
-					throw new Exception('The command "'.$command.'" has already been given and it cannot be repeated. If you wish to allow a repeating command, set $allow_command_repetition to true.');
-				}
-				else if(is_array($this->_post_input_commands[$command]) === false)
-				{
-					$this->_post_input_commands[$command] = array($this->_post_input_commands[$command]);
-				}
-				array_push($this->_post_input_commands[$command], $argument);
-			}
-			else
-			{
-				$this->_post_input_commands[$command] = $argument;
-			}
-			
-			return $this;
-		}
-
-		/**
-		 * Adds a command to be bundled into command line call to be 
-		 * added to the command line call after the ouput file is added.
-		 *
-		 * @access public
-		 * @param string $command
-		 * @param mixed $argument
-		 * @return self
-		 */
-		public function addPostOutputCommand($command, $argument=false, $allow_command_repetition=false)
-		{
-			$argument = $argument === false ? false : escapeshellarg($argument);
-			
-			if(isset($this->_post_ouput_commands[$command]) === true)
-			{
-				if($allow_command_repetition === false)
-				{
-					throw new Exception('The command "'.$command.'" has already been given and it cannot be repeated. If you wish to allow a repeating command, set $allow_command_repetition to true.');
-				}
-				else if(is_array($this->_post_ouput_commands[$command]) === false)
-				{
-					$this->_post_ouput_commands[$command] = array($this->_post_ouput_commands[$command]);
-				}
-				array_push($this->_post_ouput_commands[$command], $argument);
-			}
-			else
-			{
-				$this->_post_ouput_commands[$command] = $argument;
-			}
-			
-			return $this;
-		}
-
-		/**
-		 * Adds multiple commands to be bundled into command line call to be 
-		 * added to the command line call after the input file is added.
-		 *
-		 * @access public
-		 * @param array $command
-		 * @return self
-		 */
-		public function addCommands($commands)
-		{
-			if(is_array($commands) === false)
-			{
-				throw new Exception('Commands must be supplied as an array in \\PHPVideoToolkit\\ExecBuffer::addCommands');
-			}
-			
-			if(empty($commands) === false)
-			{
-				foreach ($commands as $option => $argument)
-				{
-					$this->addCommand($option, $argument);
-				}
-			}
-
-			return $this;
-		}
-
-		/**
-		 * Determines if the the command exits.
-		 *
-		 * @access public
-		 * @param string $command
-		 * @return mixed boolean if failure or value if exists.
-		 */
-		public function hasPreInputCommand($command)
-		{
-			return isset($this->_pre_input_commands[$command]) === true ? ($this->_pre_input_commands[$command] === false ? true : $this->_pre_input_commands[$command]): false;
+			$this->_command = $exec_command_string;
 		}
 		
 		/**
-		 * Determines if the the command exits.
-		 *
-		 * @access public
-		 * @param string $command
-		 * @return mixed boolean if failure or value if exists.
-		 */
-		public function hasCommand($command)
-		{
-			return isset($this->_post_input_commands[$command]) === true ? ($this->_post_input_commands[$command] === false ? true : $this->_post_input_commands[$command]): false;
-		}
-		
-		/**
-		 * Determines if the the command exits.
-		 *
-		 * @access public
-		 * @param string $command
-		 * @return mixed boolean if failure or value if exists.
-		 */
-		public function hasPostOutputCommand($command)
-		{
-			return isset($this->_post_ouput_commands[$command]) === true ? ($this->_post_ouput_commands[$command] === false ? true : $this->_post_ouput_commands[$command]): false;
-		}
-		
-		protected function _combineCommandList($commands)
-		{
-			$command_string = '';
-			
-			if(empty($commands) === false)
-			{
-				foreach ($commands as $command=>$argument)
-				{
-					if(is_array($argument) === true)
-					{
-						foreach ($argument as $arg)
-						{
-							$command_string .= $this->_joinCommand($command, $arg).' ';
-						}
-					}
-					else
-					{
-						$command_string .= $this->_joinCommand($command, $argument).' ';
-					}
-				}
-			}
-			
-			return $command_string;
-		}
-		
-		/**
-		 * Combines the commands stored into a string
-		 *
-		 * @access protected
-		 * @return string
-		 */
-		protected function _combineCommands()
-		{
-			$command_string = '';
-
-//			build any pre input commands
-			$command_string .= $this->_combineCommandList($this->_pre_input_commands);
-			
-//			add in the input
-			if(empty($this->_input) === false)
-			{
-				$command_string .= '-i '.escapeshellarg($this->_input).' ';
-			}
-			
-//			build the post input commands
-			$command_string .= $this->_combineCommandList($this->_post_input_commands);
-			
-//			add in the output
-			if(empty($this->_output) === false)
-			{
-				$command_string .= escapeshellarg($this->_output);
-			}
-			
-//			build the post output commands
-			$command_string .= $this->_combineCommandList($this->_post_output_commands);
-			
-//			trim off extra whitespace and return.
-		    return rtrim($command_string);
-		}
-		
-		/**
-		 * Joins a command and its related argument (if any) and returns the joined string.
+		 * Destruct function autoamtically tidies up tmp files.
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @param string $command 
-		 * @param mixed $argument 
-		 * @return string
-		 */
-		protected function _joinCommand($command, $argument)
-		{
-			return trim($command.(empty($argument) === false ? ' '.$argument : ''));
-		}
-
-		public function setNonBlocking($non_blocking_status=true)
-		{
-			if(is_bool($non_blocking_status) === false)
-			{
-				throw new Exception('$non_blocking_status must be a boolean value.');
-			}
-			
-			$this->_non_blocking = $non_blocking_status;
-		}
-		
-		public function getNonBlocking()
-		{
-			return $this->_non_blocking;
-		}
-		
-		/**
-		 * Prepares the command for execution
-		 *
-		 * @access public
-		 * @return string
-		 */
-		public function getExecutableString()
-		{
-//			if we have a progress handler, we may need to add commands to the exec chain.
-			if($this->_progress_handler !== null)
-			{
-				$this->_progress_handler->setProgressExecCommands($this);
-			}
-			
-//			now combine all the commands we have,
-			$command_string = $this->_combineCommands();
-	        if(strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN' || preg_match('/\s/', $path) === 0)
-	        {
-	            $command_string = $this->_program.' '.$command_string;
-	        }
-			else
-			{
-		        $command_string = 'start /D "'.$this->_program.'" /B '.$command_string;
-			}
-			
-			if($this->_non_blocking === true)
-			{
-				$command_string .= ' > /dev/null 2>&1 &';
-			}
-			
-//			if we have a progress handler we may need to post process the command string
-			if($this->_progress_handler !== null)
-			{
-				$this->_progress_handler->postProcessExecCommandsString($this, $command_string);
-			}
-			
-			return $command_string;
-		}
-		
-		protected function _getTemporaryOutputFile()
-		{
-			$tempfile = Factory::tempFile();
-			return $tempfile->file(null, 'txt');
-		}
-		
-		public function setProgressHandler(ProgressHandlerAbstract $progress_handler=null)
-		{
-			$this->_progress_handler = $progress_handler;
-		}
-		
-		/**
-		 * Captures the output of a call to the command line.
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param string $command 
-		 * @param string $tmp_dir 
 		 * @return void
 		 */
-		public function execute($i=false)
+		public function __destruct()
 		{
-//			build the executable string.
-			$executable_string = $this->getExecutableString();
-			
-//			if we have a progress handler, start it now.
-			if($this->_progress_handler !== null)
+			if(empty($this->_tmp_files) === false)
 			{
-				$this->_progress_handler->getReadyToExecute($this, $executable_string);
-			}
-//			try processing the command straight into the buffer.
-//			this works on some systems but not on others.   
-			exec($executable_string, $buffer, $err); 
-			
-//			if we have a progress handler, start it now.
-			if($this->_progress_handler !== null)
-			{
-				$this->_progress_handler->startHandler();
-			}
-			if($err !== 127)
-			{ 
-				if(isset($buffer[0]) === false)
-				{   
-//					create a temp file to store the buffered read.
-					$output_file = $this->_getTemporaryOutputFile();
-						
-//					ouput the buffer into the temporary output file so that we can read it back into PHP.
-					exec($executable_string.' &>'.$output_file, $buffer, $err);
-					
-// 					loop through the lines of data and collect the buffer
-					if($handle = fopen($output_file, 'r'))
-					{
-						$buffer = array();
-					    while (feof($handle) === false)
-						{
-					        array_push($buffer, fgets($handle, 4096));
-						}
-						fclose($handle);
-					}
+				foreach ($this->_tmp_files as $path)
+				{
+					//@unlink($path);
 				}
+			}
+		}
+		
+		/**
+		 * Start the exec, essentially call exec().
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function execute($callback=null)
+		{
+//			check the the callback is callable.
+			if($callback !== null)
+			{
+				if(is_callable($callback) === false)
+				{
+					throw new Exception('The supplied callback is not callable.');
+				}
+				$this->setBlocking(true);
+			}
+			
+//			get the execution string
+			$this->_executed_command = $this->getExecString();
+
+//			do the execution.
+			$this->_running = true;
+			$this->_start_time = time()+microtime();
+			exec($this->_executed_command, $buffer, $err); // note error cannot be replied upon because of the output options.
+			$buffer = implode(PHP_EOL, $buffer);
+			$this->_error_code = $err;
+			
+//			do we need to process output buffer
+			if(empty($this->_output) === false)
+			{
+//				if the process is blocking, the run
+				if($this->_blocking === true)
+				{
+					if($callback !== null && is_callable($callback) === true)
+					{
+						call_user_func($callback, $this, null, null);
+					}
+					$this->_run($callback);
+				}
+			}
+			
+			if($this->_blocking === true)
+			{
+				$this->_end_time = time()+microtime();
+			}
+			
+//			this is the final callback
+			if($callback === null && is_callable($callback) === true)
+			{
+				call_user_func($callback, $this, null, true);
+			}
+			
+			return $this;
+		}
+		
+		/**
+		 * Gets the current run time of the command execution.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function getRunTime()
+		{
+			if(empty($this->_start_time) === true)
+			{
+				throw new Exception('Unable to read runtime as command has not yet been executed.');
+			}
+			if(empty($this->_end_time) === false)
+			{
+				$end = $this->_end_time;
 			}
 			else
 			{
-				// TODO throw exception here.
-				$buffer = array();
+				$end = time()+microtime();
 			}
 			
-//			save for future reference and debugging
-			self::$executed_commands[$executable_string] = $buffer;
-			
-			return $buffer;
+			return $end - $this->_start_time;
 		}
 		
-		// At least one output file must be specified
-		// (Error|Permission denied|could not seek to position|Invalid pixel format|Unknown encoder|could not find codec|does not contain any stream)
+		/**
+		 * Runs the read/wait loop.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param mixed $callback 
+		 * @return void
+		 */
+		protected function _run($callback)
+		{
+//			get the buffer regardless of wether or not there is a callback as it updates and 
+//			checks for the completion of the command.
+			$buffer = $this->getBuffer();
+			
+//			get the buffer to give to the
+			if($callback !== null && is_callable($callback) === true)
+			{
+				call_user_func($callback, $this, $buffer, false);
+			}
 
+//			if we have finished running the loop then break here.
+			if($this->_running === false)
+			{
+				return;
+			}
+			
+//			still running so wait and then run again.
+			$this->wait($this->_callback_period_interval);
+			$this->_run($callback);
+		}
+		
+		/**
+		 * Makes the read/wait loop wait.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function wait($seconds=1)
+		{
+			usleep($seconds*100000);
+		}
+		
+		/**
+		 * Stops the read/wait loop from running.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function stop()
+		{
+			$this->_running = false;
+		}
+		
+		/**
+		 * Returns the buffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function getRawBuffer()
+		{
+			if(empty($this->_output) === false)
+			{
+				$this->_buffer = file_get_contents($this->_output);
+				$this->_detectCompletionAndEnd();
+			}
+			
+			return $this->_buffer;
+		}
+		
+		/**
+		 * Returns the buffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function getBuffer()
+		{
+			return rtrim(preg_replace(array('/'.$this->_failure_boundary.'/', '/'.$this->_completion_boundary.'/', '/'.$this->_error_code_boundary.'([0-9]+)/'), '', $this->getRawBuffer()));
+		}
+		
+		/**
+		 * Returns the buffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function getLastLine()
+		{
+			$buffer = $this->getBuffer();
+			$lines = preg_split('/\r\n|\r|\n/', $buffer);
+			return array_pop($lines);
+		}
+		
+		/**
+		 * Returns the buffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function getLastSplit()
+		{
+			$buffer = $this->getBuffer();
+			$splits = explode(PHP_EOL, $buffer);
+			return array_pop($splits);
+		}
+		
+		/**
+		 * Deletes the output buffer file.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function deleteOutputFile()
+		{
+			if(empty($this->_output) === false && is_file($this->_output) === true)
+			{
+				@unlink($this->_output);
+				$this->_output = null;
+			}
+		}
+		
+		/**
+		 * Detects the failure boundary in the output.
+		 *
+		 * @access protected
+		 * @author Oliver Lillie
+		 * @param boolean $update_buffer 
+		 * @return boolean
+		 */
+		protected function _detectFailureBoundaryInOutput($update_buffer=false)
+		{
+			if($this->_failure_tracking !== true)
+			{
+				throw new Exception('Failure tracking is not enabled. Unable to determine if command failed.');
+			}
+			
+//			do we need to update the buffer?
+			if($update_buffer === true)
+			{
+				$this->getBuffer();
+			}
+			
+			return strpos($this->_buffer, $this->_failure_boundary) !== false;
+		}
+		
+		public function getErrorCode()
+		{
+			return $this->_getErrorCodeInOutput();
+		}
+		
+		public function hasError()
+		{
+			return $this->_detectFailureBoundaryInOutput(true);
+		}
+		
+		public function isCompleted()
+		{
+			return $this->_detectCompletionBoundaryInOutput(true);
+		}
+		
+		protected function _detectCompletionAndEnd()
+		{
+//			detect if the output has completed, and if it does
+//			delete the output file and stop the loop.
+			if($this->_detectCompletionBoundaryInOutput() === true)
+			{
+				$this->deleteOutputFile();
+				$this->stop();
+			}
+			else if($this->_detectFailureBoundaryInOutput() === true)
+			{
+				$this->_error_code = $this->_getErrorCodeInOutput();
+			}
+		}
+		
+		protected function _getErrorCodeInOutput($update_buffer=false)
+		{
+//			do we need to update the buffer?
+			if($update_buffer === true)
+			{
+				$this->getBuffer();
+			}
+			
+			if(preg_match('/'.$this->_error_code_boundary.'([0-9]+)/', $this->_buffer, $matches) > 0)
+			{
+				return $matches[1];
+			}
+			return null;
+		}
+				
+		
+		/**
+		 * Detects the completion boundary in the output.
+		 *
+		 * @access protected
+		 * @author Oliver Lillie
+		 * @param boolean $update_buffer 
+		 * @return boolean
+		 */
+		protected function _detectCompletionBoundaryInOutput($update_buffer=false)
+		{
+//			do we need to update the buffer?
+			if($update_buffer === true)
+			{
+				$this->getBuffer();
+			}
+			
+			return strpos($this->_buffer, $this->_completion_boundary) !== false;
+		}
+		
+		/**
+		 * Returns an augmented command string based on the classes options.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function getExecString()
+		{
+			$command_string = $this->_command;
+			
+//			get the output append string
+			$output = $this->getBufferOutput();
+			if(empty($output) === false)
+			{
+				$output = ' > '.escapeshellarg($output);
+			}
+			
+//			get the buffer divert string.
+			$buffer_divert = '';
+			if(empty($output) === false || empty($tracking) === false)
+			{
+				$buffer_divert = ' 2>&1 &';
+			}
+			
+//			get the failure tracking boundaries
+//			and get the completion boundary
+			$completion_boundary_open = '';
+			$completion_boundary_close = '';
+			if($this->_failure_tracking === true)
+			{
+				$completion_boundary_open = '((';
+				$completion_boundary_close = ' && echo '.escapeshellarg($this->_completion_boundary).') || echo '.escapeshellarg($this->_failure_boundary).' '.escapeshellarg($this->_completion_boundary).' '.escapeshellarg($this->_error_code_boundary).'$?) 2>&1';
+			}
+			else
+			{
+				$completion_boundary_open = '(';
+				$completion_boundary_close = ' && echo '.escapeshellarg($this->_completion_boundary).') 2>&1';
+			}
+			
+//			compile the final command and track
+			return $completion_boundary_open.$command_string.$completion_boundary_close.$output.$buffer_divert;
+		}
+		
+		/**
+		 * Returns the executred command.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function getExecutedCommand()
+		{
+			if(empty($this->_executed_command) === true)
+			{
+				throw new Exception('The command has not yet been executed.');
+			}
+			
+			return $this->_executed_command;
+		}
+		
+		/**
+		 * Sets the pid tracking status of the query.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $enable_pid_tracking 
+		 * @return void
+		 */
+		public function setFailureTracking($enable_failure_tracking)
+		{
+			if(is_bool($enable_failure_tracking) === false && is_null($enable_failure_tracking) === false)
+			{
+				throw new Exception('$enable_failure_tracking must be a boolean (or null) value.');
+			}
+			
+			$this->_failure_tracking = $enable_failure_tracking;
+			return $this;
+		}
+		
+		/**
+		 * Gets the failure tracking status of the exec command.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return mixed
+		 */
+		public function getFailureTracking()
+		{
+			return $this->_failure_tracking;
+		}
+		
+		/**
+		 * Sets the callback period wait interval.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param integer $callback_period_interval
+		 * @return void
+		 */
+		public function setCallbackWaitInterval($callback_period_interval)
+		{
+			if(is_int($pid) === false)
+			{
+				throw new Exception('$callback_period_interval must be an integer.');
+			}
+			
+			$this->_callback_period_interval = $callback_period_interval;
+			return $this;
+		}
+		
+		/**
+		 * Returns the pid of an executed command.
+		 * If the command has not yet been executed then it will return null, unless a pid
+		 * has been set by setPid();
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return mixed
+		 */
+		public function getCallbackWaitInterval()
+		{
+			return $this->_callback_period_interval;
+		}
+		
+		/**
+		 * Sets the exec calls blocking mode.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param boolean $enable_blocking 
+		 * @return void
+		 */
+		public function setBlocking($enable_blocking)
+		{
+			if(is_bool($enable_blocking) === false && is_null($enable_blocking) === false)
+			{
+				throw new Exception('$enable_blocking must be a boolean (or null) value.');
+			}
+			
+			$this->_blocking = $enable_blocking;
+			return $this;
+		}
+		
+		/**
+		 * Returns the exec calls blocking mode.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return boolean
+		 */
+		public function getBlocking()
+		{
+			return $this->_blocking;
+		}
+		
+		/**
+		 * Sets the output of the exec call.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param mixed $enable_pid_tracking Can be one of the following constants. ExecBuffer::DEV_NULL, ExecBuffer::TEMP, 
+		 *	a string will be interpretted as a file or null will output everything to sdout.
+		 * @return void
+		 */
+		public function setBufferOutput($buffer_output)
+		{
+			if(in_array($buffer_output, array(null, self::DEV_NULL, self::TEMP)) === false)
+			{
+				$dir = dirname($buffer_ouput);
+				if(is_dir($dir) === false)
+				{
+					throw new Exception('Buffer output parent directory "'.$dir.'" is not a directory.');
+				}
+				else if(is_readable($dir) === false || is_writeable($dir) === false)
+				{
+					throw new Exception('Buffer output parent directory "'.$dir.'" is not read-writable by the webserver.');
+				}
+			}
+			
+			$this->_output = $buffer_output;
+			return $this;
+		}
+		
+		/**
+		 * Gets the status of the buffer output.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function getBufferOutput()
+		{
+			if($this->_output === null)
+			{
+				if($this->_blocking === false)
+				{
+					return $this->_output = $this->generateTmpFile();
+				}
+			}
+			else if($this->_output === self::TEMP)
+			{
+				return $this->_output = $this->generateTmpFile();
+			}
+			
+			return $this->_output;
+		}
+		
+		/**
+		 * Generate and create a temp file.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function generateTmpFile($prefix='')
+		{
+			$tmp = tempnam($this->_temp_directory, 'phpvideotoolkit_'.$prefix);
+			array_push($this->_tmp_files, $tmp);
+			return $tmp;			
+		}
+		
 	}

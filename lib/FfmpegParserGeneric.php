@@ -41,11 +41,11 @@
 				return $data;
 			}
 			
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
-			$exec->addCommand('-codecs');
-			$data = $exec->execute();
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$data = $exec->addCommand('-codecs')
+						 ->execute()
+						 ->getBuffer();
 			
-			$data = implode("\n", $data);
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
@@ -66,11 +66,11 @@
 				return $data;
 			}
 			
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
-			$exec->addCommand('-filters');
-			$data = $exec->execute();
-			
-			$data = implode("\n", $data);
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$data = $exec->addCommand('-filters')
+						 ->execute()
+						 ->getBuffer();
+
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
@@ -91,11 +91,11 @@
 				return $data;
 			}
 			
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
-			$exec->addCommand('-bsfs');
-			$data = $exec->execute();
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$data = $exec->addCommand('-bsfs')
+						 ->execute()
+						 ->getBuffer();
 			
-			$data = implode("\n", $data);
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
@@ -116,11 +116,11 @@
 				return $data;
 			}
 			
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
-			$exec->addCommand('-protocols');
-			$data = $exec->execute();
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$data = $exec->addCommand('-protocols')
+						 ->execute()
+						 ->getBuffer();
 			
-			$data = implode("\n", $data);
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}

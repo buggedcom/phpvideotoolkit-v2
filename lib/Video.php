@@ -28,15 +28,15 @@
 		protected $_extracting_frames;
 		protected $_extracting_audio;
 		
-		public function __construct($video_file_path, VideoFormat $video_input_format=null, $ffmpeg_path, $ffprobe_path, $temp_directory)
+		public function __construct($video_file_path, VideoFormat $video_input_format=null, $ffmpeg_path, $temp_directory)
 		{
-			parent::__construct($video_file_path, $video_input_format, $ffmpeg_path, $ffprobe_path, $temp_directory);
+			parent::__construct($video_file_path, $video_input_format, $ffmpeg_path, $temp_directory);
 			
 //			validate this media file is a video file
 			$type = $this->readType();
 			if($type !== 'video')
 			{
-				throw new Exception('You cannot use an \\PHPVideoToolkit\\Video for "'.$file_path.'" as the file is not a video file. It is reported to be a '.$type);
+				throw new Exception('You cannot use an \\PHPVideoToolkit\\Video for "'.$video_file_path.'" as the file is not a video file. It is reported to be a '.$type);
 			}
 			
 			$this->_extracting_frames = false;
@@ -87,14 +87,14 @@
 					$data = $this->readAudioComponent(); 
 					// TODO checks for empty name
 					// TODO check for encode availability
-					$this->_exec->addCommand('-acodec', $data['codec']['name']);
+					$this->_process->addCommand('-acodec', $data['codec']['name']);
 				}
 				if(empty($options['video_codec']) === true)
 				{
 					$data = $this->readVideoComponent();
 					// TODO checks for empty name
 					// TODO check for encode availability
-					$this->_exec->addCommand('-vcodec', $data['codec']['name']);
+					$this->_process->addCommand('-vcodec', $data['codec']['name']);
 				}
 			}
 		}

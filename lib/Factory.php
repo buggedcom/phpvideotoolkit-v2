@@ -119,7 +119,7 @@
 		
 		public static function exec($program_path)
 		{
-			return new ExecBuffer($program_path, self::$temp_directory);
+			return new Process($program_path, self::$temp_directory);
 		}
 	}
 	

@@ -62,10 +62,10 @@
 				return $data;
 			}
 			
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
-			$data = $exec->execute();
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$data = $exec->execute()
+						 ->getBuffer();
 
-			$data = implode("\n", $data);
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
@@ -86,11 +86,11 @@
 				return $data;
 			}
 			
-			$exec = new ExecBuffer($this->_program_path, $this->_temp_directory);
+			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
 			$data = $exec->addCommand('-formats')
-						 ->execute();
+						 ->execute()
+						 ->getBuffer();
 
-			$data = implode("\n", $data);
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
