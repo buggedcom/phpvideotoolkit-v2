@@ -37,7 +37,7 @@
 		{
 			$parser = new Parser($ffmpeg_path, $temp_directory);
 			$format_data = $parser->getRawFormatData();
-			if(preg_match_all('/ [DEVAST ]{0,6} [A-Za-z0-9\_]* .*/', $format_data) > 0)
+			if(strpos($format_data, 'Codecs:') !== false)
 			{
 				$this->_parser = new FfmpegParserFormatsArgumentOnly($ffmpeg_path, $temp_directory);
 			}

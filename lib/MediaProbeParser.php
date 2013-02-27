@@ -643,7 +643,7 @@
 
 // 			execute the ffmpeg lookup
 			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
-			$raw_data = $exec->setInput($real_file_path)
+			$raw_data = $exec->setInputPath($real_file_path)
 							 ->addCommand('-show_streams')
 							 ->addCommand('-show_format')
 							 ->execute()

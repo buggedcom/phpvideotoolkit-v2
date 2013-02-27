@@ -20,22 +20,28 @@
 	 */
 	class ProgressHandlerOutput extends ProgressHandlerAbstract
 	{
-		protected $_is_non_blocking_comaptible = false;
-
 		protected function _parseOutputData(&$return_data, $raw_data)
 		{
 			$return_data['started'] = true;
 
 //			parse out the details of the data.
-//Trace::vars($raw_data);
-			if(preg_match_all('/frame=\s*([0-9]+)\sfps=\s*([0-9]+)\sq=([0-9\.]+)\s(L)?size=\s*([0-9bkBmg]+)\stime=\s*([0-9]{2,}:[0-9]{2}:[0-9]{2}.[0-9]+)\sbitrate=\s*([0-9\.a-z\/]+)(\sdup=\s*([0-9]+))?(\sdrop=\s*([0-9]+))?/', $raw_data, $matches) > 0)
+			if(preg_match_all(
+				'/frame=\s*([0-9]+)\s'.
+				'fps=\s*([0-9\.]+)\s'.
+				'q=([0-9\.]+)\s'.
+				'(L)?size=\s*([0-9\.bkBmg]+)\s'.
+				'time=\s*([0-9]{2,}:[0-9]{2}:[0-9]{2}.[0-9]+)\s'.
+				'bitrate=\s*([0-9\.]+\s?[bkBmg\/s]+)'.
+				'(\sdup=\s*([0-9]+))?'.
+				'(\sdrop=\s*([0-9]+))?'.
+				'/', $raw_data, $matches) > 0)
 			{
 				$last_key = count($matches[0])-1;
 				$return_data['frame'] = $matches[1][$last_key];
 				$return_data['fps'] = $matches[2][$last_key];
 				$return_data['size'] = $matches[5][$last_key];
-				$return_data['time'] = new Timecode($matches[6][$last_key], Timecode::INPUT_FORMAT_TIMECODE);
-				$return_data['percentage'] = ($return_data['time']->total_seconds/$this->_total_duration->total_seconds)*100;
+				$return_data['duration'] = new Timecode($matches[6][$last_key], Timecode::INPUT_FORMAT_TIMECODE);
+				$return_data['percentage'] = ($return_data['duration']->total_seconds/$this->_total_duration->total_seconds)*100;
 				$return_data['dup'] = $matches[9][$last_key];
 				$return_data['drop'] = $matches[11][$last_key];
 					
@@ -52,12 +58,19 @@
 				}
 					
 //				work out the fps average for performance reasons
-				$total_fps = 0;
-				foreach ($matches[2] as $fps)
+				if(count($matches[2]) === 1)
 				{
-					$total_fps += $fps;
+					$return_data['fps_avg'] = $return_data['frame']/$return_data['run_time'];
 				}
-				$return_data['fps_avg'] = $total_fps/($last_key+1);
+				else
+				{
+					$total_fps = 0;
+					foreach ($matches[2] as $fps)
+					{
+						$total_fps += $fps;
+					}
+					$return_data['fps_avg'] = $total_fps/($last_key+1);
+				}
 			}
 		}
 		 

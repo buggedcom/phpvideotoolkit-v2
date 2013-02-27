@@ -49,6 +49,8 @@
 		
 		public function __construct($exec_command_string, $temp_directory=null)
 		{
+			$this->setTempDirectory($temp_directory);
+			
 			$this->_failure_tracking = true;
 			$this->_blocking = true;
 			$this->_output = self::TEMP;
@@ -68,11 +70,16 @@
 			$this->_failure_boundary = '<f-'.$id.'>';
 			$this->_completion_boundary = '<c-'.$id.'>';
 			
+			$this->_command = $exec_command_string;
+		}
+		
+		public function setTempDirectory($temp_directory=null)
+		{
 			if($temp_directory === null)
 			{
 				$temp_directory = sys_get_temp_dir();
 			}
-			else if(is_dir($temp_directory) === false)
+			if(is_dir($temp_directory) === false)
 			{
 				throw new Exception('The temp directory does not exist or is not a directory.');
 			}
@@ -86,7 +93,7 @@
 			}
 			$this->_temp_directory = $temp_directory;
 			
-			$this->_command = $exec_command_string;
+			return $this;
 		}
 		
 		/**
@@ -208,7 +215,7 @@
 			{
 				call_user_func($callback, $this, $buffer, false);
 			}
-
+			
 //			if we have finished running the loop then break here.
 			if($this->_running === false)
 			{

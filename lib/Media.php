@@ -35,6 +35,8 @@
 
 		protected $_media_file_path;
 		protected $_media_input_format;
+		
+		private $_blocking;
 
 		public $last_error_message;
 		public $error_messages;
@@ -53,7 +55,7 @@
 		
 		protected $_process;
 
-		public function __construct($media_file_path, VideoFormat $video_input_format=null, $ffmpeg_path, $temp_directory)
+		public function __construct($media_file_path, Format $input_format=null, $ffmpeg_path, $temp_directory)
 		{
 			parent::__construct($ffmpeg_path, $temp_directory);
 			
@@ -96,6 +98,7 @@
 			
 			$this->_output_path = null;
 			$this->_processing_path = null;
+			$this->_blocking = true;
 			
 			$this->_post_process_callbacks = array(
 				'toolkit' => array(),
@@ -144,7 +147,7 @@
 				throw new Exception('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
 			}
 			
-			return new $class_name($type, $this->_ffmpeg_path, $this->_temp_directory);;
+			return new $class_name($type, $this->_program_path, $this->_temp_directory);
 		}
 		
 		/**
@@ -503,7 +506,7 @@
 		 * @author Oliver Lillie
 		 * @return mixed
 		 */
-		public function getFinalDuration()
+		public function getEstimatedFinalDuration()
 		{
 			$duration = $this->readDuration();
 			$duration_seconds = $duration->total_seconds;
@@ -597,19 +600,22 @@
 		 * @param Format $output_format 
 		 * @param string $overwrite 
 		 * @param ProgressHandlerAbstract $progress_handler
-		 * @return mixed Returns a new Media object on a successfull completion, otherwise returns false.
-		 *	The last error message is set to Media->last_error_message. A full list of error messages is 
-		 *	available through Media->error_messages.
+		 * @return mixed If the blocking mode of the process is set to block, the it returns a new 
+		 * 	Media object on a successfull completion, otherwise an exception is thrown. If the blocking
+		 *	mode is non blocking then the underlying FfmpegProcess is returned.
 		 */
-		public function save($save_path, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
+		public function save($save_path=null, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
 		{
+			$save_path = $save_path === null ? false : $save_path;
+			$output_format = $output_format === null ? false : $output_format;
+			
 //			pre process all of the common functionality and pre process the output format.
 			$this->_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
 			
 //			set the progress handler 
 			if($progress_handler !== null)
 			{
-				$progress_handler->setTotalDuration($this->getFinalDuration());
+				$progress_handler->setTotalDuration($this->getEstimatedFinalDuration());
 				$this->_process->attachProgressHandler($progress_handler);
 			}
 			
@@ -619,10 +625,25 @@
 			$this->_saveAddOutputFormatCommands($output_format);
 
 //			set the processing output path
-			$this->_process->setOutput($this->_processing_path);
+//			exec the buffer
+//			set the blocking mode
+//			and execute the ffmpeg process.
+			$this->_process->setOutputPath($this->_processing_path)
+						   ->getExecBuffer()
+						   ->setBlocking($this->_blocking);
 			
-//			do the business that we came for
-			$this->_process->execute();
+			Trace::vars($this->_process);
+			
+						   $this->_process->execute();
+			
+//			now we work out what we are returning as it depends on the blocking status.
+			if($this->_blocking === true)
+			{
+				return $this->_process->getOutput();
+			}
+			
+//			just return the process if the process is non blocking.
+			return $this->_process;
 		}
 		
 		/**
@@ -643,10 +664,10 @@
 		 *	The last error message is set to Media->last_error_message. A full list of error messages is 
 		 *	available through Media->error_messages.
 		 */
-		public function saveNonBlocking($save_path, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
+		public function saveNonBlocking($save_path=null, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
 		{
 //			set the non blocking of the exec process
-			$this->_process->setBlocking(false);
+			$this->_blocking = false;
 			
 //			set the progress handler 
 			if($progress_handler !== null)
@@ -658,7 +679,7 @@
 				}
 			}
 			
-			$this->save($save_path, $output_format, $overwrite, $progress_handler);
+			return $this->save($save_path, $output_format, $overwrite, $progress_handler);
 		}
 		
 		/**
@@ -687,7 +708,7 @@
 			$this->_saveAddOutputFormatCommands($output_format);
 
 //			generate a processing address within the temp directory
-			$this->_process->setOutput($this->_processing_path);
+			$this->_process->setOutputPath($this->_processing_path);
 
 			Trace::vars($this->_process->getExecutableString());
 		}
@@ -708,7 +729,14 @@
 		{
 //			do some processing on the input format
 			// $this->_processInputFormat();
-
+			
+//			if the save path is null then we are overwriting the existing media file.
+			if($save_path === null)
+			{
+				$overwrite = self::OVERWRITE_EXISTING;
+				$save_path = $this->_media_file_path;
+			}
+			
 //			do some pre processing of the output format
 			$this->_processOutputFormat($output_format, $save_path);
 			
@@ -752,7 +780,7 @@
 			$save_path = $save_dir.DIRECTORY_SEPARATOR.$basename;
 			
 //			set the input files.
-			$this->_process->setInput($this->_media_file_path);
+			$this->_process->setInputPath($this->_media_file_path);
 			
 //			process the overwrite status
 			switch($overwrite)
@@ -909,7 +937,7 @@
 		 * @param boolean $read_from_cache 
 		 * @return array
 		 */
-		public function readInformation($read_from_cache=true)
+		public function read($read_from_cache=true)
 		{
 			return parent::getFileInformation($this->_media_file_path, $read_from_cache);
 		}

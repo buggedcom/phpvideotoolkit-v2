@@ -5,6 +5,17 @@
 	ini_set('display_errors', '1');
 	ini_set('display_startup_errors', '1');
 	
+//  define the error callback
+    function __errorHandler()
+    {      
+        $args = func_get_args();      
+        $count = func_num_args();  
+		\PHPVideoToolkit\Trace::vars('ERROR---------', $count === 1 ? 'exception' : 'error', $args);
+    }
+    set_error_handler('__errorHandler');
+    set_exception_handler('__errorHandler');
+	
+	
 	require_once '../vendor/autoload.php';
 	require_once '../autoloader.php';
 	
@@ -90,27 +101,50 @@
 		// 	ob_flush();
 		// });
 		
-		$progress_handler = new \PHPVideoToolkit\ProgressHandlerNative(function($data, Media $output=null)
-		{
-			\PHPVideoToolkit\Trace::vars($data);
-		});
+		$progress_handler = new \PHPVideoToolkit\ProgressHandlerNative(
+			// function($data, Media $output=null)
+			// {
+			// 	\PHPVideoToolkit\Trace::vars($data);
+			// }
+		);
 
  		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
 		
 		//$video->getExecProcess()->addCommand('-test');
 		
-		$video
+		$result = $video
 			//->purgeMetaData()
 			//->setMetaData('title', 'Hello')
 			//->setMetaData('description', 'What the "chuff", this is \' a quote.')
 			 ->extractSegment(
 			  				null,
-			  				new \PHPVideoToolkit\Timecode(20, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS)
+			  				new \PHPVideoToolkit\Timecode(5, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS)
 			  			)
 			//->split(60, 0.5)
-			->save('./output/test-'.time().'.mp4', $output_format, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
+			->saveNonBlocking('./output/test-'.time().'.mp4', $output_format, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
 		
-		\PHPVideoToolkit\Trace::vars($video);exit;
+			\PHPVideoToolkit\Trace::vars($result);
+
+		while($progress_handler->completed !== true)
+		{
+			$data = $progress_handler->probe();
+			echo $data['percentage'].'<Br />';
+		}
+		
+		$new_video = $result->getOutput();
+		
+		\PHPVideoToolkit\Trace::vars($new_video);
+		\PHPVideoToolkit\Trace::vars($new_video->read());
+		
+		$new_video->setMetaData('encoded', 'PHPVideoToolkit');
+		
+		\PHPVideoToolkit\Trace::vars($new_video);
+
+		$new_video_with_meta_data = $new_video->save();
+		
+		\PHPVideoToolkit\Trace::vars($new_video_with_meta_data);
+		
+		\PHPVideoToolkit\Trace::vars($new_video->read());exit;
 			
 		// while($progress_handler->completed !== true)
 		// {

@@ -25,7 +25,7 @@
 	 */
 	class ProcessBuilder
 	{
-	    protected $_binary;
+	    protected $_binary_path;
 	    protected $_arguments;
 	    protected $_temp_directory;
 
@@ -40,7 +40,7 @@
 //			validate we have a path
 			if($binary_path === false)
 			{
-				throw new Exception('Unable to locate '.$binary_path.'.');
+				throw new Exception('Unable to locate the binary at "'.$binary_path.'".');
 			}
 			else if(is_executable($binary_path) === false)
 			{
@@ -187,13 +187,6 @@
 			array_push($this->_arguments, $command);
 			
 			return $this;
-	    }
-
-	    public function setInput($stdin)
-	    {
-	        $this->_stdin = $stdin;
-
-	        return $this;
 	    }
 
 		/**

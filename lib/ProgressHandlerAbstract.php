@@ -20,40 +20,70 @@
 	 */
 	abstract class ProgressHandlerAbstract
 	{
-		protected $_is_non_blocking_comaptible = false;
+		protected $_is_non_blocking_comaptible = true;
 		 
 		protected $_ffmpeg_process;
+		protected $_temp_directory;
 		
 		protected $_callback;
-		protected $_output_file;
-		protected $_running;
 		protected $_total_duration;
-		protected $_start_time;
+		
+		private $_wait_on_next_probe;
 		
 		public $completed;
 				 
-		public function __construct($callback=null)
+		public function __construct($callback=null, $temp_directory=null)
 		{
 			if($callback !== null && is_callable($callback) === false)
 			{
 				throw new Exception('The progress handler callback is not callable.');
 			}
-			 
+			if($temp_directory !== null)
+			{
+				$this->setTempDirectory($temp_directory);
+			}
+			
 			$this->completed = null;
 			
 			$this->_callback = $callback;
-			$this->_running = false;
 			$this->_total_duration = 0;
-			$this->_start_time = null;
-			$this->_output_file = null;
 			$this->_ffmpeg_process = null;
+			$this->_wait_on_next_probe = false;
 			
 //			check to see if we have been supplied a callback, if so then it is no longer compatible 
 //			with a non blocking save.
-			if($this->_callback === null)
+			if($this->_callback !== null)
 			{
 				$this->_is_non_blocking_comaptible = false;
 			}
+		}
+		
+		public function setTempDirectory($temp_directory=null)
+		{
+			if(is_dir($temp_directory) === false)
+			{
+				throw new Exception('The temp directory does not exist or is not a directory.');
+			}
+			else if(is_readable($temp_directory) === false)
+			{
+				throw new Exception('The temp directory is not readable.');
+			}
+			else if(is_writable($temp_directory) === false)
+			{
+				throw new Exception('The temp directory is not writeable.');
+			}
+			$this->_temp_directory = $temp_directory;
+			
+			return $this;
+		}
+		
+		public function getTempDirectory()
+		{
+			if($this->_temp_directory === null)
+			{
+				return $this->_temp_directory = sys_get_temp_dir();
+			}
+			return $this->_temp_directory;
 		}
 		
 		public function getNonBlockingCompatibilityStatus()
@@ -68,8 +98,24 @@
 			return $this;
 		}
 
-		public function probe()
+		public function probe($probe_then_wait=true, $seconds=1)
 		{
+			if($this->_wait_on_next_probe === true)
+			{
+				if(is_int($seconds) === false)
+				{
+					throw new Exception('$seconds must be an integer.');
+				}
+				else if($seconds <= 0)
+				{
+					throw new Exception('$seconds must be an integer greater than 0.');
+				}
+				
+				usleep($seconds*100000);
+			}
+			
+			$this->_wait_on_next_probe = $probe_then_wait;
+			
 			return $this->_processOutputFile();
 		}
 		
@@ -82,8 +128,12 @@
 			}
 		}
 		
-		public function attachFfmpegProcess(FfmpegProcess $process)
+		public function attachFfmpegProcess(FfmpegProcess $process, $process_temp_directory)
 		{
+			if($this->_temp_directory === null)
+			{
+				$this->setTempDirectory($process_temp_directory);
+			}
 			$this->_ffmpeg_process = $process;
 		}
 
@@ -100,7 +150,7 @@
 				'fps_avg' 	 => 0,
 				'size' 		 => 0,
 				'frame' 	 => 0,
-				'time' 		 => 0,
+				'duration'   => 0,
 				'expected_duration' => $this->_total_duration,
 				'fps' 		 => 0,
 				'dup' 		 => 0,
@@ -128,7 +178,7 @@
 				{
 					$return_data['completed'] = true;
 					$return_data['percentage'] = 100;
-					$return_data['output_file'] = $this->_ffmpeg_process->getOutput();
+					$return_data['output_file'] = $this->_ffmpeg_process->getOutputPath();
 				}
 //				or if it has been interuptted 
 				else if($return_data['interrupted'] === true)
@@ -142,7 +192,7 @@
 			}
 			
 //			the handler is marked as completed if the processing is complete, interuptted or has an error.
-			$this->completed = $return_data['complete'] === true || $return_data['interrupted'] === true || $return_data['error'] === true;;
+			$this->completed = $return_data['completed'] === true || $return_data['interrupted'] === true || $return_data['error'] === true;;
 			
 			return $return_data;
 		}

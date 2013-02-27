@@ -154,9 +154,9 @@
 			
 // 			grab the bitrate
 			$data = null;
-			if(preg_match('/bitrate: ([^,]*)/', $raw_data, $matches) > 0)
+			if(preg_match('/bitrate: (N\/A|[0-9\.]+\s?[bkBmg\/s]+)/', $raw_data, $matches) > 0)
 			{
-				$data = strtoupper($value) === 'N/A' ? -1 : (int) $matches[1];
+				$data = strtoupper($matches[1]) === 'N/A' ? -1 : (int) $matches[1];
 			}
 
 			$this->_cacheSet($cache_key, $data);
@@ -187,7 +187,7 @@
 			$data = null;
 			if(preg_match('/start: ([^,]*)/', $raw_data, $matches) > 0)
 			{
-				$data = new Timecode($value, Timecode::INPUT_FORMAT_SECONDS);
+				$data = new Timecode($matches[1], Timecode::INPUT_FORMAT_SECONDS);
 			}
 
 			$this->_cacheSet($cache_key, $data);
@@ -293,6 +293,8 @@
 					'metadata' => array(),
 				);
 				
+				$other_parts = array();
+				
 //				get the stream
 				if(preg_match('/#([0-9\:]{3,})/', $matches[0], $stream_matches) > 0)
 				{
@@ -314,6 +316,7 @@
 					);
 				}
 				$dimension_match = $dimensions_matches[0];
+				array_push($other_parts, $dimension_match);
 
 // 				get the timebases
 				$data['time_bases'] = array();
@@ -325,6 +328,7 @@
 					}
 				}
 				$timebase_match = implode(', ', $timebase_matches[0]);
+				array_push($other_parts, $timebase_match);
 			
 // 				get the video frames per second
 				$fps = isset($data['time_bases']['fps']) === true ? $data['time_bases']['fps'] : 
@@ -333,7 +337,8 @@
 				if ($fps !== false)
 				{
 					$data['frames']['rate'] = (float) $fps;
-					$data['frames']['total'] = ceil($data['duration']->seconds * $data['frames']['rate']);
+					$duration_timecode = $this->getFileDuration($file_path, $read_from_cache);
+					$data['frames']['total'] = $duration_timecode !== null ? ceil($duration_timecode->seconds * $data['frames']['rate']) : null;
 				}
 
 // 				get the ratios
@@ -355,7 +360,6 @@
 
 // 				formats should be anything left over, let me know if anything else exists
 				$parts = explode(',', $matches[2]);
-				$other_parts = array($dimension_match, $timebase_match);
 				$formats = array();
 				foreach ($parts as $key => $part)
 				{
@@ -636,7 +640,7 @@
 
 // 			execute the ffmpeg lookup
 			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
-			$raw_data = $exec->setInput($real_file_path)
+			$raw_data = $exec->setInputPath($real_file_path)
 							 ->execute()
 							 ->getBuffer();
 

@@ -69,7 +69,7 @@
 		 * @param string $input
 		 * @return self
 		 */
-		public function setInput($input)
+		public function setInputPath($input)
 		{
 			$this->_input = $input;
 			return $this;
@@ -81,7 +81,7 @@
 		 * @access public
 		 * @return string
 		 */
-		public function getInput()
+		public function getInputPath()
 		{
 			return $this->_input;
 		}
@@ -93,7 +93,7 @@
 		 * @param string $output
 		 * @return self
 		 */
-		public function setOutput($output)
+		public function setOutputPath($output)
 		{
 			$this->_output = $output;
 			return $this;
@@ -105,7 +105,7 @@
 		 * @access public
 		 * @return string
 		 */
-		public function getOutput()
+		public function getOutputPath()
 		{
 			return $this->_output;
 		}
@@ -369,6 +369,11 @@
 		public function getBuffer()
 		{
 			return $this->_callExecBufferFunction('getBuffer');
+		}
+		
+		public function getRawBuffer()
+		{
+			return $this->_callExecBufferFunction('getRawBuffer');
 		}
 		
 		public function getLastLine()

@@ -18,7 +18,7 @@
 		if($namespace === 'PHPVideoToolkit')
 		{
 			$class = array_pop($parts);
-			$path = dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.implode(DIRECTORY_SEPARATOR, $parts).$class.'.php';
+			$path = dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.ltrim(implode(DIRECTORY_SEPARATOR, $parts).DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR).$class.'.php';
 			if(is_file($path) === true)
 			{
 				require_once $path;

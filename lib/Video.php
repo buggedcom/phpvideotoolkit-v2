@@ -109,7 +109,7 @@
 		 */
 		protected function _processOutputFormat(Format &$output_format, &$save_path)
 		{
-			parent::_processOutputFormat($output_format);
+			parent::_processOutputFormat($output_format, $save_path);
 			
 //			turn off the related options.
 			if($this->_extracting_audio === true)
