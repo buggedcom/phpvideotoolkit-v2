@@ -18,7 +18,7 @@
 	 * @author Oliver Lillie
 	 * @package default
 	 */
-	class H264 extends \PHPVideoToolkit\Video
+	class H264 extends \PHPVideoToolkit\VideoFormat
 	{
 	}
 
