@@ -29,9 +29,8 @@
 	     * Overwrite constants used in save, saveNonBlocking and getExecutionCommand
 	     */
 	    const OVERWRITE_FAIL = -1;
-	    const OVERWRITE_PRESERVE = -2;
-	    const OVERWRITE_EXISTING = -3;
-	    const OVERWRITE_UNIQUE = -4;
+	    const OVERWRITE_EXISTING = -2;
+	    const OVERWRITE_UNIQUE = -3;
 
 		protected $_media_file_path;
 		protected $_media_input_format;
@@ -46,7 +45,9 @@
 		protected $_appends;
 		protected $_extract_segment;
 		protected $_split_options;
+		
 		protected $_metadata;
+		protected $_supported_meta_data;
 		
 		private $_output_path;
 		private $_processing_path;
@@ -76,15 +77,7 @@
 				$this->_media_file_path = $real_file_path;
 			}
 			
-//			create a default input format if none is set.
-			if($input_format === null)
-			{
-				$this->_media_input_format = $this->getDefaultFormat('input');
-			}
-			else
-			{
-				$this->_media_input_format = $input_format;
-			}
+			$this->setInputFormat($input_format);
 			
 			$this->last_error_message = null;
 			$this->error_messages = array();
@@ -100,12 +93,53 @@
 			$this->_processing_path = null;
 			$this->_blocking = true;
 			
+			// @see http://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
+			// @see http://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata
+			$this->_supported_meta_data = array(
+				'title', 
+				'date', 
+				'author', 
+				'album_artist', 
+				'album', 
+				'grouping', 
+				'composer', 
+				'year', 
+				'track', 
+				'comment', 
+				'genre', 
+				'copyright', 
+				'description', 
+				'synopsis', 
+				'show', 
+				'episode_id', 
+				'network', 
+				'lyrics', 
+			);
+			
 			$this->_post_process_callbacks = array(
 				'toolkit' => array(),
 				'user' => array(),
 			);
 			
 			$this->_process = new FfmpegProcessProgressable($ffmpeg_path, $temp_directory);
+		}
+		
+		public function setInputFormat(Format $input_format=null)
+		{
+//			create a default input format if none is set.
+			if($input_format === null)
+			{
+				$this->_media_input_format = $this->getDefaultFormat('input');
+			}
+			else
+			{
+				$this->_media_input_format = $input_format;
+			}
+		}
+		
+		public function getInputFormat()
+		{
+			return $this->_media_input_format;
 		}
 
 		/**
@@ -170,9 +204,10 @@
 		 * @author Oliver Lillie
 		 * @param string $key 
 		 * @param string $value 
+		 * @param boolean $force 
 		 * @return void
 		 */
-		public function setMetaData($key, $value=null)
+		public function setMetaData($key, $value=null, $force=false)
 		{
 			if(is_array($key) === true)
 			{
@@ -186,6 +221,13 @@
 			if(empty($key) === true)
 			{
 				throw new Exception('Empty metadata key. Metadata keys must be at least one character long.');
+			}
+			
+//			check that meta key is supported by this format.
+			$key = strtolower($key);
+			if($force === false && in_array($key, $this->_supported_meta_data) === false)
+			{
+				throw new Exception('The metadata key "'.$key.'" cannot be set as it is not honoured by the muxer.');
 			}
 			
 			$this->_metadata[$key] = $value;
@@ -209,7 +251,7 @@
 			{
 				foreach ($meta as $key => $ignored)
 				{
-					$this->setMetaData($key, '');
+					$this->setMetaData($key, '', true);
 				}
 			}
 			
@@ -491,7 +533,7 @@
 		 * @author Oliver Lillie
 		 * @return void
 		 */
-		public function &getExecProcess()
+		public function &getProcess()
 		{
 			return $this->_process;
 		}
@@ -606,9 +648,6 @@
 		 */
 		public function save($save_path=null, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
 		{
-			$save_path = $save_path === null ? false : $save_path;
-			$output_format = $output_format === null ? false : $output_format;
-			
 //			pre process all of the common functionality and pre process the output format.
 			$this->_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
 			
@@ -630,11 +669,8 @@
 //			and execute the ffmpeg process.
 			$this->_process->setOutputPath($this->_processing_path)
 						   ->getExecBuffer()
-						   ->setBlocking($this->_blocking);
-			
-			Trace::vars($this->_process);
-			
-						   $this->_process->execute();
+						   ->setBlocking($this->_blocking)
+						   ->execute();
 			
 //			now we work out what we are returning as it depends on the blocking status.
 			if($this->_blocking === true)
@@ -725,7 +761,7 @@
 		 * @param ProgressHandlerAbstract $progress_handler 
 		 * @return void
 		 */
-		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
+		protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
 		{
 //			do some processing on the input format
 			// $this->_processInputFormat();
@@ -733,7 +769,7 @@
 //			if the save path is null then we are overwriting the existing media file.
 			if($save_path === null)
 			{
-				$overwrite = self::OVERWRITE_EXISTING;
+				$overwrite = self::OVERWRITE_UNIQUE;
 				$save_path = $this->_media_file_path;
 			}
 			
@@ -785,10 +821,6 @@
 //			process the overwrite status
 			switch($overwrite)
 			{
-		    	case self::OVERWRITE_PRESERVE :
-					// do nothing as preservation comes later.
-					break;
-					
 		    	case self::OVERWRITE_EXISTING :
 					$this->_process->addCommand('-y');
 					break;
@@ -865,7 +897,7 @@
 				$meta_string = array();
 				foreach ($this->_metadata as $key => $value)
 				{
-					$this->_process->addCommand('-metadata:g', $key.'="'.$value.'"', true);
+					$this->_process->addCommand('-metadata:g', $key.'='.$value.'', true);
 				}
 			}
 
@@ -890,7 +922,7 @@
 		 * @param Format &$output_format 
 		 * @return void
 		 */
-		protected function _processOutputFormat(Format &$output_format, &$save_path)
+		protected function _processOutputFormat(Format &$output_format=null, &$save_path)
 		{
 //			check to see if we have been set and output format, if not generate an empty one.
 			if($output_format === null)
@@ -904,10 +936,16 @@
 						  ->updateFormatOptions();
 		}
 		
-		protected function _saveAddOutputFormatCommands(Format $output_format)
+		protected function _saveAddOutputFormatCommands(Format $output_format=null)
 		{
-			$commands = $output_format->getCommandsHash();
-			$this->_process->addCommands($commands);
+			if($output_format !== null)
+			{
+				$commands = $output_format->getCommandsHash();
+				if(empty($commands) === false)
+				{
+					$this->_process->addCommands($commands);
+				}
+			}
 		}
 		
 		protected function _generateRandomString()
