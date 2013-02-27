@@ -476,6 +476,18 @@
 		}
 		
 		/**
+		 * Returns the original command.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function getCommand()
+		{
+			return $this->_command;
+		}
+		
+		/**
 		 * Sets the pid tracking status of the query.
 		 *
 		 * @access public
