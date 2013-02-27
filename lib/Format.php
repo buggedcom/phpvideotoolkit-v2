@@ -63,7 +63,8 @@
 				'preset_options_file'  => '-fpre <setting>',
 			);
 			
-			$this->setType($input_output_type);
+			$this->setType($input_output_type)
+				 ->setStrictness('experimental');
 		}
 		
 		public function getFormatOptions()
@@ -131,22 +132,27 @@
 			{
 				foreach ($merged_commands as $command)
 				{
-					preg_match('/^([^\s]+)\s+(.*)/', $command, $matches);
-					
-//					check to see if we have the special "audio/video filters".
-//					if so then they must be grouped together in order to be sent.
-					// TODO decouple this into their own class
-					if($matches[1] === '-af' || $matches[1] === '-vf')
+					if(preg_match('/^([^\s]+)\s+(.*)/', $command, $matches) > 0)
 					{
-						if(isset($commands[$matches[1]]) === false)
+//						check to see if we have the special "audio/video filters".
+//						if so then they must be grouped together in order to be sent.
+						// TODO decouple this into their own class
+						if($matches[1] === '-af' || $matches[1] === '-vf')
 						{
-							$commands[$matches[1]] = array();
+							if(isset($commands[$matches[1]]) === false)
+							{
+								$commands[$matches[1]] = array();
+							}
+							array_push($commands[$matches[1]], $matches[2]);
 						}
-						array_push($commands[$matches[1]], $matches[2]);
+						else
+						{
+							$commands[$matches[1]] = trim($matches[2]);
+						}
 					}
 					else
 					{
-						$commands[$matches[1]] = trim($matches[2]);
+						$commands[$command] = '';
 					}
 				}
 			}
