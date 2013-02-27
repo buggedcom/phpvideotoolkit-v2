@@ -91,11 +91,9 @@
 		
 		public function getOutput()
 		{
-//			if the process has not yet completed there is no need to throw an exception, just 
-//			return a null status so that the it can be checked again.
 			if($this->isCompleted() === false)
 			{
-				return null;
+				throw new Exception('Encoding has not yet started.');
 			}
 			
 //			check for an error.
@@ -146,29 +144,12 @@
 			{
 				case 'audio' :
 				case 'video' :
-					$class = $this->_lookupMediaClass($type, $output_information[$type]['codec']['name'], ucfirst($type));
-					break;
-					
 				case 'image' :
-					$class = 'Image';
-					//$class = $this->_lookupMediaClass('image', $output_information['image']['codec']['name'], 'Image');
+					$class = '\\PHPVideoToolkit\\'.ucfirst(strtolower($type));
 					break;
 			}
 			
 			return $class;
 		}
-		
-		protected function _lookupMediaClass($type, $codec, $default_class)
-		{
-			$type = ucfirst(strtolower($type));
-			$codec_class_name = ucfirst(strtolower($codec));
-			$codec_class_path = dirname(__FILE__).'/Media/'.$type.'/'.$codec_class_name.'.php';
-			if(is_file($codec_class_path) === true)
-			{
-				return '\\PHPVideoToolkit\\Media\\'.$type.'\\'.$codec_class_name;
-			}
-			
-			return '\\PHPVideoToolkit\\'.$default_class;
-		}
-		
+
 	}
