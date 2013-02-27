@@ -144,6 +144,7 @@
 				'error'      => false,
 				'error_message' => null,
 				'started'    => false,
+				'finished'   => false,
 				'completed'  => false,
 				'run_time'   => 0,
 				'percentage' => 0,
@@ -176,7 +177,7 @@
 //				check to see if the process has completed
 				if($return_data['percentage'] >= 100)
 				{
-					$return_data['completed'] = true;
+					$return_data['finished'] = true;
 					$return_data['percentage'] = 100;
 					$return_data['output_file'] = $this->_ffmpeg_process->getOutputPath();
 				}
@@ -191,8 +192,8 @@
 			{
 			}
 			
-//			the handler is marked as completed if the processing is complete, interuptted or has an error.
-			$this->completed = $return_data['completed'] === true || $return_data['interrupted'] === true || $return_data['error'] === true;;
+//			has the process completed itself?
+			$this->completed = $this->_ffmpeg_process->isCompleted();
 			
 			return $return_data;
 		}
