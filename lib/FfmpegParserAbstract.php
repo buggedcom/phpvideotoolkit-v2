@@ -639,10 +639,10 @@
 					{
 						$raw_data = trim(substr($raw_data, $pos + strlen($locate)));
 						$raw_data = explode("\n", $raw_data);
-						array_walk($raw_data, function(&$filter, $key)
+						array_walk($raw_data, function(&$protocol, $key)
 						{
 //							both input and output is assumed to be true
-							$data[$filter] = array(
+							$data[$protocol] = array(
 								'input' => true,
 								'output' => true,
 							);
@@ -695,6 +695,7 @@
 							'hardware_accelerated' => null,
 							'paletted_format' 	   => null,
 							'bitstream_format'     => null,
+							'alpha'      		   => $match[4] === 'y',
 						);
 					}
 				}
@@ -723,6 +724,7 @@
 							'hardware_accelerated' => $match[3] === 'H',
 							'paletted_format' 	   => $match[4] === 'P',
 							'bitstream_format'     => $match[5] === 'B',
+							'alpha'      		   => null,
 						);
 					}
 				}
