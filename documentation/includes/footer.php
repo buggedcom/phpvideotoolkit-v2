@@ -11,22 +11,11 @@
 	<!-- Javascript
 	================================================== -->
 	<!-- Placed at the end of the document so the pages load faster -->
-	<script src="./js/jquery.js"></script>
-	<script src="./js/bootstrap-transition.js"></script>
-	<script src="./js/bootstrap-alert.js"></script>
-	<script src="./js/bootstrap-modal.js"></script>
-	<script src="./js/bootstrap-dropdown.js"></script>
-	<script src="./js/bootstrap-scrollspy.js"></script>
-	<script src="./js/bootstrap-tab.js"></script>
-	<script src="./js/bootstrap-tooltip.js"></script>
-	<script src="./js/bootstrap-popover.js"></script>
-	<script src="./js/bootstrap-button.js"></script>
-	<script src="./js/bootstrap-collapse.js"></script>
-	<script src="./js/bootstrap-carousel.js"></script>
-	<script src="./js/bootstrap-typeahead.js"></script>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="./js/bootstrap.min.js"></script>
 
 	<!-- pretty printer -->
-	<script type="text/javascript" src="./js/google-pretty-print/prettify.js"></script>
+	<script type="text/javascript" src="//google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
 	
 </body>
 </html>

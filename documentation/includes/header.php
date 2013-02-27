@@ -2,6 +2,8 @@
 	
 	$current_page = basename($_SERVER['PHP_SELF']);
 	
+	include_once 'configuration.php';
+	
 ?>
 
 <!DOCTYPE html>
@@ -10,7 +12,7 @@
 <head>
 		
 	<meta charset="utf-8">
-	<title>Bootstrap, from Twitter</title>
+	<title>PHPVideoToolkit V2 Documention.</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="description" content="">
 	<meta name="author" content="">
@@ -27,7 +29,7 @@
 	<link href="./css/bootstrap-responsive.css" rel="stylesheet">
 
 	<!-- pretty printer -->
-	<link href="./css/google-pretty-print/prettify.css" type="text/css" rel="stylesheet" />
+	<link href="./css/google-code-prettify/prettify.css" type="text/css" rel="stylesheet" />
 
 	<!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
 	<!--[if lt IE 9]>
@@ -103,3 +105,24 @@
 					</ul>
 				</div><!--/.well -->
 			</div><!--/span-->
+			
+<?php
+
+	if(PROGRAM_PATH === null)
+	{
+		
+?>
+
+			<div class="span9">
+				<div class="alert alert-error">
+				  	<strong>Configuration Not Configured!</strong> 
+					<p>In order for some of the examples in the documentation to work you need set the configuration options in <?php echo dirname(__FILE__); ?>/configuration.php.</p>
+				</div>
+			</div>
+
+<?php
+
+	}
+	
+	
+?>
