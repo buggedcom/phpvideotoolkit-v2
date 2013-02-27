@@ -51,7 +51,7 @@
 		 * @param string $timecode_format 
 		 * @param Media $media 
 		 */
-		public function __construct($input_value, $value_format, $timecode_format='%hh:%mm:%ss.%ms', Media $media=null)
+		public function __construct($input_value, $value_format=Timecode::INPUT_FORMAT_SECONDS, $timecode_format='%hh:%mm:%ss.%ms', Media $media=null)
 		{
 			$this->_milliseconds = 0;
 			$this->_seconds = 0;
@@ -207,7 +207,7 @@
 			if(strpos($timecode_format, '%ms') !== false)
 			{
 				array_push($searches, '%ms');
-				array_push($replacements, $this->_milliseconds);
+				array_push($replacements, round($this->_milliseconds, 2)*10);
 			}
 // 			replace the total seconds (rounded)
 			if(strpos($timecode_format, '%st') !== false)
