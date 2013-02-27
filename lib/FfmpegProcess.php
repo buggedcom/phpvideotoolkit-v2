@@ -366,6 +366,11 @@
 			return $this->_callExecBufferFunction('getRunTime');
 		}
 		
+		public function getExecutedCommand($raw=false)
+		{
+			return $this->_callExecBufferFunction($raw === false ? 'getCommand' : 'getExecutedCommand');
+		}
+		
 		public function getBuffer()
 		{
 			return $this->_callExecBufferFunction('getBuffer');
