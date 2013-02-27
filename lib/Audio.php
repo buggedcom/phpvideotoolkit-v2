@@ -33,7 +33,7 @@
 			$type = $this->readType();
 			if($type !== 'audio')
 			{
-				throw new Exception('You cannot use an \\PHPVideoToolkit\\Audio for "'.$audio_file_path.'" as the file is not an audio file. It is reported to be a '.$type);
+				throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$audio_file_path.'" as the file is not an audio file. It is reported to be a '.$type);
 			}
 		}
 		
@@ -50,7 +50,7 @@
 			return $this->_getDefaultFormat($type, 'AudioFormat');
 		}
 		
-		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
+		protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
 		{
 			parent::_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
 			
@@ -76,7 +76,7 @@
 		 * @param Format &$output_format 
 		 * @return void
 		 */
-		protected function _processOutputFormat(Format &$output_format, &$save_path)
+		protected function _processOutputFormat(Format &$output_format=null, &$save_path)
 		{
 			parent::_processOutputFormat($output_format);
 			
