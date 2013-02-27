@@ -85,9 +85,8 @@
 		\PHPVideoToolkit\Factory::setDefaultVars('./tmp', '/opt/local/bin');
 
 		$output_format = \PHPVideoToolkit\Factory::videoFormat('output')
-			->setStrictness('experimental')
 			->setVideoAspectRatio('16:9', false)
-			->setVideoDimensions(100, 80)
+			//->setVideoDimensions(100, 80)
 		//	->setFormat('mkv');
 			->setVideoBitrate('10000k')
 			//->setVideoFrameRate(30)
@@ -110,41 +109,37 @@
 
  		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
 		
-		//$video->getExecProcess()->addCommand('-test');
+		//$video->getProcess()->addCommand('-test');
 		
 		$result = $video
 			//->purgeMetaData()
 			//->setMetaData('title', 'Hello')
 			//->setMetaData('description', 'What the "chuff", this is \' a quote.')
 			 ->extractSegment(
-			  				null,
-			  				new \PHPVideoToolkit\Timecode(5, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS)
+			  				new \PHPVideoToolkit\Timecode(50, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS),
+			  				new \PHPVideoToolkit\Timecode(70, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS)
 			  			)
 			//->split(60, 0.5)
-			->saveNonBlocking('./output/test-'.time().'.mp4', $output_format, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
+			->save('./output/test-'.time().'.mp4', $output_format, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
 		
-			\PHPVideoToolkit\Trace::vars($result);
-
-		while($progress_handler->completed !== true)
-		{
-			$data = $progress_handler->probe();
-			echo $data['percentage'].'<Br />';
-		}
-		
-		$new_video = $result->getOutput();
-		
+		$new_video = $result;//->getOutput();
 		\PHPVideoToolkit\Trace::vars($new_video);
 		\PHPVideoToolkit\Trace::vars($new_video->read());
 		
-		$new_video->setMetaData('encoded', 'PHPVideoToolkit');
+		$new_video->purgeMetaData()
+				  ->setMetaData(array(
+				  	'title' => 'Fuck you!',
+				  	'date' => date('Y-m-d H:i:s'),
+				  ));
+		$output_format = \PHPVideoToolkit\Factory::videoFormat('output');
+		$output_format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_SQCIF);
 		
-		\PHPVideoToolkit\Trace::vars($new_video);
-
-		$new_video_with_meta_data = $new_video->save();
+		$new_video_with_meta_data = $new_video->save(null, $output_format);
 		
-		\PHPVideoToolkit\Trace::vars($new_video_with_meta_data);
+		$process = $new_video->getProcess();
+		\PHPVideoToolkit\Trace::vars($process->getExecutedCommand(), $process->getRawBuffer());
 		
-		\PHPVideoToolkit\Trace::vars($new_video->read());exit;
+		\PHPVideoToolkit\Trace::vars($new_video_with_meta_data->read(false));exit;
 			
 		// while($progress_handler->completed !== true)
 		// {
