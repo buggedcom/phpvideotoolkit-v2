@@ -26,6 +26,8 @@
 	class Video extends Media
 	{
 		protected $_extracting_frames;
+		protected $_extracting_frame;
+		
 		protected $_extracting_audio;
 		
 		public function __construct($video_file_path, VideoFormat $video_input_format=null, $ffmpeg_path, $temp_directory)
@@ -36,10 +38,12 @@
 			$type = $this->readType();
 			if($type !== 'video')
 			{
-				throw new Exception('You cannot use an \\PHPVideoToolkit\\Video for "'.$video_file_path.'" as the file is not a video file. It is reported to be a '.$type);
+				throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$video_file_path.'" as the file is not a video file. It is reported to be a '.$type);
 			}
 			
 			$this->_extracting_frames = false;
+			$this->_extracting_frame = false;
+			
 			$this->_extracting_audio = false;
 		}
 		
@@ -65,13 +69,35 @@
 		
 		public function extractFrame(Timecode $timecode)
 		{
+			if($this->_extracting_frames === true)
+			{
+				throw new Exception('You cannot extract multiple frames and then extract a single frame in the same execution chain.');
+			}
+			
 			$this->extractSegment($timecode, $timecode);
-			$this->_extracting_frames = true;
+			$this->_extracting_frame = true;
 			
 			return $this;
 		}
 		
-		protected function _savePreProcess(Format &$output_format, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
+		public function extractFrames(Timecode $from_timecode=null, Timecode $to_timecode=null, $force_frame_rate=null)
+		{
+			if($this->_extracting_frame === true)
+			{
+				throw new Exception('You cannot a single frame and then extract multiple frames in the same execution chain.');
+			}
+			if($force_frame_rate !== null && is_int($force_frame_rate) === false && is_float($force_frame_rate) === false)
+			{
+				throw new Exception('If setting a forced frame rate please make sure it is either an integer or a float.');
+			}
+			
+			$this->extractSegment($from_timecode, $to_timecode);
+			$this->_extracting_frames = $force_frame_rate === null ? true : $force_frame_rate;
+			
+			return $this;
+		}
+		
+		protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
 		{
 			parent::_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
 			
@@ -107,7 +133,7 @@
 		 * @param Format &$output_format 
 		 * @return void
 		 */
-		protected function _processOutputFormat(Format &$output_format, &$save_path)
+		protected function _processOutputFormat(Format &$output_format=null, &$save_path)
 		{
 			parent::_processOutputFormat($output_format, $save_path);
 			
@@ -116,7 +142,7 @@
 			{
 				$output_format->disableVideo();
 			}
-			if($this->_extracting_frames === true)
+			if($this->_extracting_frames !== null || $this->_extracting_frame === true)
 			{
 				$output_format->disableAudio();
 			}
@@ -126,6 +152,42 @@
 			if($options['disable_audio'] === true && $options['disable_video'] === true)
 			{
 				throw new Exception('Unable to process output format to send to ffmpeg as both audio and video are disabled.');
+			}
+
+//			process the frame extraction options onto the video output format.
+			if($this->_extracting_frame === true)
+			{
+//				check for conflictions with a single frame extraction and a setting of the video frame rate output format
+				if($options['video_frame_rate'] !== null && $options['video_frame_rate'] !== 1)
+				{
+					// TODO change to log a warning instead
+					throw new Exception('You are attempting to extract a frame, however you have also specified a frame rate in the video output format. When extracting a frame you cannot set the frame rate of the output format. If you wish to extract multiple frames please use the extractFrames function instead.');
+				}
+//				check for conflictions with a max frames setting
+				else if($options['video_frame_rate'] !== null && $options['video_frame_rate'] !== 1)
+				{
+					// TODO change to log a warning instead
+					throw new Exception('You are attempting to extract a frame, however you have also specified a max frame limit in the video output format. When extracting a frame you cannot set the max frame limit of the output format. If you wish to extract multiple frames please use the extractFrames function instead.');
+				}
+				
+				$output_format->setVideoFrameRate(1);
+				$output_format->setVideoMaxFrames(1);
+			}
+//			check to see if we are extracting multiple frames. if so check save path and set related options.
+			else if($this->_extracting_frames !== null)
+			{
+//				if the extracting frames value is not true, then it is a forced frame rate.
+				if($this->_extracting_frames !== true)
+				{
+//					check for conflictions with a an output format frame raete being set.
+					if($options['video_frame_rate'] !== null)
+					{
+						// TODO change to log a warning instead
+						throw new Exception('You are attempting to extract multiple frames and force a frame rate, however you have also specified a frame rate in the video output format. When extracting multiple frames whilst specifying a forced frame rate you cannot set the frame rate of the output format.');
+					}
+					
+					$output_format->setVideoFrameRate($this->_extracting_frames);
+				}
 			}
 
 //			check to see if output is a gif, if that is the case we need to change the output format and path so that
@@ -165,7 +227,7 @@
 				$dimensions = $options['video_dimensions'];
 				if(empty($dimensions) === true)
 				{
-					$dimensions = $this->getDimensions();
+					$dimensions = $this->readDimensions();
 					if(empty($dimensions) === false)
 					{
 						$dimensions['auto_adjust_dimensions'] = $aspect_ratio['auto_adjust_dimensions'];
@@ -222,6 +284,7 @@
 					$output_format->setVideoPadding($optimal_dimensions['pad_top'], $optimal_dimensions['pad_right'], $optimal_dimensions['pad_bottom'], $optimal_dimensions['pad_left'], $optimal_dimensions['padded_width'], $optimal_dimensions['padded_height']);
 				}
 			}
+			
 		}
 		
 		/**
@@ -256,7 +319,7 @@
 		 */
 		public function getOptimalDimensions($target_width, $target_height, $force_aspect=true)
 	    {
-			$dimensions = $this->getDimensions();
+			$dimensions = $this->readDimensions();
 			if(empty($dimensions) === true)
 			{
 				throw new Exception('Unable to read the videos dimensions.');
@@ -372,7 +435,7 @@
 		 * @param boolean $read_from_cache 
 		 * @return mixed Returns an array of found data, otherwise returns null.
 		 */
-		public function getDimensions($read_from_cache=true)
+		public function readDimensions($read_from_cache=true)
 		{
 			$video_data = parent::readVideoComponent($read_from_cache);
 			return $video_data['dimensions'];

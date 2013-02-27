@@ -69,6 +69,7 @@
 				'video_rotation' => null,
 				'video_flip_horizontal' => null,
 				'video_flip_vertical' => null,
+				'video_max_frames' => null,
 			));
 			$this->_format_to_command = array_merge($this->_format_to_command, array(
 				'disable_video' 			=> '-vn',
@@ -84,6 +85,7 @@
 				'video_rotation' 			=> '-vf transpose=<setting>',
 				'video_flip_horizontal' 	=> '-vf hflip',
 				'video_flip_vertical' 		=> '-vf vflip',
+				'video_max_frames' 			=> '-vframes <setting>',
 			));
 		}
 		
@@ -282,7 +284,7 @@
 //				...or if the media object has been set get the dimensions of the media object.
 				else if(empty($this->_media_object) === false)
 				{
-					$dimensions = $this->_media_object->getDimensions();
+					$dimensions = $this->_media_object->readDimensions();
 					if(empty($dimensions) === false)
 					{
 						$width = $width === null ? $dimensions['width'] : $width;
@@ -353,8 +355,30 @@
 			{
 				throw new Exception('Unrecognised frame rate "'.$frame_rate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate');
 			}
+			else if(is_int($frame_rate) === false && is_float($frame_rate) === false)
+			{
+				throw new Exception('If setting frame rate please make sure it is either an integer or a float.');
+			}
 			
 			$this->_format['video_frame_rate'] = $frame_rate;
+			return $this;
+		}
+		
+		public function setVideoMaxFrames($max_frame_count)
+		{
+			// PEG1/2 does not support 5/1 fps
+			if($max_frame_count === null)
+			{
+				$this->_format['video_max_frames'] = null;
+				return $this;
+			}
+			
+			if($max_frame_count < 1)
+			{
+				throw new Exception('Unrecognised max frame count "'.$max_frame_count.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate');
+			}
+			
+			$this->_format['video_max_frames'] = $max_frame_count;
 			return $this;
 		}
 		
