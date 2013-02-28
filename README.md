@@ -12,6 +12,39 @@ Extensive documentation and examples are bundled with the download and is availa
 
 Whilst the extensive documentation covers just about everything, here are a few examples of what you can do.
 
+###Configuring PHPVideoToolkit
+
+PHPVideoToolkit requires some basic configuration and is one through the Factory class.
+
+```php
+namespace PHPVideoToolkit;
+
+Factory::setDefaultVars('./tmp', '/opt/local/bin', 'ffmpeg', 'ffprobe');
+```
+###Accessing Data About FFmpeg
+
+Simple demonstration about how to access information about FfmpegParser object.
+
+```php
+namespace PHPVideoToolkit;
+
+$ffmpeg = Factory::ffmpegParser();
+$is_available = $ffmpeg->isAvailable(); // returns boolean
+$ffmpeg_version = $ffmpeg->getVersion(); // outputs something like - array('version'=>1.0, 'build'=>null)
+	
+```
+###Accessing Data About media files
+
+Simple demonstration about how to access information about media files using the MediaParser object.
+
+```php
+namespace PHPVideoToolkit;
+
+$parser = Factory::mediaParser();
+$data = $parser->getFileInformation('BigBuckBunny_320x180.mp4');
+echo '<pre>'.print_r($data, true).'</pre>';
+	
+```
 ###Extract a Single Frame of a Video
 
 The code below extracts a frame from the video at the 40 second mark.
