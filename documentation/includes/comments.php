@@ -1,4 +1,4 @@
-<div class="span9">
+<div class="span9 pull-right">
   <h2>Notes</h2>
   
   <div id="disqus_thread"></div>
