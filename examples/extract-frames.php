@@ -28,19 +28,12 @@
 	{
 		\PHPVideoToolkit\Factory::setDefaultVars('./tmp', '/opt/local/bin');
 
-		$output_format = \PHPVideoToolkit\Factory::videoFormat('output');
-		//$output_format->setVideoFormat('ljpeg');
-		
  		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
+		$output = $video->extractFrames(new \PHPVideoToolkit\Timecode(40), new \PHPVideoToolkit\Timecode(50))
+			   			->save('./output/big_buck_bunny_frame_%timecode.jpg');
 		
-		$video->extractFrames(new \PHPVideoToolkit\Timecode(40), new \PHPVideoToolkit\Timecode(50));
-		
-		$result = $video
-			->save('./output/test-'.time().'_%timecode.jpg');
-		
-		\PHPVideoToolkit\Trace::vars($result);
-		\PHPVideoToolkit\Trace::vars($video->getProcess()->getExecutedCommand());
-		\PHPVideoToolkit\Trace::vars($video->getProcess()->getBuffer());
+		echo '<hr /><h1>Executed Command</h1>'.($video->getProcess()->getExecutedCommand());
+		echo '<hr /><h1>Buffer Output</h1><pre>'.($video->getProcess()->getBuffer()).'</pre>';
 	}
 	catch(\PHPVideoToolkit\Exception $e)
 	{

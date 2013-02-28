@@ -907,6 +907,8 @@
 				{
 					$this->_process->addCommand('-segment_format', $options['format']);
 				}
+				
+				// TODO add time delta and segment_list
 			}
 			
 //			check to see if we have any global meta
