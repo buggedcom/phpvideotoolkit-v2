@@ -33,21 +33,21 @@
 		
  		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
 		
-		$video->extractFrames(new \PHPVideoToolkit\Timecode(40.5), new \PHPVideoToolkit\Timecode(50));
-		
-		\PHPVideoToolkit\Trace::vars($video->read());
+		$video->extractFrames(new \PHPVideoToolkit\Timecode(40), new \PHPVideoToolkit\Timecode(50));
 		
 		$result = $video
-			->save('./output/test-'.time().'%timecode.jpg', $output_format, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
+			->save('./output/test-'.time().'_%timecode.jpg');
 		
 		\PHPVideoToolkit\Trace::vars($result);
+		\PHPVideoToolkit\Trace::vars($video->getProcess()->getExecutedCommand());
+		\PHPVideoToolkit\Trace::vars($video->getProcess()->getBuffer());
 	}
 	catch(\PHPVideoToolkit\Exception $e)
 	{
-		// if($video->getProcess()->isCompleted())
-// 		{
-// 			\PHPVideoToolkit\Trace::vars($video->getProcess()->getExecutedCommand());
-// 			\PHPVideoToolkit\Trace::vars($video->getProcess()->getBuffer());
-// 		}
+		if($video->getProcess()->isCompleted())
+		{
+			\PHPVideoToolkit\Trace::vars($video->getProcess()->getExecutedCommand());
+			\PHPVideoToolkit\Trace::vars($video->getProcess()->getBuffer());
+		}
 		\PHPVideoToolkit\Trace::vars($e);
 	}
