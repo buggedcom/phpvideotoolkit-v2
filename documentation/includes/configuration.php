@@ -1,6 +1,7 @@
 <?php
 	
-	define('PROGRAM_PATH', '/opt/local/bin');
+	define('PROGRAM_PATH', null);
+	//define('PROGRAM_PATH', '/opt/local/bin');
 	define('FFMPEG_PROGRAM', 'ffmpeg');
 	define('FFPROBE_PROGRAM', 'ffprobe');
 	define('TEMP_PATH', '../examples/tmp');
