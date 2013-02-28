@@ -532,5 +532,6 @@
         
 <?php
     
+    require_once './includes/comments.php';
     require_once './includes/footer.php';
     

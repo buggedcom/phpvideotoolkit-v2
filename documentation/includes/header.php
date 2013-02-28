@@ -86,6 +86,7 @@
 						<li<?php echo $current_page === 'documentation.input-and-output-formats.php' ? ' class="active"' : ''; ?>><a href="./documentation.input-and-output-formats.php">Input and Output Formats</a></li>
 						<li<?php echo $current_page === 'documentation.advanced-options.php' ? ' class="active"' : ''; ?>><a href="./documentation.advanced-options.php">Advanced Options</a></li>
 						<li<?php echo $current_page === 'documentation.phpvideotoolkit-class-reference.php' ? ' class="active"' : ''; ?>><a href="./documentation.phpvideotoolkit-class-reference.php">PHPVideoToolkit Class Reference</a></li>
+						<li class="divider"></li>
 						<li class="nav-header">Examples</li>
 						<li<?php echo $current_page === 'examples.your-ffmpeg-setup.php' ? ' class="active"' : ''; ?>><a href="./examples.your-ffmpeg-setup.php">Your FFmpeg Setup</a></li>
 						<li<?php echo $current_page === 'examples.export-a-single-frame.ph' ? ' class="active"' : ''; ?>><a href="./examples.export-a-single-frame.php">Export a Single Frame</a></li>
