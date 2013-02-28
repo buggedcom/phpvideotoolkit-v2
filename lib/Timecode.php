@@ -27,18 +27,21 @@
 		const INPUT_FORMAT_MINUTES = -3;
 		const INPUT_FORMAT_HOURS = -4;
 		
+		const EPSILON = 0.00001;
+		
+		protected $_total_frames;
 		protected $_total_milliseconds;
 		protected $_total_seconds;
 		protected $_total_minutes;
 		protected $_total_hours;
 		
+		protected $_frames;
 		protected $_milliseconds;
 		protected $_seconds;
 		protected $_minutes;
 		protected $_hours;
 		
 		protected $_frame_rate;
-		protected $_media;
 		
 		/**
 		 * Takes a time input format and converts it into seconds.
@@ -51,24 +54,30 @@
 		 * @param string $timecode_format 
 		 * @param Media $media 
 		 */
-		public function __construct($input_value, $value_format=Timecode::INPUT_FORMAT_SECONDS, $timecode_format='%hh:%mm:%ss.%ms', Media $media=null)
+		public function __construct($input_value, $value_format=Timecode::INPUT_FORMAT_SECONDS, $frame_rate=null, $timecode_format='%hh:%mm:%ss.%ms')
 		{
+			$this->_frames = null;
 			$this->_milliseconds = 0;
 			$this->_seconds = 0;
 			$this->_minutes = 0;
 			$this->_hours = 0;
 			
+			$this->_total_frames = null;
 			$this->_total_milliseconds = 0;
 			$this->_total_seconds = 0;
 			$this->_total_minutes = 0;
 			$this->_total_hours = 0;
 			
-			$this->_frame_rate = null;
-			$this->_media = $media;
+			$this->_frame_rate = $frame_rate;
 			
 //			convert the timecode to 
 			$seconds = $this->_convertTimeInputToSeconds($input_value, $value_format, $timecode_format);
 			
+			$this->setSeconds($seconds);
+		}
+		
+		public function setSeconds($seconds)
+		{
 //			convert to totals
 			$this->_total_milliseconds = $seconds*1000;
 			$this->_total_seconds = $seconds;
@@ -88,6 +97,77 @@
 			}
 			$this->_milliseconds = $seconds-floor($seconds);
 			$this->_seconds = floor($seconds);
+			
+//			if the milliseconds are 1, then make a seconds adjust
+			if(abs($this->_milliseconds-1) < self::EPSILON)
+			{
+				$this->_milliseconds = 0;
+				$this->_seconds += 1;
+			}
+			
+//			if we have a frame rate then set those values.
+			if($this->_frame_rate !== null)
+			{
+				$this->_frames = round($this->_frame_rate * $this->_milliseconds);
+				$this->_total_frames = round($this->_frame_rate * $this->_total_seconds);
+			}
+		}
+		
+		public function __set($property, $value)
+		{
+			switch($property)
+			{
+				case 'hour' :
+				case 'hours' :
+				
+					$this->_total_seconds += ($value * 60 * 60);
+					
+					break;
+					
+				case 'min' :
+				case 'mins' :
+				case 'minute' :
+				case 'minutes' :
+				
+					$this->_total_seconds += ($value * 60);
+					
+					break;
+					
+				case 'sec' :
+				case 'secs' :
+				case 'second' :
+				case 'seconds' :
+				
+					$this->_total_seconds += $value;
+					
+					break;
+					
+				case 'millisec' :
+				case 'millisecs' :
+				case 'millisecond' :
+				case 'milliseconds' :
+				
+					$this->_total_seconds += ($value / 1000);
+					
+					break;
+					
+				case 'frame' :
+				case 'frames' :
+				
+					if($this->_frame_rate === null)
+					{
+						throw new Exception('You cannot set '.$var.' because the frame rate has not been set.');
+					}
+					$this->_total_seconds += ($value / $this->_frame_rate);
+					
+					break;
+					
+				default: 
+				
+					throw new Exception('You cannot set '.$var.'.');
+			}
+			
+			$this->setSeconds($this->_total_seconds);
 		}
 		
 		/**
@@ -207,7 +287,7 @@
 			if(strpos($timecode_format, '%ms') !== false)
 			{
 				array_push($searches, '%ms');
-				array_push($replacements, round($this->_milliseconds, 2)*10);
+				array_push($replacements, str_pad(round($this->_milliseconds, 2)*100, 2, '0', STR_PAD_LEFT));
 			}
 // 			replace the total seconds (rounded)
 			if(strpos($timecode_format, '%st') !== false)
@@ -239,13 +319,13 @@
 			if($has_frames === true || $has_total_frames === true)
 			{
 // 				if the fps is false then we must automagically detect it from the input file
-				if($this->_media === null)
+				if($this->_frame_rate === null)
 				{
 					// TODO throw exception
 					return -1;
 				}
 // 				check the information has been received
-				$frames_per_second = $this->_media->frames_per_second;
+				$frames_per_second = $this->_frame_rate;
 				if(!$frames_per_second)
 				{
 // 					fps cannot be reached so return -1
@@ -295,7 +375,7 @@
 			switch($value_format)
 			{
 				case self::INPUT_FORMAT_TIMECODE :
-					return self::parseTimecode($input_value, $timecode_format, null, $this->_media);
+					return self::parseTimecode($input_value, $timecode_format, $this->_frame_rate, null);
 					break;
 					
 				case self::INPUT_FORMAT_SECONDS :
