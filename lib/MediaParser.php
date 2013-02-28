@@ -88,7 +88,7 @@
 			$data = null;
 			if(preg_match('/Duration: ([^,]*)/', $raw_data, $matches) > 0)
 			{
-				$data = new Timecode($matches[1], Timecode::INPUT_FORMAT_TIMECODE, '%hh:%mm:%ss.%ms');
+				$data = new Timecode($matches[1], Timecode::INPUT_FORMAT_TIMECODE);
 			}
 
 			$this->_cacheSet($cache_key, $data);
