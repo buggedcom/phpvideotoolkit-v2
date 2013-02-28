@@ -54,6 +54,8 @@
 		
 		private $_post_process_callbacks;
 		
+		protected $_require_d_in_output;
+		
 		protected $_process;
 
 		public function __construct($media_file_path, Format $input_format=null, $ffmpeg_path, $temp_directory)
@@ -92,6 +94,8 @@
 			$this->_output_path = null;
 			$this->_processing_path = null;
 			$this->_blocking = true;
+			
+			$this->_require_d_in_output = false;
 			
 			// @see http://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
 			// @see http://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata
@@ -393,6 +397,9 @@
 				$this->_extract_segment['length'] = $to_timecode->total_seconds - $from_timecode->total_seconds;
 			}
 			
+//			mark that we require a %d (or in phpvideotoolkits case %index or %timecode) in the file name output as multiple files will be outputed.
+			$this->_require_d_in_output = true;
+			
 			return $this;
 		}
 		
@@ -522,6 +529,9 @@
 				
 				$this->_split_options['segment_list'] = $output_list_path;
 			}
+			
+//			mark that we require a %d (or in phpvideotoolkits case %index or %timecode) in the file name output as multiple files will be outputed.
+			$this->_require_d_in_output = true;
 			
 			return $this;
 		}
@@ -778,6 +788,8 @@
 			
 //			check the save path.
 			$has_timecode_or_index = false;
+			$has_timecode = false;
+			$has_index = false;
 			$basename = basename($save_path);
 			$save_dir = dirname($save_path);
 			$save_dir = realpath($save_dir);
@@ -793,13 +805,19 @@
 //			although this is technically still allowed by ffmpeg, phpvideotoolkit has depreciated %d in favour of its own %index
 			else if(preg_match('/\%([0-9]*)d/', $save_path) > 0)
 			{
-				throw new Exception('The output file appears to be using ffmpegs\' %d notation for multiple file output. %d notation is depreciated in PHPVideoToolkit in favour of the %index or %timecode notations.');
+				throw new Exception('The output file appears to be using FFmpeg\'s %d notation for multiple file output. The %d notation is depreciated in PHPVideoToolkit in favour of the %index or %timecode notations.');
 			}
 //			if a %index or %timecode output is added then we can't check for exact file existence
 //			we can however check for possible interfering matches.
-			else if(($has_timecode_or_index = (preg_match('/\%(timecode|([0-9]+)?index)/', $save_path) > 0)))
+			else if(($has_timecode_or_index = (preg_match('/\%(timecode|[0-9]*(index))/', $save_path, $matches) > 0)))
 			{
-				// TODO glob and then regex the related matches to check for errors
+				$has_timecode = $matches[1] === 'timecode';
+				$has_index = isset($matches[2]) === true && $matches[2] === 'index';
+			}
+//			check to see if we have to have a timecode or index in the output and that we actually have one.
+			else if($has_timecode_or_index === false && $this->_require_d_in_output === true)
+			{
+				throw new Exception('It is required that either "%timecode" or "%index" to the save path as more that one file is expected be outputed. When using %index, it is possible to specify a number to be padded with a specific amount of 0s. For example adding %5index.jpg will output files like 00001.jpg, 00002.jpg etc.');
 			}
 //			otherwise check that a file exists and the overrwite status of the request.
 			else
@@ -905,12 +923,46 @@
 //			we can perform the rename to timecode and index after they items have been transcoded by ffmpeg.
 			if($has_timecode_or_index === true)
 			{
-				$processing_path = preg_replace('/%timecode/', '%12d', $this->_output_path);
-				$processing_path = preg_replace('/%([0-9]+)?index/', '%$1d', $processing_path);
+				$processing_path = $this->_output_path;
+				if($has_timecode === true)
+				{
+//					we build the timecode and frame rate data into the output if we use %timecode
+//					that way we can always reconstruct the timecode even from another script or process.
+					
+//					get the frame rate of the export.
+					$frame_rate = $this->_process->getCommand('-r');
+					if($frame_rate === false)
+					{
+						$data = $this->readVideoComponent();
+						$frame_rate = $data['frames']['rate'];
+					}
+					
+//					get the starting offset of the export
+					$offset = '0';
+					$stream_seek_input = $this->_process->getPreInputCommand('-ss');
+					if($stream_seek_input !== false)
+					{
+						$offset += Timecode::parseTimecode($stream_seek_input, '%hh:%mm:%ss.%ms');
+					}
+					$stream_seek_output = $this->_process->getCommand('-ss');
+					if($stream_seek_output !== false)
+					{
+						$offset += Timecode::parseTimecode($stream_seek_output, '%hh:%mm:%ss.%ms');
+					}
+					
+//					apply rounding to get a float of precise length
+					$offset = round($offset, 2);
+					
+					$processing_path = preg_replace('/%timecode/', '.%12d.'.$frame_rate.'_'.$offset.'._t.', $processing_path);
+				}
+				if($has_index === true)
+				{
+					$processing_path = preg_replace('/%([0-9]*)index/', '.%$1d._i.', $processing_path);
+				}
 				
 //				add a unique identifier to the processing path to prevent overwrites.
 				$pathinfo = pathinfo($processing_path);
-				$this->_processing_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-d_'.$this->_generateRandomString().'.'.$pathinfo['extension'];
+				$this->_processing_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'._u.'.$this->_generateRandomString().'.u_.'.$pathinfo['extension'];
 			}
 		}
 		
@@ -950,12 +1002,12 @@
 		
 		protected function _generateRandomString()
 		{
-			return (rand(99, 99999).'_'.$this->_generateRandomAlphaString(15).'_'.time());
+			return (rand(10000, 99999).'_'.$this->_generateRandomAlphaString(5).'_'.time());
 		}
 		
 		protected function _generateRandomAlphaString($length) 
 		{
-		    $characters = 'abcdefghijklmnopqrstuvwxyz';
+		    $characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
 		    $randomString = '';
 		    for ($i = 0; $i < $length; $i++)
 			{

@@ -102,26 +102,71 @@
 				throw new Exception('Encoding failed and an error was returned from ffmpeg. Error code '.$this->getErrorCode().' was returned the message (if any) was: '.$this->getLastSplit());
 			}
 			
-//			get the output of the process and check for existence
+//			get the output of the process
 			$output = $this->getOutputPath();
-			if(empty($output) === true)
-			{
-				throw new Exception('Unable to find output for the process as it was not set.');
-			}
-			else if(is_file($output) === false)
-			{
-				throw new Exception('The output "'.$output.'", of the Ffmpeg process does not exist.');
-			}
-			else if(filesize($output) <= 0)
-			{
-				throw new Exception('The output "'.$output.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
-			}
 			
-//			get the media class from the output.
-			$media_class = $this->findMediaClass($output);
-			
-//			create the object from the class name and return the new object.
-			return new $media_class($output, null, $this->_binary_path, $this->_temp_directory);
+//			we have the output path but we now need to treat differently dependant on if we have multiple file output.
+			if(preg_match('/\.(\%([0-9]*)d)\.([0-9\.]+_[0-9\.]+\.)?_(i|t)\./', $output, $matches) > 0)
+			{
+//				determine what we have to rename all the files to.
+				$convert_back_to = $matches[4] === 't' ? 'timecode' : (int) $matches[2];
+				
+//				get the glob path and then find all the files from this output
+				$output_glob_path = str_replace($matches[0], '.*.'.$matches[3].'_'.$matches[4].'.', $output);
+				$output = glob($output_glob_path);
+				
+//				sort the output naturally so that if there is no index padding that we get the frames in the correct order.
+				natsort($output);
+
+//				loop and rename the output.
+				$rename = array();
+				$timecode = null;
+				foreach ($output as $path)
+				{
+					$actual_path = preg_replace('/\._u\.[0-9]{5}_[a-z0-9]{5}_[0-9]+\.u_\./', '.', $path);
+					if($convert_back_to === 'timecode')
+					{
+//						if the start timecode has not been generated then find the required from the path string.
+						if($timecode === null)
+						{
+							$matches[3] = rtrim($matches[3], '.');
+							$matches[3] = explode('_', $matches[3]);
+							$timecode = new Timecode($matches[3][1], Timecode::INPUT_FORMAT_SECONDS, $matches[3][0]);
+						}
+						else
+						{
+							$timecode->frame += 1;
+						}
+						$actual_path = preg_replace('/\.[0-9]{12}\.[0-9\.]+_[0-9\.]+\._t\./', $timecode->getTimecode('%hh_%mm_%ss_%ms', false), $actual_path);
+					}
+					else
+					{
+						$actual_path = preg_replace('/\.([0-9]+)\._i\./', '$1', $actual_path);
+					}
+					rename($path, $actual_path);
+				}
+			}
+			else
+			{
+//				check for a none multiple file existence
+				if(empty($output) === true)
+				{
+					throw new Exception('Unable to find output for the process as it was not set.');
+				}
+				else if(is_file($output) === false)
+				{
+					throw new Exception('The output "'.$output.'", of the Ffmpeg process does not exist.');
+				}
+				else if(filesize($output) <= 0)
+				{
+					throw new Exception('The output "'.$output.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
+				}
+				
+//				get the media class from the output.
+//				create the object from the class name and return the new object.
+				$media_class = $this->findMediaClass($output);
+				return new $media_class($output, null, $this->_binary_path, $this->_temp_directory);
+			}
 		}
 		
 		public function findMediaClass($path)
