@@ -3,7 +3,7 @@
 		<hr />
 
 		<footer>
-			<p>&copy; Oliver Lillie 2013-<?php echo date('Y'); ?></p>
+			<p>&copy; <a href="mailto:buggedcom@gmail.com">Oliver Lillie</a> 2012-<?php echo date('Y'); ?></p>
 		</footer>
 
 	</div><!--/.fluid-container-->

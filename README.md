@@ -130,7 +130,7 @@ $output = $video->split(45)
 ```
 ###Purging and then adding Meta Data
 
-Unfortunately there is no way using FFmpeg to add meta data without re-encoding the file. There are other tools that can do that.
+Unfortunately there is no way using FFmpeg to add meta data without re-encoding the file. There are other tools that can do that though, however if you wish to write meta data to the media during encoding you can do so using code like the example below.
 
 ```php
 namespace PHPVideoToolkit;
