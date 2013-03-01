@@ -25,7 +25,7 @@
 			}
 			else
 			{
-				trigger_error('Class \''.$class_name.'\' not found in <b>'.__FILE__.'<\b> on line <b>23</b>.', E_ERROR);
+				trigger_error('Class \''.$class_name.'\' not found in <b>'.__FILE__.'<\b> on line <b>'.__LINE__.'</b>.', E_ERROR);
 			}
 		}
 	});
