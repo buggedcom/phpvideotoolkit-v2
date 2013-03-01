@@ -93,13 +93,13 @@
 		{
 			if($this->isCompleted() === false)
 			{
-				throw new Exception('Encoding has not yet started.');
+				throw new FfmpegProcessOutputException('Encoding has not yet started.');
 			}
 			
 //			check for an error.
 			if($this->hasError() === true)
 			{
-				throw new Exception('Encoding failed and an error was returned from ffmpeg. Error code '.$this->getErrorCode().' was returned the message (if any) was: '.$this->getLastSplit());
+				throw new FfmpegProcessOutputException('Encoding failed and an error was returned from ffmpeg. Error code '.$this->getErrorCode().' was returned the message (if any) was: '.$this->getLastSplit());
 			}
 			
 //			get the output of the process
@@ -151,15 +151,15 @@
 //				check for a none multiple file existence
 				if(empty($output) === true)
 				{
-					throw new Exception('Unable to find output for the process as it was not set.');
+					throw new FfmpegProcessOutputException('Unable to find output for the process as it was not set.');
 				}
 				else if(is_file($output) === false)
 				{
-					throw new Exception('The output "'.$output.'", of the Ffmpeg process does not exist.');
+					throw new FfmpegProcessOutputException('The output "'.$output.'", of the Ffmpeg process does not exist.');
 				}
 				else if(filesize($output) <= 0)
 				{
-					throw new Exception('The output "'.$output.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
+					throw new FfmpegProcessOutputException('The output "'.$output.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
 				}
 				
 //				get the media class from the output.
