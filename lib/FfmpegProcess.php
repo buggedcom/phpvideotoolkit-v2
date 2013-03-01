@@ -35,6 +35,15 @@
 		protected $_detect_error;
 		protected $_combined;
 		
+		/**
+		 * Constructor
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $binary_path The path of ffmpeg or ffprobe or whatever program you will be
+		 *	executing the command on.
+		 * @param string $temp_directory The path of the temp directory.
+		 */
 		public function __construct($binary_path, $temp_directory)
 		{
 			parent::__construct($binary_path);
@@ -295,6 +304,13 @@
 			}
 		}
 		
+		/**
+		 * Returns the command string to be executed.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
 		public function getCommandString()
 		{
 			$this->_combineCommands();
@@ -346,6 +362,15 @@
 			return $this;
 		}
 		
+		/**
+		 * Protected private function for calling functions from the ExecBuffer.
+		 *
+		 * @access protected
+		 * @author Oliver Lillie
+		 * @param string $function 
+		 * @param array $arguments 
+		 * @return mixed
+		 */
 		protected function _callExecBufferFunction($function, $arguments=array())
 		{
 			if(empty($this->_exec) === true)
@@ -361,46 +386,168 @@
 			return call_user_func_array(array($this->_exec, $function), $arguments);
 		}
 		
+		/**
+		 * Returns any "[xxx @ xxxxx] message" messages set in the buffer by FFmpeg.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function getMessages()
+		{
+			$messages = array();
+			$buffer = $this->getBuffer();
+			if(empty($buffer) === false)
+			{
+				// 0x7f9db9065a00
+				if(preg_match_all('/\[([a-zA-Z0-9]+) @ (0x[a-z0-9]+)\] (.*)/', $buffer, $matches) > 0)
+				{
+					foreach ($matches[1] as $key=>$match)
+					{
+						if(isset($messages[$match]) === false)
+						{
+							$messages[$match] = array();
+						}
+						if(isset($messages[$match][$matches[2][$key]]) === false)
+						{
+							$messages[$match][$matches[2][$key]] = array();
+						}
+						array_push($messages[$match][$matches[2][$key]], $matches[3][$key]);
+					}
+				}
+			}
+			return $messages;
+		}
+		
+		/**
+		 * Returns the current (or if called after isCompleted() returns true, the completed)
+		 * run time of the exec function.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return mixed
+		 */
 		public function getRunTime()
 		{
 			return $this->_callExecBufferFunction('getRunTime');
 		}
 		
+		/**
+		 * Returns the buffers command or executed command.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see ExecBuffer::getExecutedCommand
+		 * @param boolean $raw If true then the raw command is returned from the buffer, otherwise
+		 *	the original command is returned.
+		 * @return mixed
+		 */
 		public function getExecutedCommand($raw=false)
 		{
 			return $this->_callExecBufferFunction($raw === false ? 'getCommand' : 'getExecutedCommand');
 		}
 		
+		/**
+		 * Returns the filtered buffer output of ExecBuffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see ExecBuffer::getBuffer
+		 * @return mixed
+		 */
 		public function getBuffer()
 		{
 			return $this->_callExecBufferFunction('getBuffer');
 		}
 		
+		/**
+		 * Returns the raw buffer output of ExecBuffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see ExecBuffer::getRawBuffer
+		 * @return mixed
+		 */
 		public function getRawBuffer()
 		{
 			return $this->_callExecBufferFunction('getRawBuffer');
 		}
 		
+		/**
+		 * Returns the last line from the buffer output of ExecBuffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see ExecBuffer::getLastLine
+		 * @return mixed
+		 */
 		public function getLastLine()
 		{
 			return $this->_callExecBufferFunction('getLastLine');
 		}
 		
+		/**
+	 	 * Returns the last split from the buffer output of ExecBuffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see ExecBuffer::getLastSplit
+		 * @return mixed
+		 */
 		public function getLastSplit()
 		{
 			return $this->_callExecBufferFunction('getLastSplit');
 		}
 		
+		/**
+		 * Returns the error code encountered by the ExecBuffer.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see ExecBuffer::getErrorCode
+		 * @return mixed
+		 */
 		public function getErrorCode()
 		{
 			return $this->_callExecBufferFunction('getErrorCode');
 		}
 		
-		public function hasError()
+		/**
+		 * Returns a boolean value determining if the process has encountered an error.
+		 * Typically if this returns true, it also means the process has completed.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see ExecBuffer::hasError
+		 * @param boolean $delete_output_on_error If true and an error has been encountered
+		 *	and the output has been set and the output exists, then the output is deleted.
+		 * @return boolean
+		 */
+		public function hasError($delete_output_on_error=true)
 		{
-			return $this->_callExecBufferFunction('hasError');
+			$has_error = $this->_callExecBufferFunction('hasError');
+			
+//			if we have an error and we want to delete any output on the error
+			if($delete_output_on_error === true && $has_error === true)
+			{
+				$output = $this->getOutputPath();
+				if(empty($output) === false && is_file($output) === true)
+				{
+					@unlink($output);
+				}
+			}
+			
+			return $has_error;
 		}
 		
+		/**
+		 * Returns a boolean value determining if the process has completed.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see ExecBuffer::isCompleted
+		 * @return boolean
+		 */
 		public function isCompleted()
 		{
 			return $this->_callExecBufferFunction('isCompleted');
