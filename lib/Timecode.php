@@ -76,6 +76,14 @@
 			$this->setSeconds($seconds);
 		}
 		
+		/**
+		 * Set the total seconds value of the timecode and recalculate the timecode values.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $seconds 
+		 * @return Timecode
+		 */
 		public function setSeconds($seconds)
 		{
 //			convert to totals
@@ -111,8 +119,19 @@
 				$this->_frames = round($this->_frame_rate * $this->_milliseconds);
 				$this->_total_frames = round($this->_frame_rate * $this->_total_seconds);
 			}
+			
+			return $this;
 		}
 		
+		/**
+		 * Set timecode values.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $property 
+		 * @param string $value 
+		 * @return void
+		 */
 		public function __set($property, $value)
 		{
 			switch($property)
