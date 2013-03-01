@@ -10,6 +10,8 @@ PHPVideoToolkit Copyright (c) 2012-2013 Oliver Lillie
 
 DUAL Licensed under MIT and GPL v2
 
+See LICENSE.md for more details.
+
 ##Documentation
 
 Extensive documentation and examples are bundled with the download and is available in the documentation directory.
@@ -81,7 +83,7 @@ There are two ways you can export at a differing frame rate from that of the par
 ```php
 namespace PHPVideoToolkit;
 
-$output_format = \PHPVideoToolkit\Factory::videoFormat('output');
+$output_format = Factory::videoFormat('output');
 $output_format->setFrameRate(1);
 
 $video  = Factory::video('BigBuckBunny_320x180.mp4');
