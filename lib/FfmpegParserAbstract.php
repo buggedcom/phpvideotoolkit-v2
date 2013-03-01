@@ -356,11 +356,14 @@
 			{
 		        foreach($format_matches[0] as $key=>$match)
 				{
+					$format_code = strtolower(trim($format_matches[2][$key]));
+					
 					$mux_and_demux = $format_matches[1][$key] === 'DE';
-					$data[strtolower(trim($format_matches[2][$key]))] = array(
+					$data[$format_code] = array(
 						'mux' 		=> $mux_and_demux === true || $format_matches[1][$key] === 'E',
 						'demux' 	=> $mux_and_demux === true || $format_matches[1][$key] === 'D',
 						'fullname' 	=> $format_matches[3][$key],
+						'extensions'=> Formats::toExtensions($format_code),
 					);
 		        }
 			}

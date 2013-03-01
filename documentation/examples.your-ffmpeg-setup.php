@@ -200,7 +200,7 @@
         $ffmpeg_formats = $ffmpeg->getFormats();
     }
     
-    // \PHPVideoToolkit\Trace::vars($ffmpeg_formats);
+    // \PHPVideoToolkit\Trace::vars($ffmpeg_formats);exit;
     
 ?>
           
@@ -221,6 +221,7 @@
                     <th>Identifier</th>
                     <th>Can be Decoded (Demuxed)</th>
                     <th>Can be Encoded (Muxed)</th>
+                    <th>Recognised Extensions</th>
                 </thead>
                 <tbody>
                     
@@ -231,6 +232,7 @@
                             <td><?php echo HTML($code); ?></td>
                             <td><?php echo $info['demux'] === true ? 'yes' : ''; ?></td>
                             <td><?php echo $info['mux'] === true ? 'yes' : ''; ?></td>
+                            <td><?php echo $info['extensions'] !== false ? implode(', ', $info['extensions']) : ''; ?></td>
                         </tr>
                         
                     <?php endforeach ?>
