@@ -142,7 +142,7 @@
 			{
 				$output_format->disableVideo();
 			}
-			if($this->_extracting_frames !== null || $this->_extracting_frame === true)
+			if($this->_extracting_frames !== false || $this->_extracting_frame === true)
 			{
 				$output_format->disableAudio();
 			}
@@ -174,7 +174,7 @@
 				$output_format->setVideoMaxFrames(1);
 			}
 //			check to see if we are extracting multiple frames. if so check save path and set related options.
-			else if($this->_extracting_frames !== null)
+			else if($this->_extracting_frames !== false)
 			{
 //				if the extracting frames value is not true, then it is a forced frame rate.
 				if($this->_extracting_frames !== true)

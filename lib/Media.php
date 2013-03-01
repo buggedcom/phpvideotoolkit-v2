@@ -397,9 +397,6 @@
 				$this->_extract_segment['length'] = $to_timecode->total_seconds - $from_timecode->total_seconds;
 			}
 			
-//			mark that we require a %d (or in phpvideotoolkits case %index or %timecode) in the file name output as multiple files will be outputed.
-			$this->_require_d_in_output = true;
-			
 			return $this;
 		}
 		
