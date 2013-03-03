@@ -45,9 +45,9 @@
 		 * @param string $type Either input for an input format or output for an output format.
 		 * @return Format
 		 */
-		public function getDefaultFormat($type)
+		public function getDefaultFormat($type, $format)
 		{
-			return $this->_getDefaultFormat($type, 'VideoFormat');
+			return $this->_getDefaultFormat($type, 'ImageFormat', $format);
 		}
 		
 		/**

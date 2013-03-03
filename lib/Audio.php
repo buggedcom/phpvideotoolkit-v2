@@ -43,11 +43,12 @@
 		 * @access public
 		 * @author Oliver Lillie
 		 * @param string $type Either input for an input format or output for an output format.
+		 * @param string $format A specific output format (if any to use)
 		 * @return Format
 		 */
-		public function getDefaultFormat($type)
+		public function getDefaultFormat($type, $format)
 		{
-			return $this->_getDefaultFormat($type, 'AudioFormat');
+			return $this->_getDefaultFormat($type, 'AudioFormat', $format);
 		}
 		
 		protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)

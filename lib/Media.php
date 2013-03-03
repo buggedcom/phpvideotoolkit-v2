@@ -133,7 +133,15 @@
 //			create a default input format if none is set.
 			if($input_format === null)
 			{
-				$this->_media_input_format = $this->getDefaultFormat('input');
+				$format = null;
+				$ext = pathinfo($this->_media_file_path, PATHINFO_EXTENSION);
+				if(empty($ext) === false)
+				{
+//					check we have a format we know about.
+					$format = Extensions::toBestGuessFormat($ext);
+				}
+				
+				$this->_media_input_format = $this->getDefaultFormat('input', $format);
 			}
 			else
 			{
@@ -154,9 +162,10 @@
 		 * @param string $type Either input for an input format or output for an output format.
 		 * @return Format
 		 */
-		public function getDefaultFormat($type)
+		public function getDefaultFormat($type, $format)
 		{
-			return $this->_getDefaultFormat($type, 'Format');
+			// $format is purposely ignored
+			return $this->_getDefaultFormat($type, 'Format', null);
 		}
 		
 		/**
@@ -168,19 +177,27 @@
 		 * @param string $class_name The class name of the Format instance to return.
 		 * @package Format Returns an instance of a Format object or child class.
 		 */
-		protected function _getDefaultFormat($type, $class_name)
+		protected function _getDefaultFormat($type, $default_class_name, $format)
 		{
 			if(in_array($type, array('input', 'output')) === false)
 			{
 				throw new Exception('Unrecognised format type "'.$type.'".');
 			}
 			
-			$class_name = '\\PHPVideoToolkit\\'.$class_name;
+//			check the requested class exists
+			$class_name = '\\PHPVideoToolkit\\'.$default_class_name.(empty($format) === false ? '_'.ucfirst(strtolower($format)) : '');
 			if(class_exists($class_name) === false)
 			{
-				throw new Exception('Class does not exist, "'.$class_name.'".');
+				$requested_class_name = $class_name;
+				$class_name = '\\PHPVideoToolkit\\'.$default_class_name;
+				if(class_exists($class_name) === false)
+				{
+					throw new Exception('Requested default format class does not exist, "'.($requested_class_name === $class_name ? $class_name : $requested_class_name.'" and "'.$class_name.'"').'".');
+				}
 			}
-			else if($class_name !== '\\PHPVideoToolkit\\Format' && is_subclass_of($class_name, '\\PHPVideoToolkit\\Format') === false)
+			
+//			check that it extends from the base Format class.
+			if($class_name !== '\\PHPVideoToolkit\\Format' && is_subclass_of($class_name, '\\PHPVideoToolkit\\Format') === false)
 			{
 				throw new Exception('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
 			}
@@ -585,6 +602,7 @@
 //			do we have any split options?
 			if(empty($this->_split_options) === false)
 			{
+				// TODO
 				// segment_time, a single time in seconds
 				// segment_times, multiple times in seconds
 				// segment_frames, frames
@@ -830,6 +848,28 @@
 			}
 			$save_path = $save_dir.DIRECTORY_SEPARATOR.$basename;
 			
+//			check for a regonised output format, and if one is not supplied
+//			then check the a the format has been set in the output format, if not through an error and exit
+			$ext = pathinfo($save_path, PATHINFO_EXTENSION);
+			if(empty($ext) === true)
+			{
+//				get the output commands and augment with the final output options.
+				$options = $output_format->getFormatOptions();
+				if(empty($options['format']) === true)
+				{
+					throw new Exception('The save path supplied does not have an extension and you have not supplied an output format. Please either add a file extension to the save path or call setFormat() on the output format.');
+				}
+			}
+			else
+			{
+//				check we have a format we know about.
+				$format = Extensions::toBestGuessFormat($ext);
+				if(empty($format) === true)
+				{
+					throw new Exception('Un-recognised file extension. Please call setFormat() on the output format to set the format of the output media.');
+				}
+			}
+			
 //			set the input files.
 			$this->_process->setInputPath($this->_media_file_path);
 			
@@ -978,7 +1018,13 @@
 //			check to see if we have been set and output format, if not generate an empty one.
 			if($output_format === null)
 			{
-				$output_format = $this->getDefaultFormat('output');
+				$format = null;
+				$ext = pathinfo($save_path, PATHINFO_EXTENSION);
+				if(empty($ext) === false)
+				{
+					$format = Extensions::toBestGuessFormat($ext);
+				}
+				$output_format = $this->getDefaultFormat('output', $format);
 			}
 			
 //			set the media into the format object so that we can update the format options that
