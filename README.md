@@ -305,6 +305,28 @@ To help explain it further, here is a simplified command string using the above 
 /opt/bin/local/ffmpeg -custom-command -i '/your/input/file.mp4' -custom-command-with-arg 'arg value' '/your/output/file.mp4' -output-command 'another value'
 ```
 
+###Imposing a processing timelimit
+
+You may wish to impose a processing timelimit on encoding. There are various reasons for doing this and should be self explanitory. FFmpeg supplies a command to be able to do this and can be invoked like so...
+
+```php
+namespace PHPVideoToolkit;
+
+$video  = Factory::video('BigBuckBunny_320x180.mp4');
+
+$process = $video->getProcess();
+$process->setProcessTimelimit(10); // in seconds
+
+try
+{
+	$video->save('output.mp4');
+}
+catch(FfmpegProcessOutputException $e)
+{
+	echo $e->getMessage(); // Imposed time limit (10 seconds) exceeded.
+}
+				
+```
 
 
 
