@@ -31,6 +31,16 @@
 			$this->_progress_callbacks = array();
 		}
 		
+		/**
+		 * Attaches a progress handler to the ffmpeg progress. 
+		 * The progress handler is executed during the ffmpeg process.
+		 * Attaching a handler causes PHP to block.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $callback 
+		 * @return void
+		 */
 		public function attachProgressHandler($callback)
 		{
 			if(is_object($callback) === true)
@@ -50,6 +60,16 @@
 			array_push($this->_progress_callbacks, $callback);
 		}
 		
+		/**
+		 * This function is used to execute the callback handlers when present.
+		 *
+		 * IMPORTANT! This is a protected function, however due to the nature of the 
+		 * callbacks, it must be public in order to be callable. 
+		 *
+		 * @access protected
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function _executionCallbackRunner()
 		{
 	        foreach($this->_progress_callbacks as $callback)
@@ -65,6 +85,14 @@
 	        }
 		}
 		
+		/**
+		 * Executes the ffmpeg process and can be supplied with an optional progress callback.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param mixed $callback If given it must be a valid function that is callable.
+		 * @return void
+		 */
 		public function execute($callback=null)
 		{
 			if($callback !== null)
@@ -89,6 +117,18 @@
 			return $this;
 		}
 		
+		/**
+		 * Once the process has been completed this function can be called to return the output
+		 * of the process. Depending on what the process is outputting depends on what is returned.
+		 * If a single video or audio is being outputted then the related PHPVideoToolkit media object
+		 * will be returned. However if multiple files are being outputed then an array of the associated
+		 * objects are returned. Typically speaking an array will be returned when %index or %timecode
+		 * are within the output path.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return mixed
+		 */
 		public function getOutput()
 		{
 			if($this->isCompleted() === false)
@@ -164,12 +204,21 @@
 				
 //				get the media class from the output.
 //				create the object from the class name and return the new object.
-				$media_class = $this->findMediaClass($output);
+				$media_class = $this->_findMediaClass($output);
 				return new $media_class($output, null, $this->_binary_path, $this->_temp_directory);
 			}
 		}
 		
-		public function findMediaClass($path)
+		/**
+		 * Attempts to read the data about the file given by $path and then returns the class
+		 * name of the related media object.
+		 *
+		 * @access protected
+		 * @author Oliver Lillie
+		 * @param string $path 
+		 * @return string
+		 */
+		protected function _findMediaClass($path)
 		{
 //			read the output to determine what it is so it can be post processed.
 			try
