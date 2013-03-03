@@ -162,10 +162,7 @@
 		
 		public function setVideoCodec($video_codec)
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The video codec cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('video codec');
 			
 			if($video_codec === null)
 			{
@@ -250,10 +247,7 @@
 		
 		public function setVideoScale($width, $height)
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The video scale cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('video scale');
 			
 			if($width === null)
 			{
@@ -349,10 +343,7 @@
 		
 		public function setVideoAspectRatio($aspect_ratio, $auto_adjust_dimensions=false)
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The video aspect ratio cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('video aspect ratio');
 			
 			if($aspect_ratio === null)
 			{
@@ -449,13 +440,6 @@
 				return $this;
 			}
 			
-			$valid_pixel_formats = $this->getPixelFormats();
-			if(in_array($pixel_format, array_keys($valid_pixel_formats)) === true)
-			{
-				$this->_format['video_pixel_format'] = $pixel_format;
-				return $this;
-			}
-			
 //			now check the class settings to see if restricted pixel formats have been set and have to be obeyed
 			if($this->_restricted_video_pixel_formats !== null)
 			{
@@ -465,16 +449,20 @@
 				}
 			}
 			
+			$valid_pixel_formats = $this->getPixelFormats();
+			if(in_array($pixel_format, array_keys($valid_pixel_formats)) === true)
+			{
+				$this->_format['video_pixel_format'] = $pixel_format;
+				return $this;
+			}
+			
 			throw new Exception('Unrecognised pixel format "'.$pixel_format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setPixelFormat');
 		}
 		
 		
 		public function setVideoQuality($quality)
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The video quality cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('video quality');
 			
 			if($quality === null)
 			{
@@ -495,10 +483,7 @@
 		
 		public function setVideoRotation($rotation)
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The video rotation cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('video rotation');
 			
 			if(in_array('transpose', $this->getFilters()) === false)
 			{
@@ -533,23 +518,20 @@
 				$this->_format['video_rotation'] = null;
 				$this->videoFlipVertical();
 				$this->videoFlipHorizontal();
-				return $this;
 			}
 			else
 			{
 				$this->_format['video_rotation'] = $transpose;
-				return $this;
 			}
+			
+			return $this;
 		}
 		
 		public function videoFlipVertical()
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The video rotation cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('video rotation');
 			
-			if($this->_format['video_flip_vertical'] === false)
+			if(empty($this->_format['video_flip_vertical']) === false)
 			{
 				$this->_format['video_flip_vertical'] = null;
 			}
@@ -561,12 +543,9 @@
 		
 		public function videoFlipHorizontal()
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The video rotation cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('video rotation');
 			
-			if($this->_format['video_flip_horizontal'] === false)
+			if(empty($this->_format['video_flip_horizontal']) === false)
 			{
 				$this->_format['video_flip_horizontal'] = null;
 			}

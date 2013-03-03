@@ -34,8 +34,12 @@
 		{
 			parent::__construct($ffmpeg_path, $temp_directory);
 			
+			$this->setType($input_output_type)
+			
 			if($input_output_type === 'output')
 			{
+				$this->setThreads(1)
+				 	 ->setStrictness('experimental');
 			}
 			else if($input_output_type === 'input')
 			{
@@ -56,16 +60,16 @@
 				'strictness' => null,
 				'preset_options_file' => null,
 				'preset' => null,
+				'threads' => null,
 			);
 			$this->_format_to_command = array(
 				'quality' => '-q <setting>',
 				'format'  => '-f <setting>',
 				'strictness'  => '-strict <setting>',
 				'preset_options_file'  => '-fpre <setting>',
+				'threads'  => '-threads <setting>',
 			);
 			
-			$this->setType($input_output_type)
-				 ->setStrictness('experimental');
 		}
 		
 		public function getFormatOptions()
@@ -76,6 +80,34 @@
 		public function setMedia(Media $media)
 		{
 			$this->_media_object = $media;
+			return $this;
+		}
+		
+		protected function _blockSetOnInputFormat($setting_name)
+		{
+			_blockSetOnInputFormat
+			{
+				$backtrace = debug_backtrace();
+				throw new Exception('The '.$setting_name.' cannot be set on an input \\'.get_class($backtrace[1]['object']).'::'.$backtrace[1]['function'].'.');
+			}
+		}
+		
+		public function setThreads($threads)
+		{
+			$this->_blockSetOnInputFormat('thread level');
+			
+			if($threads === null)
+			{
+				$this->_format['threads'] = null;
+				return $this;
+			}
+			
+			if($threads > 64 || $threads < 1)
+			{
+				throw new InvalidArgumentException('Invalid `threads` value ; threads must fit in range 1 - 64');
+			}
+
+			$this->_format['threads'] = (int) $threads;
 			return $this;
 		}
 		
@@ -379,10 +411,7 @@
 		 */
 		public function setQuality($quality)
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The quality cannot be set on an input \\PHPVideoToolkit\\'.get_class($this).'::setQuality.');
-			}
+			_blockSetOnInputFormatect('quality');
 			
 			if($quality === null)
 			{

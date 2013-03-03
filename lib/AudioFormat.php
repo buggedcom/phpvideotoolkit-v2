@@ -121,10 +121,7 @@
 		
 		public function setAudioBitrate($bitrate)
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The audio bitrate cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('audio bitrate');
 			
 			if($bitrate === null)
 			{
@@ -216,10 +213,7 @@
 		
 		public function setAudioQuality($quality)
 		{
-			if($this->_type === 'input')
-			{
-				throw new Exception('The audio quality cannot be set on an input '.get_class($this).'.');
-			}
+			$this->_blockSetOnInputFormat('audio quality');
 			
 			if($quality === null)
 			{
