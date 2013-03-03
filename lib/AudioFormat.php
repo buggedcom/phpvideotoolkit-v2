@@ -20,6 +20,10 @@
 	 */
 	class AudioFormat extends Format
 	{
+		protected $_restricted_audio_bitrates;
+		protected $_restricted_audio_sample_frequencies;
+		protected $_restricted_audio_codecs;
+
 		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
 		{
 			parent::__construct($input_output_type, $ffmpeg_path, $temp_directory);
@@ -45,6 +49,10 @@
 				),
 				'audio_volume' 				=> '-af "volume=<setting>"',
 			));
+			
+			$this->_restricted_audio_bitrates = null;
+			$this->_restricted_audio_sample_frequencies = null;
+			$this->_restricted_audio_codecs = null;
 		}
 		
 		public function disableAudio()
@@ -98,6 +106,15 @@
 				}
 			}
 			
+//			now check the class settings to see if restricted pixel formats have been set and have to be obeyed
+			if($this->_restricted_audio_codecs !== null)
+			{
+				if(in_array($audio_codec, $this->_restricted_audio_codecs) === false)
+				{
+					throw new Exception('The audio codec "'.$audio_codec.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_audio_codecs));
+				}
+			}
+			
 			$this->_format['audio_codec'] = $audio_codec;
 			return $this;
 		}
@@ -115,13 +132,25 @@
 				return $this;
 			}
 			
+//			expand out any short hand
 			if(preg_match('/^[0-9]+k$/', $bitrate) > 0)
 			{
-				$this->_format['audio_bitrate'] = $bitrate;
-				return $this;
+				// TODO make this exapnd out the kbs values
 			}
 			
-			throw new Exception('Unrecognised audio bitrate "'.$bitrate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioBitrate');
+//			now check the class settings to see if restricted audio bitrates have been set and have to be obeys
+			if($this->_restricted_audio_bitrates !== null)
+			{
+				if(in_array($bitrate, $this->_restricted_audio_bitrates) === false)
+				{
+					throw new Exception('The bitrate "'.$bitrate.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioBitrate. Please select one of the following bitrates: '.implode(', ', $this->_restricted_audio_bitrates));
+				}
+			}
+			
+			$this->_format['audio_bitrate'] = $bitrate;
+			return $this;
+			
+			//throw new Exception('Unrecognised audio bitrate "'.$bitrate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioBitrate');
 		}
 		
 		public function setAudioSampleFrequency($audio_sample_frequency)
@@ -133,13 +162,22 @@
 			}
 			
 			$audio_sample_frequency = (int) $audio_sample_frequency;
-		    if(in_array($audio_sample_frequency, array(11025, 22050, 44100)) === false)
+		    if($audio_sample_frequency <= 0)
 			{
-				$this->_format['audio_sample_frequency'] = $audio_sample_frequency;
-				return $this;
+				throw new Exception('Unrecognised audio sample frequency "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioSampleFrequency');
 		    }
 			
-			throw new Exception('Unrecognised audio sample frequency "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioSampleFrequency');
+//			now check the class settings to see if restricted audio audio sample frequencies have been set and have to be obeyed
+			if($this->_restricted_audio_sample_frequencies !== null)
+			{
+				if(in_array($audio_sample_frequency, $this->_restricted_audio_sample_frequencies) === false)
+				{
+					throw new Exception('The audio sample frequency "'.$audio_sample_frequency.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioSampleFrequency. Please select one of the following sample frequencies: '.implode(', ', $this->_restricted_audio_sample_frequencies));
+				}
+			}
+				
+			$this->_format['audio_sample_frequency'] = $audio_sample_frequency;
+			return $this;
 		}
 		
 		public function setAudioChannels($channels)

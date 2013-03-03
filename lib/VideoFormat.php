@@ -50,6 +50,10 @@
 	    const DIMENSION_HD480 	= '852x480';
 	    const DIMENSION_HD720 	= '1280x720';
 	    const DIMENSION_HD1080 	= '1920x1080';
+		
+		protected $_restricted_video_bitrates;
+		protected $_restricted_video_codecs;
+		protected $_restricted_video_pixel_formats;
 
 		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
 		{
@@ -87,6 +91,10 @@
 				'video_flip_vertical' 		=> '-vf vflip',
 				'video_max_frames' 			=> '-vframes <setting>',
 			));
+			
+			$this->_restricted_video_bitrates = null;
+			$this->_restricted_video_codecs = null;
+			$this->_restricted_video_pixel_formats = null;
 		}
 		
 		public function updateFormatOptions()
@@ -124,6 +132,19 @@
 			return $this;
 		}
 		
+		/**
+		 * Enables FFmpegs' two pass output encoding.
+		 * Two pass output encoding is typically has better output.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function enableTwoPassEncoding()
+		{
+			
+		}
+
 		public function disableVideo()
 		{
 			if($this->_type === 'input')
@@ -159,7 +180,16 @@
 			
 			if(in_array($video_codec, $codecs) === false)
 			{
-				throw new Exception('Unrecognised audio codec "'.$video_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
+				throw new Exception('Unrecognised video codec "'.$video_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
+			}
+			
+//			now check the class settings to see if restricted codecs have been set and have to be obeys
+			if($this->_restricted_video_codecs !== null)
+			{
+				if(in_array($video_codec, $this->_restricted_video_codecs) === false)
+				{
+					throw new Exception('The video codec "'.$video_codec.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_video_codecs));
+				}
 			}
 			
 			$this->_format['video_codec'] = $video_codec;
@@ -390,13 +420,25 @@
 				return $this;
 			}
 			
+//			expand out any short hand
 			if(preg_match('/^[0-9]+k$/', $bitrate) > 0)
 			{
-				$this->_format['video_bitrate'] = $bitrate;
-				return $this;
+				// TODO make this exapnd out the kbs values
 			}
 			
-			throw new Exception('Unrecognised video bitrate "'.$bitrate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoBitrate');
+//			now check the class settings to see if restricted codecs have been set and have to be obeys
+			if($this->_restricted_video_bitrates !== null)
+			{
+				if(in_array($bitrate, $this->_restricted_video_bitrates) === false)
+				{
+					throw new Exception('The bitrate "'.$bitrate.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoBitrate. Please select one of the following bitrates: '.implode(', ', $this->_restricted_video_bitrates));
+				}
+			}
+			
+			$this->_format['video_bitrate'] = $bitrate;
+			return $this;
+			
+			//throw new Exception('Unrecognised video bitrate "'.$bitrate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoBitrate');
 		}
 		
 		public function setPixelFormat($pixel_format)
@@ -412,6 +454,15 @@
 			{
 				$this->_format['video_pixel_format'] = $pixel_format;
 				return $this;
+			}
+			
+//			now check the class settings to see if restricted pixel formats have been set and have to be obeyed
+			if($this->_restricted_video_pixel_formats !== null)
+			{
+				if(in_array($video_codec, $this->_restricted_video_pixel_formats) === false)
+				{
+					throw new Exception('The video pixel format "'.$pixel_format.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setPixelFormat. Please select one of the following pixel formats: '.implode(', ', $this->_restricted_video_pixel_formats));
+				}
 			}
 			
 			throw new Exception('Unrecognised pixel format "'.$pixel_format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setPixelFormat');
