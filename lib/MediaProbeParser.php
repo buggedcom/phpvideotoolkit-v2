@@ -299,10 +299,10 @@
 						'codec' 				=> array(
 							'name'					=> isset($data_stream['codec_name']) === true ? $data_stream['codec_name'] : null,
 							'long_name' 			=> isset($data_stream['codec_long_name']) === true ? $data_stream['codec_long_name'] : null,
-							'profile'				=> isset($data_stream['profile']) === true && $data_stream['profile'] !== 'unknown' ? $data_stream['xxx'] : null,
+							'profile'				=> isset($data_stream['profile']) === true && $data_stream['profile'] !== 'unknown' ? $data_stream['profile'] : null,
 							'tag_string'			=> isset($data_stream['codec_tag_string']) === true ? $data_stream['codec_tag_string'] : null,
 							'tag'					=> isset($data_stream['codec_tag']) === true ? $data_stream['codec_tag'] : null,
-							'time_base'				=> isset($data_stream['codec_time_base']) === true ? $data_stream['xxx'] : null,
+							'time_base'				=> isset($data_stream['codec_time_base']) === true ? $data_stream['codec_time_base'] : null,
 							'raw'					=> null,
 						),
 						'duration'				=> isset($data_stream['duration']) === true ? new Timecode($data_stream['duration'], Timecode::INPUT_FORMAT_SECONDS) : null,
@@ -376,10 +376,10 @@
 						'codec' 			=> array(
 							'name'				=> isset($data_stream['codec_name']) === true ? $data_stream['codec_name'] : null,
 							'long_name' 		=> isset($data_stream['codec_long_name']) === true ? $data_stream['codec_long_name'] : null,
-							'profile'			=> isset($data_stream['profile']) === true && $data_stream['profile'] !== 'unknown' ? $data_stream['xxx'] : null,
+							'profile'			=> isset($data_stream['profile']) === true && $data_stream['profile'] !== 'unknown' ? $data_stream['profile'] : null,
 							'tag_string'		=> isset($data_stream['codec_tag_string']) === true ? $data_stream['codec_tag_string'] : null,
 							'tag'				=> isset($data_stream['codec_tag']) === true ? $data_stream['codec_tag'] : null,
-							'time_base'			=> isset($data_stream['codec_time_base']) === true ? $data_stream['xxx'] : null,
+							'time_base'			=> isset($data_stream['codec_time_base']) === true ? $data_stream['codec_time_base'] : null,
 							'raw'				=> null,
 						),
 						'sample' 			=> array(
