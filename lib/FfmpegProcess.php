@@ -455,22 +455,9 @@
 		 * @see ExecBuffer::getBuffer
 		 * @return mixed
 		 */
-		public function getBuffer()
+		public function getBuffer($raw=false)
 		{
-			return $this->_callExecBufferFunction('getBuffer');
-		}
-		
-		/**
-		 * Returns the raw buffer output of ExecBuffer.
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @see ExecBuffer::getRawBuffer
-		 * @return mixed
-		 */
-		public function getRawBuffer()
-		{
-			return $this->_callExecBufferFunction('getRawBuffer');
+			return $this->_callExecBufferFunction($raw === false ? 'getBuffer' : 'getRawBuffer');
 		}
 		
 		/**
