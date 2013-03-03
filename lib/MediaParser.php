@@ -519,7 +519,7 @@
 				}
 				else
 				{
-					$data['codec']['raw'] = $codec_matches[0];
+					$data['codec']['raw'] = isset($codec_matches[0]) === true ? $codec_matches[0] : null;
 				}
 				
 //				get metadata from the audio input, (if any)
