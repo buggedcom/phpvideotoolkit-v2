@@ -17,15 +17,11 @@
 		$namespace = array_shift($parts);
 		if($namespace === 'PHPVideoToolkit')
 		{
-			$class = array_pop($parts);
+			$class = str_replace('_', DIRECTORY_SEPARATOR, array_pop($parts));
 			$path = dirname(__FILE__).DIRECTORY_SEPARATOR.'lib'.DIRECTORY_SEPARATOR.ltrim(implode(DIRECTORY_SEPARATOR, $parts).DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR).$class.'.php';
 			if(is_file($path) === true)
 			{
 				require_once $path;
-			}
-			else
-			{
-				trigger_error('Class \''.$class_name.'\' not found in <b>'.__FILE__.'<\b> on line <b>'.__LINE__.'</b>.', E_ERROR);
 			}
 		}
 	});
