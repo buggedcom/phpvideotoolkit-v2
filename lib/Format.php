@@ -55,6 +55,7 @@
 				'format' => null,
 				'strictness' => null,
 				'preset_options_file' => null,
+				'preset' => null,
 			);
 			$this->_format_to_command = array(
 				'quality' => '-q <setting>',
@@ -308,6 +309,17 @@
 			throw new Exception('Unrecognised format "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setFormat');
 		}
 		
+		/**
+		 * A preset file contains a sequence of option=value pairs, one for each line, specifying a sequence of options 
+		 * which would be awkward to specify on the command line. Lines starting with the hash (’#’) character are ignored 
+		 * and are used to provide comments. Check the ‘presets’ directory in the FFmpeg source tree for examples.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @link http://ffmpeg.org/ffmpeg.html#toc-Preset-files
+		 * @param string $preset_file_path 
+		 * @return void
+		 */
 		public function setPresetOptionsFile($preset_file_path)
 		{
 			if($preset_file_path === null)
@@ -331,6 +343,15 @@
 			return $this;
 		}
 		
+		/**
+		 * Sets the output strictness (-strictness) determining what level of stable funcitonality is used.
+		 * By default "experimental" is used/
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $strictness 
+		 * @return void
+		 */
 		public function setStrictness($strictness)
 		{
 			if($strictness === null)
@@ -348,6 +369,14 @@
 			throw new Exception('Unrecognised strictness "'.$strictness.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setStrictness');
 		}
 		
+		/**
+		 * Sets the output quality (using "-q")
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $quality 
+		 * @return void
+		 */
 		public function setQuality($quality)
 		{
 			if($this->_type === 'input')
@@ -372,6 +401,14 @@
 			return $this;
 		}
 		
+		/**
+		 * Sets the output format of the ffmpeg process.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $format 
+		 * @return void
+		 */
 		public function setFormat($format)
 		{
 			// TODO work out what can be input and what can't be inputed
