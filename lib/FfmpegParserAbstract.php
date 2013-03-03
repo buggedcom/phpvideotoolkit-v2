@@ -771,10 +771,13 @@
 					$args = trim($match[2]);
 					$args = empty($args) === true ? array() : explode(' ', $args);
 					
+					$deprecated = strpos($match[3], 'deprecated') !== false;
+					
 					$data[$match[1]] = array(
 						'datatype' => $data_type,
 						'description' => $match[3],
 						'arguments' => $args,
+						'deprecated' => $deprecated,
 					);
 				}
 			}
