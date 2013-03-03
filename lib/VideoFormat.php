@@ -170,12 +170,18 @@
 				return $this;
 			}
 			
-//			validate the video codecs that are available from ffmpeg.
-			$codecs = array_keys($this->getCodecs('video'));
-//			special case for copy as it is not included in the codec list but is valid
-			array_push($codecs, 'copy');
+//			get codecs and add special case for copy as it is not included in the codec list but is valid
+			$codecs = $this->getCodecs('video');
+			$codecs['copy'] = 1;
 			
-			if(in_array($video_codec, $codecs) === false)
+//			work around for h264/libx264 codec names. Thanks to Jorrit Schippers for this one.
+			if(in_array($video_codec, array('h264', 'libx264')) === true)
+			{
+				$codec = isset($codecs['h264']) === true ? 'h264' : 'libx264';
+			}
+			
+//			validate the video codecs that are available from ffmpeg.
+			if(isset($codecs[$video_codec]) === false)
 			{
 				throw new Exception('Unrecognised video codec "'.$video_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
 			}
