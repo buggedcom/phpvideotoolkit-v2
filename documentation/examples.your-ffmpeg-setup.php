@@ -146,6 +146,7 @@
     {
         $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
         $ffmpeg_commands = $ffmpeg->getCommands();
+		ksort($ffmpeg_commands);
     }
     
 ?>
@@ -320,6 +321,7 @@
 	{
 		$ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
 		$ffmpeg_bitstream_filters = $ffmpeg->getBitstreamFilters();
+		sort($ffmpeg_bitstream_filters);
 	}
     
 	//\PHPVideoToolkit\Trace::vars($ffmpeg_bitstream_filters);
