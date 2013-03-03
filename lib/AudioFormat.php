@@ -57,6 +57,11 @@
 		
 		public function disableAudio()
 		{
+			if($this->_type === 'input')
+			{
+				throw new Exception('Audio cannot be disabled on an input '.get_class($this).'.');
+			}
+			
 			$this->_format['disable_audio'] = true;
 		}
 		

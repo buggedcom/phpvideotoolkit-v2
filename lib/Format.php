@@ -34,8 +34,9 @@
 		{
 			parent::__construct($ffmpeg_path, $temp_directory);
 			
-			$this->setType($input_output_type)
+			$this->setType($input_output_type);
 			
+//			add default input/output commands
 			if($input_output_type === 'output')
 			{
 				$this->setThreads(1)
@@ -85,7 +86,7 @@
 		
 		protected function _blockSetOnInputFormat($setting_name)
 		{
-			_blockSetOnInputFormat
+			if($this->_type === 'input')
 			{
 				$backtrace = debug_backtrace();
 				throw new Exception('The '.$setting_name.' cannot be set on an input \\'.get_class($backtrace[1]['object']).'::'.$backtrace[1]['function'].'.');
