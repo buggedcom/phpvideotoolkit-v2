@@ -32,6 +32,31 @@
 		}
 		
 		/**
+		 * Sets a command on ffmpeg that sets a timelimit
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $timelimit_in_seconds 
+		 * @return void
+		 */
+		public function setProcessTimelimit($timelimit_in_seconds)
+		{
+			$parser = new FfmpegParser($this->_binary_path, $this->_temp_directory);
+			$commands = $this->getCommands();
+			if(isset($commands['-timelimit']) === false)
+			{
+				throw new Exception('The -timelimit command is not supported by your version of FFmpeg.');
+			}
+			
+			if($timelimit_in_seconds <= 0)
+			{
+				throw new Exception('The timelimit must be greater than 0 seconds.');
+			}
+			
+			$this->addCommand('-timelimit', $timelimit_in_seconds);
+		}
+		
+		/**
 		 * Attaches a progress handler to the ffmpeg progress. 
 		 * The progress handler is executed during the ffmpeg process.
 		 * Attaching a handler causes PHP to block.
@@ -139,7 +164,44 @@
 //			check for an error.
 			if($this->hasError() === true)
 			{
-				throw new FfmpegProcessOutputException('Encoding failed and an error was returned from ffmpeg. Error code '.$this->getErrorCode().' was returned the message (if any) was: '.$this->getLastSplit());
+//				check for specific recieved signal errors.
+				$last_split = $this->getLastSplit();
+				if(preg_match('/Received signal ([0-9]+): terminating\./', $last_split, $matches) > 0)
+				{
+					$kill_signals = array(
+						1 => 'Hang up detected on controlling terminal or death of controlling process.',
+						2 => 'User sent an interrupt signal.',
+						3 => 'User sent a quit signal.',
+						4 => 'Illegal instruction.',
+						6 => 'Abort signal from abort(3).',
+						8 => 'Floating point exception.',
+						9 => 'Kill signal sent.',
+						11 => 'Invalid memory reference',
+						13 => 'Broken pipe: write to pipe with no readers',
+						14 => 'Timer signal from alarm(2)',
+						15 => 'Termination signal sent.',
+						24 => 'Imposed time limit ({length} seconds) exceeded.',
+					);
+					// TODO add more signals.
+					$kill_int = (int) $matches[1];
+					if(isset($kill_signals[$kill_int]) === true)
+					{
+						$message = $kill_signals[$kill_int];
+						if($kill_int == 24)
+						{
+							$length = $this->getCommand('-timelimit');
+							$length = !$length ? 'unknown' : $length;
+							$message = str_replace('{length}', $length, $message);
+						}
+						throw new FfmpegProcessOutputException('Process was aborted. '.$message);
+					}
+					else
+					{
+						throw new FfmpegProcessOutputException('Termination signal received and the process aborted. Signal was '.$matches[1]);
+					}
+				}
+			
+				throw new FfmpegProcessOutputException('Encoding failed and an error was returned from ffmpeg. Error code '.$this->getErrorCode().' was returned the message (if any) was: '.$last_split);
 			}
 			
 //			get the output of the process
