@@ -42,8 +42,8 @@
 		public function setProcessTimelimit($timelimit_in_seconds)
 		{
 			$parser = new FfmpegParser($this->_binary_path, $this->_temp_directory);
-			$commands = $this->getCommands();
-			if(isset($commands['-timelimit']) === false)
+			$commands = $parser->getCommands();
+			if(isset($commands['timelimit']) === false)
 			{
 				throw new Exception('The -timelimit command is not supported by your version of FFmpeg.');
 			}
