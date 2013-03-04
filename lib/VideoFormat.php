@@ -74,6 +74,7 @@
 				'video_flip_horizontal' => null,
 				'video_flip_vertical' => null,
 				'video_max_frames' => null,
+				'video_filters' => null,
 			));
 			$this->_format_to_command = array_merge($this->_format_to_command, array(
 				'disable_video' 			=> '-vn',
@@ -97,6 +98,13 @@
 			$this->_restricted_video_pixel_formats = null;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function updateFormatOptions()
 		{
 			parent::updateFormatOptions();
@@ -128,7 +136,30 @@
 					$this->setVideoPadding($padding['_padding']['top'], $padding['_padding']['right'], $padding['_padding']['bottom'], $padding['_padding']['left'], $padding['width'], $padding['height'], $padding['colour']);
 				}
 			}
+			
+			// TODO expand the video_filters format data
+			if(empty($this->_format['video_filters']) === false)
+			{
+				
+			}
 
+			return $this;
+		}
+		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param VideoFilter $filter 
+		 * @return void
+		 */
+		public function addVideoFilter(VideoFilter $filter)
+		{
+			$this->_blockSetOnInputFormat('video filter');
+			
+			$this->_setFilter('video_filters', $filter);
+			
 			return $this;
 		}
 		
@@ -145,6 +176,13 @@
 			
 		}
 
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function disableVideo()
 		{
 			if($this->_type === 'input')
@@ -153,13 +191,32 @@
 			}
 			
 			$this->_format['disable_video'] = true;
+			
+			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function enableVideo()
 		{
 			$this->_format['disable_video'] = false;
+			
+			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $video_codec 
+		 * @return void
+		 */
 		public function setVideoCodec($video_codec)
 		{
 			$this->_blockSetOnInputFormat('video codec');
@@ -177,7 +234,17 @@
 //			work around for h264/libx264 codec names. Thanks to Jorrit Schippers for this one.
 			if(in_array($video_codec, array('h264', 'libx264')) === true)
 			{
-				$codec = isset($codecs['h264']) === true ? 'h264' : 'libx264';
+				$video_codec = isset($codecs['libx264']) === true ? 'libx264' : 'h264';
+			}
+//			work around for theora/libtheora names
+			else if(in_array($video_codec, array('theora', 'libtheora')) === true)
+			{
+				$video_codec = isset($codecs['libtheora']) === true ? 'libtheora' : 'theora';
+			}
+//			work around for vp8/libvpx names
+			else if(in_array($video_codec, array('vp8', 'libvpx')) === true)
+			{
+				$video_codec = isset($codecs['libvpx']) === true ? 'libvpx' : 'vp8';
 			}
 			
 //			validate the video codecs that are available from ffmpeg.
@@ -199,6 +266,17 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $width 
+		 * @param string $height 
+		 * @param string $auto_adjust_dimensions_to_optimal 
+		 * @param string $force_aspect_ratio 
+		 * @return void
+		 */
 		public function setVideoDimensions($width, $height=null, $auto_adjust_dimensions_to_optimal=true, $force_aspect_ratio=false)
 		{
 			if($width === null)
@@ -251,6 +329,15 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $width 
+		 * @param string $height 
+		 * @return void
+		 */
 		public function setVideoScale($width, $height)
 		{
 			$this->_blockSetOnInputFormat('video scale');
@@ -347,6 +434,15 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $aspect_ratio 
+		 * @param string $auto_adjust_dimensions 
+		 * @return void
+		 */
 		public function setVideoAspectRatio($aspect_ratio, $auto_adjust_dimensions=false)
 		{
 			$this->_blockSetOnInputFormat('video aspect ratio');
@@ -369,6 +465,14 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $frame_rate 
+		 * @return void
+		 */
 		public function setVideoFrameRate($frame_rate)
 		{
 			// PEG1/2 does not support 5/1 fps
@@ -391,6 +495,14 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $max_frame_count 
+		 * @return void
+		 */
 		public function setVideoMaxFrames($max_frame_count)
 		{
 			// PEG1/2 does not support 5/1 fps
@@ -409,6 +521,14 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $bitrate 
+		 * @return void
+		 */
 		public function setVideoBitrate($bitrate)
 		{
 			if($bitrate === null)
@@ -438,6 +558,14 @@
 			//throw new Exception('Unrecognised video bitrate "'.$bitrate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoBitrate');
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $pixel_format 
+		 * @return void
+		 */
 		public function setPixelFormat($pixel_format)
 		{
 			if($pixel_format === null)
@@ -465,7 +593,14 @@
 			throw new Exception('Unrecognised pixel format "'.$pixel_format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setPixelFormat');
 		}
 		
-		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $quality 
+		 * @return void
+		 */
 		public function setVideoQuality($quality)
 		{
 			$this->_blockSetOnInputFormat('video quality');
@@ -487,6 +622,14 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $rotation 
+		 * @return void
+		 */
 		public function setVideoRotation($rotation)
 		{
 			$this->_blockSetOnInputFormat('video rotation');
@@ -533,6 +676,13 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function videoFlipVertical()
 		{
 			$this->_blockSetOnInputFormat('video rotation');
@@ -547,6 +697,13 @@
 			}
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function videoFlipHorizontal()
 		{
 			$this->_blockSetOnInputFormat('video rotation');

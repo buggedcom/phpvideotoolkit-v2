@@ -36,6 +36,7 @@
 				'audio_sample_frequency' => null,
 				'audio_channels' => null,
 				'audio_volume' => null,
+				'audio_filters' => null,
 			));
 			$this->_format_to_command = array_merge($this->_format_to_command, array(
 				'disable_audio' 			=> '-an',
@@ -55,6 +56,50 @@
 			$this->_restricted_audio_codecs = null;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function updateFormatOptions()
+		{
+			parent::updateFormatOptions();
+			
+			// TODO expand the video_filters format data
+			if(empty($this->_format['audio_filters']) === false)
+			{
+				
+			}
+
+			return $this;
+		}
+		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param AudioFilter $filter 
+		 * @return void
+		 */
+		public function addAudioFilter(AudioFilter $filter)
+		{
+			$this->_blockSetOnInputFormat('audio filter');
+			
+			$this->_setFilter('audio_filters', $filter);
+			
+			return $this;
+		}
+		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function disableAudio()
 		{
 			if($this->_type === 'input')
@@ -63,25 +108,32 @@
 			}
 			
 			$this->_format['disable_audio'] = true;
+			
+			return $this;
 		}
 		
 		/**
-		 * cutoff
-		 * xxxx
-		 * xxxx
-		 * xxxx
-		 * xxxx
-		 * xxxx
-		 * xxxx
-		 * xxxx
-		 * xxxx
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
 		 */
-		
 		public function enableAudio()
 		{
 			$this->_format['disable_audio'] = false;
+			
+			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $audio_codec 
+		 * @return void
+		 */
 		public function setAudioCodec($audio_codec)
 		{
 			if($audio_codec === null)
@@ -95,20 +147,21 @@
 //			special case for copy as it is not included in the codec list but is valid
 			array_push($codecs, 'copy');
 			
+// 			run a libmp3lame check as it require different mp3 codec
+// 			updated. thanks to Varon for providing the research
+			if(in_array($audio_codec, array('mp3', 'libmp3lame')) === true)
+			{
+				$audio_codec = isset($codecs['libmp3lame']) === true ? 'libmp3lame' : 'mp3';
+			}
+//			fix vorbis
+			else if($audio_codec === 'vorbis' || $audio_codec === 'libvorbis' )
+			{
+				$audio_codec = isset($codecs['libvorbis']) === true ? 'libvorbis' : 'vorbis';
+			}
+			
 			if(in_array($audio_codec, $codecs) === false)
 			{
 				throw new Exception('Unrecognised audio codec "'.$audio_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec');
-			}
-			
-// 			run a libmp3lame check as it require different mp3 codec
-// 			updated. thanks to Varon for providing the research
-			if($audio_codec == 'mp3')
-			{
-				$config_data = $this->getFfmpegData();
-				if(in_array('libmp3lame', $codecs) === true || in_array('--enable-libmp3lame', $config_data['binary']['configuration']) === true)
-				{
-					$audio_codec = 'libmp3lame';
-				}
 			}
 			
 //			now check the class settings to see if restricted pixel formats have been set and have to be obeyed
@@ -124,6 +177,14 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $bitrate 
+		 * @return void
+		 */
 		public function setAudioBitrate($bitrate)
 		{
 			$this->_blockSetOnInputFormat('audio bitrate');
@@ -155,6 +216,14 @@
 			//throw new Exception('Unrecognised audio bitrate "'.$bitrate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioBitrate');
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $audio_sample_frequency 
+		 * @return void
+		 */
 		public function setAudioSampleFrequency($audio_sample_frequency)
 		{
 			if($audio_sample_frequency === null)
@@ -182,6 +251,14 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $channels 
+		 * @return void
+		 */
 		public function setAudioChannels($channels)
 		{
 			if($channels === null)
@@ -199,6 +276,14 @@
 			throw new Exception('Unrecognised audio channels "'.$channels.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioChannels');
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $volume 
+		 * @return void
+		 */
 		public function setVolume($volume)
 		{
 			if($volume === null)
@@ -216,6 +301,14 @@
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $quality 
+		 * @return void
+		 */
 		public function setAudioQuality($quality)
 		{
 			$this->_blockSetOnInputFormat('audio quality');

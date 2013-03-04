@@ -36,20 +36,6 @@
 			
 			$this->setType($input_output_type);
 			
-//			add default input/output commands
-			if($input_output_type === 'output')
-			{
-				$this->setThreads(1)
-				 	 ->setStrictness('experimental');
-			}
-			else if($input_output_type === 'input')
-			{
-			}
-			else
-			{
-				throw new Exception('Unrecognised input/output type "'.$input_output_type.'" set in \\PHPVideoToolkit\\Format::__construct');
-			}
-			
 			$this->_additional_commands = array();
 			$this->_removed_commands = array();
 			
@@ -60,7 +46,6 @@
 				'format' => null,
 				'strictness' => null,
 				'preset_options_file' => null,
-				'preset' => null,
 				'threads' => null,
 			);
 			$this->_format_to_command = array(
@@ -71,19 +56,72 @@
 				'threads'  => '-threads <setting>',
 			);
 			
+//			add default input/output commands
+			if($input_output_type === 'output')
+			{
+				$this->setThreads(1)
+				 	 ->setStrictness('experimental')
+				 	 ->setQualityVsStreamabilityBalanceRatio(31);
+			}
+			else if($input_output_type === 'input')
+			{
+			}
+			else
+			{
+				throw new Exception('Unrecognised input/output type "'.$input_output_type.'" set in \\PHPVideoToolkit\\Format::__construct');
+			}
+			
 		}
 		
+		protected function _setFilter($format_key, FilterAbstract $filter)
+		{
+			if(isset($this->_format[$format_key]) === false)
+			{
+				throw new Exception('Unknown format key uncountered when setting a filter.');
+			}
+			
+			if($this->_format[$format_key] === null)
+			{
+				$this->_format[$format_key] = array();
+			}
+			
+			return array_push($this->_format[$format_key], $filter)-1;
+		}
+		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function getFormatOptions()
 		{
 			return $this->_format;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param Media $media 
+		 * @return void
+		 */
 		public function setMedia(Media $media)
 		{
 			$this->_media_object = $media;
 			return $this;
 		}
 		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $setting_name 
+		 * @return void
+		 */
 		protected function _blockSetOnInputFormat($setting_name)
 		{
 			if($this->_type === 'input')
@@ -93,25 +131,13 @@
 			}
 		}
 		
-		public function setThreads($threads)
-		{
-			$this->_blockSetOnInputFormat('thread level');
-			
-			if($threads === null)
-			{
-				$this->_format['threads'] = null;
-				return $this;
-			}
-			
-			if($threads > 64 || $threads < 1)
-			{
-				throw new InvalidArgumentException('Invalid `threads` value ; threads must fit in range 1 - 64');
-			}
-
-			$this->_format['threads'] = (int) $threads;
-			return $this;
-		}
-		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
 		public function updateFormatOptions()
 		{
 			if(empty($this->_media_object) === true)
@@ -201,7 +227,6 @@
 			{
 				$commands['-af'] = implode(',', $commands['-af']);
 			}
-			
 			return $commands;
 		}
 		
@@ -403,35 +428,6 @@
 		}
 		
 		/**
-		 * Sets the output quality (using "-q")
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param string $quality 
-		 * @return void
-		 */
-		public function setQuality($quality)
-		{
-			_blockSetOnInputFormatect('quality');
-			
-			if($quality === null)
-			{
-				$this->_format['quality'] = null;
-				return $this;
-			}
-			
-// 			interpret quality into ffmpeg value
-			$quality = 31 - round(($quality / 100) * 31);
-			if($quality > 31 || $quality < 1)
-			{
-				throw new Exception('Unrecognised quality "'.$quality.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setQuality');
-			}
-			
-			$this->_format['quality'] = $quality;
-			return $this;
-		}
-		
-		/**
 		 * Sets the output format of the ffmpeg process.
 		 *
 		 * @access public
@@ -443,7 +439,7 @@
 		{
 			// TODO work out what can be input and what can't be inputed
 			
-			if($quality === null)
+			if($format === null)
 			{
 				$this->_format['format'] = null;
 				return $this;
@@ -464,6 +460,61 @@
 			}
 			
 			throw new Exception('Unrecognised format "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setFormat');
+		}
+		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $threads 
+		 * @return void
+		 */
+		public function setThreads($threads)
+		{
+			$this->_blockSetOnInputFormat('thread level');
+			
+			if($threads === null)
+			{
+				$this->_format['threads'] = null;
+				return $this;
+			}
+			
+			if($threads < 1 || $threads > 64)
+			{
+				throw new InvalidArgumentException('Invalid `threads` value; the value must fit in range 1 - 64.');
+			}
+
+			$this->_format['threads'] = (int) $threads;
+			return $this;
+		}
+		
+		/**
+		 * undocumented function
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @see http://www.kilobitspersecond.com/2007/05/24/ffmpeg-quality-comparison/
+		 * @param string $qscale 
+		 * @return void
+		 */
+		public function setQualityVsStreamabilityBalanceRatio($qscale)
+		{
+			$this->_blockSetOnInputFormat('quality stream ability balance ratio (qscale)');
+			
+			if($qscale === null)
+			{
+				$this->_format['quality'] = null;
+				return $this;
+			}
+			
+			if($qscale < 1 || $qscale > 31)
+			{
+				throw new InvalidArgumentException('Invalid quality stream ability balance ratio (qscale) value; the value must fit in range 1 - 31.');
+			}
+			
+			$this->_format['quality'] = (int) $qscale;
+			return $this;
 		}
 		
 	}
