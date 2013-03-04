@@ -24,6 +24,12 @@
 		{
 			parent::__construct($input_output_type, $ffmpeg_path, $temp_directory);
 			
+//			default by forcing the audio codec to use mp3
+			if($input_output_type === 'output')
+			{
+				$this->setAudioCodec('mp3');
+			}
+			
 			$this->_restricted_audio_sample_frequencies = array(44100, 22050, 11025);
 		}
 		

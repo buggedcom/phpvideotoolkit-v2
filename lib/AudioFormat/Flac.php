@@ -11,14 +11,25 @@
 	 * @uses ffmpeg http://ffmpeg.sourceforge.net/
 	 */
 	 
-	namespace PHPVideoToolkit\Media\Video;
-	
+	 namespace PHPVideoToolkit;
+
 	/**
 	 * @access public
 	 * @author Oliver Lillie
 	 * @package default
 	 */
-	class H264 extends \PHPVideoToolkit\VideoFormat
+	class AudioFormat_Flac extends AudioFormat
 	{
+		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
+		{
+			parent::__construct($input_output_type, $ffmpeg_path, $temp_directory);
+			
+			if($input_output_type === 'output')
+			{
+				$this->setAudioCodec('flac')
+					 ->setFormat('flac');
+			}
+			
+			$this->_restricted_audio_codecs = array('flac');
+		}
 	}
-
