@@ -27,7 +27,7 @@
 	{
 		public function __construct($audio_file_path, AudioFormat $audio_input_format=null, $ffmpeg_path, $temp_directory)
 		{
-			parent::__contruct($audio_file_path, $audio_input_format, $ffmpeg_path, $temp_directory);
+			parent::__construct($audio_file_path, $audio_input_format, $ffmpeg_path, $temp_directory);
 			
 //			validate this media file is an audio file
 			$type = $this->readType();
@@ -79,7 +79,7 @@
 		 */
 		protected function _processOutputFormat(Format &$output_format=null, &$save_path)
 		{
-			parent::_processOutputFormat($output_format);
+			parent::_processOutputFormat($output_format, $save_path);
 			
 //			check for conflictions with having audio disabled.
 			$options = $output_format->getFormatOptions();

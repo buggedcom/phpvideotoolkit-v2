@@ -800,7 +800,7 @@
 			
 //			do some pre processing of the output format
 			$this->_processOutputFormat($output_format, $save_path);
-			
+
 //			check the save path.
 			$has_timecode_or_index = false;
 			$has_timecode = false;
