@@ -61,7 +61,7 @@
 			{
 				$this->setThreads(1)
 				 	 ->setStrictness('experimental')
-				 	 ->setQualityVsStreamabilityBalanceRatio(31);
+				 	 ->setQualityVsStreamabilityBalanceRatio(4);
 			}
 			else if($input_output_type === 'input')
 			{
