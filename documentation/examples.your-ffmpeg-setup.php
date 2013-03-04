@@ -160,7 +160,7 @@
           
 </code></pre>
           
-            <p>The following list contains the commands available to FFmpeg and their related explanations. Any rows that are highlighted in red are depreciated and should no longer be used.</p>
+            <p>The following list contains the commands available to FFmpeg and their related explanations. Any rows that are highlighted in red have been removed, yellow are depreciated and should no longer be used.</p>
           
             <table class="table table-striped table-condensed table-bordered">
                 <thead>
@@ -168,18 +168,18 @@
                     <th>Description</th>
                     <th>Data Type</th>
                     <th>Arguments (if any)</th>
-                    <th>Depreciated</th>
+                    <th>Depreciated/Removed Status</th>
                 </thead>
                 <tbody>
                     
                     <?php foreach($ffmpeg_commands as $command=>$info): ?>
                         
-                        <tr<?php if($info['deprecated'] === true): ?> class="error"<?php endif ?>>
+                        <tr<?php if($info['status'] === 'deprecated'): ?> class="warning"<?php elseif($info['status'] === 'removed'): ?> class="error"<?php endif ?>>
                             <td>-<?php echo HTML($command); ?></td>
                             <td><?php echo HTML($info['description']); ?></td>
                             <td><?php echo HTML($info['datatype']); ?></td>
                             <td><?php echo HTML(implode(' ', $info['arguments'])); ?></td>
-                            <td><?php echo $info['deprecated'] === true ? 'yes' : ''; ?></td>
+                            <td><?php echo $info['status'] ? HTML($info['status']) : ''; ?></td>
                         </tr>
                         
                     <?php endforeach ?>
@@ -369,6 +369,7 @@
 	{
 		$ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
 		$ffmpeg_filters = $ffmpeg->getFilters(false);
+		ksort($ffmpeg_filters);
 	}
     
 	//\PHPVideoToolkit\Trace::vars($ffmpeg_filters);exit;
@@ -426,6 +427,7 @@
 	{
 		$ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
 		$ffmpeg_protocols = $ffmpeg->getProtocols();
+		ksort($ffmpeg_protocols);
 	}
     
 	//\PHPVideoToolkit\Trace::vars($ffmpeg_protocols);exit;
@@ -478,6 +480,7 @@
 	{
 		$ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
 		$ffmpeg_pixel_formats = $ffmpeg->getPixelFormats();
+		ksort($ffmpeg_pixel_formats);
 	}
     
 	//\PHPVideoToolkit\Trace::vars($ffmpeg_pixel_formats);exit;
