@@ -54,6 +54,7 @@
 		protected $_restricted_video_bitrates;
 		protected $_restricted_video_codecs;
 		protected $_restricted_video_pixel_formats;
+		protected $_restricted_video_frame_rates;
 
 		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
 		{
@@ -96,6 +97,7 @@
 			$this->_restricted_video_bitrates = null;
 			$this->_restricted_video_codecs = null;
 			$this->_restricted_video_pixel_formats = null;
+			$this->_restricted_video_frame_rates = null;
 		}
 		
 		/**
@@ -489,6 +491,15 @@
 			else if(is_int($frame_rate) === false && is_float($frame_rate) === false)
 			{
 				throw new Exception('If setting frame rate please make sure it is either an integer or a float.');
+			}
+			
+//			now check the class settings to see if restricted codecs have been set and have to be obeys
+			if($this->_restricted_video_frame_rates !== null)
+			{
+				if(in_array($frame_rate, $this->_restricted_video_frame_rates) === false)
+				{
+					throw new Exception('The frame rate "'.$frame_rate.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate. Please select one of the following frame rates: '.implode(', ', $this->_restricted_video_frame_rates));
+				}
 			}
 			
 			$this->_format['video_frame_rate'] = $frame_rate;
