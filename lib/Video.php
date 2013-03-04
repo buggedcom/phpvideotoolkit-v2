@@ -221,67 +221,73 @@
 // 			This isn't strictly needed it is purely for informational purposes that this is done, because if the width is not
 // 			inline with what is should be according to the aspect ratio ffmpeg will report the wrong final width and height
 // 			when using it to lookup information about the file.
-			$aspect_ratio = $options['video_aspect_ratio'];
-			if(empty($aspect_ratio) === false)
+			if(isset($options['video_aspect_ratio']))
 			{
-				$dimensions = $options['video_dimensions'];
-				if(empty($dimensions) === true)
+				$aspect_ratio = $options['video_aspect_ratio'];
+				if(empty($aspect_ratio) === false)
 				{
-					$dimensions = $this->readDimensions();
-					if(empty($dimensions) === false)
+					$dimensions = $options['video_dimensions'];
+					if(empty($dimensions) === true)
 					{
-						$dimensions['auto_adjust_dimensions'] = $aspect_ratio['auto_adjust_dimensions'];
-						$dimensions['force_aspect'] = true;
-						$options['video_dimensions'] = $dimensions;
-					}
-				}
-				if(empty($dimensions) === false)
-				{
-					if(strpos($aspect_ratio['ratio'], ':') !== false)
-					{
-						$ratio = explode(':', $aspect_ratio['ratio']);
-						$ratio = $ratio[0] / $ratio[1];
-						$new_width = round($dimensions['height'] * $ratio);
-// 						make sure new width is an even number
-						$ceiled = ceil($new_width);
-						$new_width = $ceiled % 2 !== 0 ? floor($new_width) : $ceiled;
-						if($new_width !== $dimensions['width'])
+						$dimensions = $this->readDimensions();
+						if(empty($dimensions) === false)
 						{
-							$output_format->setVideoDimensions($new_width, $dimensions['height'], $dimensions['auto_adjust_dimensions'], $dimensions['force_aspect']);
-							$options = $output_format->getFormatOptions();
+							$dimensions['auto_adjust_dimensions'] = $aspect_ratio['auto_adjust_dimensions'];
+							$dimensions['force_aspect'] = true;
+							$options['video_dimensions'] = $dimensions;
 						}
 					}
-					else if(strpos($aspect_ratio['ratio'], '.') !== false)
+					if(empty($dimensions) === false)
 					{
-						$ratio = floatval($aspect_ratio['ratio']);
-						$new_width = $dimensions['height'] * $ratio;
-// 						make sure new width is an even number
-						$ceiled = ceil($new_width);
-						$new_width = $ceiled % 2 !== 0 ? floor($new_width) : $ceiled;
-						if($new_width !== $dimensions['width'])
+						if(strpos($aspect_ratio['ratio'], ':') !== false)
 						{
-							$output_format->setVideoDimensions($new_width, $dimensions['height'], $dimensions['auto_adjust_dimensions'], $dimensions['force_aspect']);
-							$options = $output_format->getFormatOptions();
+							$ratio = explode(':', $aspect_ratio['ratio']);
+							$ratio = $ratio[0] / $ratio[1];
+							$new_width = round($dimensions['height'] * $ratio);
+// 							make sure new width is an even number
+							$ceiled = ceil($new_width);
+							$new_width = $ceiled % 2 !== 0 ? floor($new_width) : $ceiled;
+							if($new_width !== $dimensions['width'])
+							{
+								$output_format->setVideoDimensions($new_width, $dimensions['height'], $dimensions['auto_adjust_dimensions'], $dimensions['force_aspect']);
+								$options = $output_format->getFormatOptions();
+							}
+						}
+						else if(strpos($aspect_ratio['ratio'], '.') !== false)
+						{
+							$ratio = floatval($aspect_ratio['ratio']);
+							$new_width = $dimensions['height'] * $ratio;
+// 							make sure new width is an even number
+							$ceiled = ceil($new_width);
+							$new_width = $ceiled % 2 !== 0 ? floor($new_width) : $ceiled;
+							if($new_width !== $dimensions['width'])
+							{
+								$output_format->setVideoDimensions($new_width, $dimensions['height'], $dimensions['auto_adjust_dimensions'], $dimensions['force_aspect']);
+								$options = $output_format->getFormatOptions();
+							}
 						}
 					}
 				}
 			}
 			
 //			check the video dimensions to see if we need to post process the dimensions
-			$dimensions = $options['video_dimensions'];
-			if(empty($dimensions) === false && $dimensions['auto_adjust_dimensions'] === true)
+			if(isset($options['video_dimensions']))
 			{
-//				get the optimal dimensions for this video based on the aspect ratio
-				$optimal_dimensions = $this->getOptimalDimensions($dimensions['width'], $dimensions['height'], $dimensions['force_aspect']);
-				if($dimensions['width'] !== $optimal_dimensions['padded_width'] || $dimensions['height'] !== $optimal_dimensions['padded_height'])
+				$dimensions = $options['video_dimensions'];
+				if(empty($dimensions) === false && $dimensions['auto_adjust_dimensions'] === true)
 				{
-					$output_format->setVideoDimensions($optimal_dimensions['padded_width'], $optimal_dimensions['padded_height']);
-				}
+//					get the optimal dimensions for this video based on the aspect ratio
+					$optimal_dimensions = $this->getOptimalDimensions($dimensions['width'], $dimensions['height'], $dimensions['force_aspect']);
+					if($dimensions['width'] !== $optimal_dimensions['padded_width'] || $dimensions['height'] !== $optimal_dimensions['padded_height'])
+					{
+						$output_format->setVideoDimensions($optimal_dimensions['padded_width'], $optimal_dimensions['padded_height']);
+					}
 				
-//				check to see if we have to apply any padding.
-				if($optimal_dimensions['pad_top'] > 0 || $optimal_dimensions['pad_right'] > 0 || $optimal_dimensions['pad_bottom'] > 0 || $optimal_dimensions['pad_left'] > 0)
-				{
-					$output_format->setVideoPadding($optimal_dimensions['pad_top'], $optimal_dimensions['pad_right'], $optimal_dimensions['pad_bottom'], $optimal_dimensions['pad_left'], $optimal_dimensions['padded_width'], $optimal_dimensions['padded_height']);
+//					check to see if we have to apply any padding.
+					if($optimal_dimensions['pad_top'] > 0 || $optimal_dimensions['pad_right'] > 0 || $optimal_dimensions['pad_bottom'] > 0 || $optimal_dimensions['pad_left'] > 0)
+					{
+						$output_format->setVideoPadding($optimal_dimensions['pad_top'], $optimal_dimensions['pad_right'], $optimal_dimensions['pad_bottom'], $optimal_dimensions['pad_left'], $optimal_dimensions['padded_width'], $optimal_dimensions['padded_height']);
+					}
 				}
 			}
 			
