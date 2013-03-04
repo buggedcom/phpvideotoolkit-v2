@@ -34,9 +34,9 @@
 			
 			if($input_output_type === 'output')
 			{
-				$this->setAudioCodec('libx264')
+				$this->setAudioCodec('aac')
 					 ->setAudioSampleFrequency(44100)
-					 ->setVideoCodec('amr')
+					 ->setVideoCodec('libx264')
 					 ->setFormat('3gp');
 			}
 		}
