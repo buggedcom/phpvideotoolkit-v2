@@ -772,12 +772,13 @@
 					$args = empty($args) === true ? array() : explode(' ', $args);
 					
 					$deprecated = strpos($match[3], 'deprecated') !== false;
+					$removed = strpos($match[3], 'Removed') !== false;
 					
 					$data[$match[1]] = array(
 						'datatype' => $data_type,
 						'description' => $match[3],
 						'arguments' => $args,
-						'deprecated' => $deprecated,
+						'status' => $deprecated === true ? 'deprecated' : ($removed === true ? 'removed' : null),
 					);
 				}
 			}
