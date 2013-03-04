@@ -28,11 +28,10 @@
 	{
 		\PHPVideoToolkit\Factory::setDefaultVars('./tmp', '/opt/local/bin');
 
- 		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
-		$process = $video->getProcess();
-	//	$process->setProcessTimelimit(1);
-		$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
-						->save('./output/big_buck_bunny.flv');
+ 		$audio = \PHPVideoToolkit\Factory::audio('media/Ballad_of_the_Sneak.mp3');
+		$process = $audio->getProcess();
+		$output = $audio->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+						->save('./output/test-'.time().'.mp3');
 		
 		
 		echo '<h1>Executed Command</h1>';
@@ -48,7 +47,7 @@
 		echo '<h1>Error</h1>';
 		\PHPVideoToolkit\Trace::vars($e);
 
-		$process = $video->getProcess();
+		$process = $audio->getProcess();
 		if($process->isCompleted())
 		{
 			echo '<hr /><h2>Executed Command</h2>';

@@ -32,7 +32,7 @@
 		$process = $video->getProcess();
 	//	$process->setProcessTimelimit(1);
 		$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
-						->save('./output/big_buck_bunny.flv');
+						->save('./output/big_buck_bunny_'.time().'.mp3', new \PHPVideoToolkit\AudioFormat_Mp3('output', '/opt/local/bin/ffmpeg', './tmp'));
 		
 		
 		echo '<h1>Executed Command</h1>';

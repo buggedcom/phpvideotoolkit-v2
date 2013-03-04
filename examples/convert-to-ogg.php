@@ -32,7 +32,7 @@
 		$process = $video->getProcess();
 	//	$process->setProcessTimelimit(1);
 		$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
-						->save('./output/big_buck_bunny.flv');
+						->save('./output/big_buck_bunny.ogg');
 		
 		
 		echo '<h1>Executed Command</h1>';
