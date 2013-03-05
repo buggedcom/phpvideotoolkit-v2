@@ -1,7 +1,5 @@
 .DS_Store
 examples/media/BigBuckBunny_320x180.mp4
+examples/tmp/*
 examples/output/*
-
-documentation/includes/configuration.php
-
 documentation/includes/configuration.php

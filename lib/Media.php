@@ -58,25 +58,13 @@
 		
 		protected $_process;
 
-		public function __construct($media_file_path, Format $input_format=null, $ffmpeg_path, $temp_directory)
+		public function __construct($media_file_path, Format $input_format=null, Config $config=null)
 		{
-			parent::__construct($ffmpeg_path, $temp_directory);
+			parent::__construct('convert', $config);
 			
-//			validate the file exists and is readable.
 			if($media_file_path !== null)
 			{
-				$real_file_path = realpath($media_file_path);
-				
-				if($real_file_path === false || is_file($real_file_path) === false)
-				{
-					throw new Exception('The file "'.$media_file_path.'" cannot be found in \\PHPVideoToolkit\\Media::__construct.');
-				}
-				else if(is_readable($real_file_path) === false)
-				{
-					throw new Exception('The file "'.$media_file_path.'" is not readable in \\PHPVideoToolkit\\Media::__construct.');
-				}
-			
-				$this->_media_file_path = $real_file_path;
+				$this->setMediaPath($media_file_path);
 			}
 			
 			$this->setInputFormat($input_format);
@@ -93,7 +81,7 @@
 			
 			$this->_output_path = null;
 			$this->_processing_path = null;
-			$this->_blocking = true;
+			$this->_blocking = null;
 			
 			$this->_require_d_in_output = false;
 			
@@ -120,10 +108,7 @@
 				'lyrics', 
 			);
 			
-			$this->_post_process_callbacks = array(
-				'toolkit' => array(),
-				'user' => array(),
-			);
+			$this->_post_process_callbacks = array();
 			
 			$this->_process = new FfmpegProcessProgressable($ffmpeg_path, $temp_directory);
 		}
@@ -218,6 +203,31 @@
 		}
 		
 		/**
+		 * Returns the real path of the media asset.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		public function setMediaPath($media_file_path)
+		{
+			$real_file_path = realpath($media_file_path);
+				
+			if($real_file_path === false || is_file($real_file_path) === false)
+			{
+				throw new Exception('The file "'.$media_file_path.'" cannot be found in \\PHPVideoToolkit\\Media::__construct.');
+			}
+			else if(is_readable($real_file_path) === false)
+			{
+				throw new Exception('The file "'.$media_file_path.'" is not readable in \\PHPVideoToolkit\\Media::__construct.');
+			}
+			
+			$this->_media_file_path = $real_file_path;
+			
+			return $this;
+		}
+		
+		/**
 		 * Sets global meta data on the media. That being said "global" does not mean it sets the
 		 * meta data on the media streams, rather just the meta data on the container.
 		 *
@@ -278,6 +288,8 @@
 			
 			return $this;
 		}
+		
+		// http://ffmpeg.org/faq.html 3.13 for append, prepend and overlay options.
 		
 		/**
 		 * Appends a media item to the current Media object by joining the specified media
@@ -612,22 +624,9 @@
 		}
 		
 		/**
-		 * Registers a post process function. Any function registered is called after all the toolkit
-		 * post process callbacks have been made.
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param Function $callback 
-		 * @return self
-		 */
-		public function registerSavePostProcess($callback)
-		{
-			$this->_registerSavePostProcess($callback, 'user');
-			return $this;
-		}
-		
-		/**
-		 * Registers a post process function. 
+		 * Registers an output post process function, that is called after output has been generated.
+		 * It is important to note, that when an output post process is registered, the conversion
+		 * must then become blocking.
 		 * 
 		 * @access protected
 		 * @author Oliver Lillie
@@ -635,25 +634,37 @@
 		 * @param string $callback_type
 		 * @return void
 		 */
-		protected function _registerSavePostProcess($callback, $callback_type, $index=null)
+		public function registerOutputPostProcess($callback)
 		{
 			if(is_callable($callback) === false)
 			{
 				throw new Exception('The callback "'.$callback.'" is not callable.');
 			}
-			if(in_array($type, array('user', 'toolkit')) === false)
+			array_push($this->_post_process_callbacks, $callback);
+
+//			if a callback has been supplied then the process becomes blocking and must be set.		
+			$this->_blocking = true;
+		}
+		
+		/**
+		 * The callback intentionally public, but should be regarded as protected that is used
+		 * to post process the output of a save command.
+		 *
+		 * @access protected
+		 * @author Oliver Lillie
+		 * @return mixed
+		 */
+		public function _postProcessOutput($output, $process)
+		{
+			if(empty($this->_post_process_callbacks) === false)
 			{
-				throw new Exception('The callback type "'.$callback_type.'" is not recognised.');
+				foreach ($this->_post_process_callbacks as $callback)
+				{
+					$output = call_user_func($callback, $output, $this);
+				}
 			}
 			
-			if($index === null)
-			{
-				array_push($this->_post_process_callbacks[$callback_type], $callback);
-			}
-			else
-			{
-				array_splice($this->_post_process_callbacks[$callback_type], $index, 0, $callback);
-			}
+			return $output;
 		}
 		
 		/**
@@ -694,13 +705,13 @@
 //			and execute the ffmpeg process.
 			$this->_process->setOutputPath($this->_processing_path)
 						   ->getExecBuffer()
-						   ->setBlocking($this->_blocking)
+						   ->setBlocking($this->_blocking === null ? true : $this->_blocking)
 						   ->execute();
 			
 //			now we work out what we are returning as it depends on the blocking status.
 			if($this->_blocking === true)
 			{
-				return $this->_process->getOutput();
+				return $this->_process->getOutput(array($this, '_postProcessOutput'));
 			}
 			
 //			just return the process if the process is non blocking.
@@ -727,6 +738,13 @@
 		 */
 		public function saveNonBlocking($save_path=null, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
 		{
+//			check to see if the blocking mode has already been set to true. If it has we cannot save
+//			non-blocking and must trigger error.
+			if($this->_blocking === true)
+			{
+				throw new Exception('The blocking mode has been enabled by a function that you have enabled, or a Format that you have supplied. As a result you cannot use saveNonBlocking() and must use the blocking save method save() instead.');
+			}
+			
 //			set the non blocking of the exec process
 			$this->_blocking = false;
 			

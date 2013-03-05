@@ -13,8 +13,6 @@
 	 
 	namespace PHPVideoToolkit;
 	
-	use Symfony\Component\Process;
-	 
 	/**
 	 * Aids in the building of a Process.
 	 * Ensipired by the ProcessBuilder bundled with Symphony Process component.

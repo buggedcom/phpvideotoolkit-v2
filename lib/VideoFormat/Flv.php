@@ -20,16 +20,23 @@
 	 */
 	class VideoFormat_Flv extends VideoFormat
 	{
-		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
+		public function __construct($input_output_type, Config $config=null)
 		{
-			parent::__construct($input_output_type, $ffmpeg_path, $temp_directory);
+			parent::__construct($input_output_type, $config);
+			
+			// TODO validate.
+			$this->_temp_directory = $temp_directory;
 			
 //			default by forcing the audio codec to use mp3
 			if($input_output_type === 'output')
 			{
-				$this->setAudioCodec('mp3');
+				$this->setAudioCodec('mp3')
+					 ->setVideoCodec('flv1')
+					 ->setFormat('flv');
 			}
 			
+			$this->_restricted_audio_codecs = array('mp3');
+			$this->_restricted_video_codecs = array('flv1');
 			$this->_restricted_audio_sample_frequencies = array(44100, 22050, 11025);
 		}
 		
@@ -62,6 +69,52 @@
 				}
 			}
 			
+//			assign a post process so that yamdil (http://yamdi.sourceforge.net/) injects the meta data into to the flv.
+			$this->_media_object->registerOutputPostProcess(array($this, 'postProcessMetaData'));
+			
 			return $this;
+		}
+		
+		/**
+		 * Specifically for authomatic post processing of FLV output to inject metadata,
+		 * however it can also be used as a standalone function call from the FLVFormat object.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param Media $media 
+		 * @return Media
+		 */
+		public function postProcessMetaData(Media $media)
+		{
+//			set the yamdi input and output options.
+			$output = $media->getMediaPath();
+			$temp_output = $output.'.yamdi.flv';
+
+//			build the yamdi process
+			$yamdi_process = new ProcessBuilder('/opt/local/bin/yamdi', $this->_temp_directory);
+			$exec = $yamdi_process
+						  ->add('-i', $output)
+						  ->add('-o')->add($temp_output)
+						  ->add('-s')
+						  ->add('-k')
+						  ->getExecBuffer();
+				
+//			execute the process.
+			$exec->setBlocking(true)
+				 ->execute();
+				
+//			check for any yamdi errors
+			if($exec->hasError() === true)
+			{
+				// TODO, log or exception not sure as the original file is ok.
+			}
+			else
+			{
+//				nope everything went ok. so delete ffmpeg file, and then rename yamdi file to that of the original.
+				unlink($output);
+				rename($temp_output, $output);
+			}
+			
+			return $media;
 		}
 	}

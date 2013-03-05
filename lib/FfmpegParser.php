@@ -33,17 +33,17 @@
 		 * @param string $ffmpeg_path 
 		 * @param string $temp_directory 
 		 */
-		public function __construct($ffmpeg_path, $temp_directory)
+		public function __construct(Config $config=null)
 		{
-			$parser = new Parser($ffmpeg_path, $temp_directory);
+			$parser = new Parser($config);
 			$format_data = $parser->getRawFormatData();
 			if(strpos($format_data, 'Codecs:') !== false)
 			{
-				$this->_parser = new FfmpegParserFormatsArgumentOnly($ffmpeg_path, $temp_directory);
+				$this->_parser = new FfmpegParserFormatsArgumentOnly($config);
 			}
 			else
 			{
-				$this->_parser = new FfmpegParserGeneric($ffmpeg_path, $temp_directory);
+				$this->_parser = new FfmpegParserGeneric($config);
 			}
 		}
 		

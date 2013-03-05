@@ -25,9 +25,9 @@
 	 */
 	class MediaProbeParser extends MediaParserAbstract
 	{
-		public function __construct($ffprobe_path, $temp_directory)
+		public function __construct(Config $config=null)
 		{
-			parent::__construct($ffprobe_path, $temp_directory);
+			parent::__construct($config, 'probe');
 		}
 		
 		/**

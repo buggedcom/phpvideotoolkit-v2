@@ -30,9 +30,9 @@
 		protected $_additional_commands;
 		protected $_removed_commands;
 		
-		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
+		public function __construct($input_output_type, Config $config=null)
 		{
-			parent::__construct($ffmpeg_path, $temp_directory);
+			parent::__construct($config);
 			
 			$this->setType($input_output_type);
 			

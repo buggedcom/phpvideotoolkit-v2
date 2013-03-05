@@ -18,6 +18,6 @@
 	 * @author Oliver Lillie
 	 * @package default
 	 */
-	class VideoFormat_Mp4 extends VideoFormat_H264
+	class ImageFormat_Jpg extends ImageFormat_Jpeg
 	{
 	}

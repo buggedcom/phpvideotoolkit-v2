@@ -56,9 +56,9 @@
 		protected $_restricted_video_pixel_formats;
 		protected $_restricted_video_frame_rates;
 
-		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
+		public function __construct($input_output_type, Config $config=null)
 		{
-			parent::__construct($input_output_type, $ffmpeg_path, $temp_directory);
+			parent::__construct($input_output_type, $config);
 			
 			$this->_format = array_merge($this->_format, array(
 				'disable_video' => null,

@@ -28,23 +28,13 @@
 		protected $_cacher;
 		static $_cache = array();
 		
-		public function __construct($program_path, $temp_directory)
+		public function __construct(Config $config=null, $program_config_key='convert')
 		{
-			$this->_program_path = $program_path;
+			$this->_config = $config === null ? Config::getInstance() : $config;
 			
-			if(is_dir($temp_directory) === false)
-			{
-				throw new Exception('The temp directory does not exist or is not a directory.');
-			}
-			else if(is_readable($temp_directory) === false)
-			{
-				throw new Exception('The temp directory is not readable.');
-			}
-			else if(is_writable($temp_directory) === false)
-			{
-				throw new Exception('The temp directory is not writeable.');
-			}
-			$this->_temp_directory = $temp_directory;
+			// TODO remove reliance on these.
+			$this->_program_path = $this->_config->{$program_config_key};
+			$this->_temp_directory = $this->_config->temp_directory;
 			
 			if($this->isAvailable() === false)
 			{

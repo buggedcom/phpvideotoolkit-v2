@@ -25,9 +25,9 @@
 	 */
 	class Audio extends Media
 	{
-		public function __construct($audio_file_path, AudioFormat $audio_input_format=null, $ffmpeg_path, $temp_directory)
+		public function __construct($audio_file_path, $audio_input_format=null, Config $config=null)
 		{
-			parent::__construct($audio_file_path, $audio_input_format, $ffmpeg_path, $temp_directory);
+			parent::__construct($audio_file_path, $audio_input_format, $config);
 			
 //			validate this media file is an audio file
 			$type = $this->readType();

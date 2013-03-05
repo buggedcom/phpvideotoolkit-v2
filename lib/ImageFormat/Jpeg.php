@@ -18,6 +18,20 @@
 	 * @author Oliver Lillie
 	 * @package default
 	 */
-	class VideoFormat_Mp4 extends VideoFormat_H264
+	class ImageFormat_Jpeg extends ImageFormat
 	{
+		public function __construct($input_output_type, Config $config=null)
+		{
+			parent::__construct($input_output_type, $config);
+			
+			if($input_output_type === 'output')
+			{
+				$this->disableAudio()
+				 	 ->setVideoCodec('mjpeg')
+					 ->setFormat('image2');
+			}
+			
+			$this->_restricted_audio_codecs = array();
+			$this->_restricted_video_codecs = array('mjpeg');
+		}
 	}

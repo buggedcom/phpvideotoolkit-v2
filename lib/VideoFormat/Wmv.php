@@ -20,9 +20,9 @@
 	 */
 	class VideoFormat_Wmv extends VideoFormat
 	{
-		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
+		public function __construct($input_output_type, Config $config=null)
 		{
-			parent::__construct($input_output_type, $ffmpeg_path, $temp_directory);
+			parent::__construct($input_output_type, $config);
 			
 			$this->_restricted_audio_codecs = array('wmav2', 'wmav1');
 			$this->_restricted_video_codecs = array('wmv2', 'wmv1');

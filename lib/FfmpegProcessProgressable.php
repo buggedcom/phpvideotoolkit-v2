@@ -154,7 +154,7 @@
 		 * @author Oliver Lillie
 		 * @return mixed
 		 */
-		public function getOutput()
+		public function getOutput($post_process_callback=null)
 		{
 			if($this->isCompleted() === false)
 			{
@@ -202,6 +202,14 @@
 				}
 			
 				throw new FfmpegProcessOutputException('Encoding failed and an error was returned from ffmpeg. Error code '.$this->getErrorCode().' was returned the message (if any) was: '.$last_split);
+			}
+			
+			if($post_process_callback !== null)
+			{
+				if(is_callable($post_process_callback) === false)
+				{
+					throw new Exception('The supplied post proces scallback is not callable.');
+				}
 			}
 			
 //			get the output of the process
@@ -267,7 +275,16 @@
 //				get the media class from the output.
 //				create the object from the class name and return the new object.
 				$media_class = $this->_findMediaClass($output);
-				return new $media_class($output, null, $this->_binary_path, $this->_temp_directory);
+				$output = new $media_class($output, null, $this->_binary_path, $this->_temp_directory);
+				
+//				do any post processing callbacks
+				if($post_process_callback !== null)
+				{
+					$output = call_user_func($post_process_callback, $output, $this);
+				}
+				
+//				finally return the output to the user.
+				return $output;
 			}
 		}
 		

@@ -20,9 +20,24 @@
 	 */
 	class VideoFormat_H264 extends VideoFormat
 	{
-		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
+		protected $_restricted_video_presets;
+
+		public function __construct($input_output_type, Config $config=null)
 		{
-			parent::__construct($input_output_type, $ffmpeg_path, $temp_directory);
+			parent::__construct($input_output_type, $config);
+			
+			$this->_format = array_merge($this->_format, array(
+				'h264_preset' => null,
+				'h264_tune' => null,
+				'h264_constant_quantization' => null,
+			));
+			$this->_format_to_command = array_merge($this->_format_to_command, array(
+				'h264_preset' => '-preset <setting>',
+				'h264_tune' => '-tune <setting>',
+				'h264_constant_quantization' => '-qp <setting>',
+			));
+			
+			$this->_restricted_video_presets = null;
 			
 			if($input_output_type === 'output')
 			{
@@ -30,8 +45,55 @@
 					 ->setVideoCodec('h264')
 					 ->setFormat('h264');
 			}
+		}
+		
+		public function setH264Preset($preset=null)
+		{
+			$this->_blockSetOnInputFormat('h264 preset');
 			
-			$this->_restricted_audio_codecs = array('libvo_aacenc', 'libfaac', 'libmp3lame', 'mp3');
-			$this->_restricted_video_codecs = array('libx264', 'h264');
+			if($preset === null)
+			{
+				$this->_format['h264_preset'] = null;
+				return $this;
+			}
+			
+			if(in_array($preset, array('ultrafast', 'superfast', 'veryfast', 'faster', 'fast', 'medium', 'slow', 'slower', 'veryslow', 'placebo')) === false)
+			{
+				throw new Exception('Unrecognised h264 preset "'.$preset.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setH264Preset');
+			}
+			
+			$this->_format['h264_preset'] = $preset;
+			return $this;
+		}
+		
+		public function setH264Tune($tune=null)
+		{
+			$this->_blockSetOnInputFormat('h264 tune');
+			
+			if($tune === null)
+			{
+				$this->_format['h264_tune'] = null;
+				return $this;
+			}
+			
+			if(in_array($tune, array('film', 'animation', 'grain', 'stillimage', 'psnr', 'ssim', 'fastdecode', 'zerolatency')) === false)
+			{
+				throw new Exception('Unrecognised h264 preset "'.$preset.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setH264Tune');
+			}
+			
+			$this->_format['h264_tune'] = $tune;
+			return $this;
+		}
+		
+		public function enableH264LosslessEncoding()
+		{
+			$this->_format['h264_constant_quantization'] = 0;
+			return $this;
+		}
+		
+		public function disableH264LosslessEncoding()
+		{
+			$this->_format['h264_constant_quantization'] = null;
+			return $this;
 		}
 	}

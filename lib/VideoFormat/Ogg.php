@@ -20,9 +20,9 @@
 	 */
 	class VideoFormat_Ogg extends VideoFormat
 	{
-		public function __construct($input_output_type, $ffmpeg_path, $temp_directory)
+		public function __construct($input_output_type, Config $config=null)
 		{
-			parent::__construct($input_output_type, $ffmpeg_path, $temp_directory);
+			parent::__construct($input_output_type, $config);
 			
 			if($input_output_type === 'output')
 			{
