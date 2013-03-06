@@ -1,7 +1,7 @@
 <?php
 
-	include_once './includes/boostrap.php';
-	
+	include_once './includes/bootstrap.php';
+
 	try
 	{
  		$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
