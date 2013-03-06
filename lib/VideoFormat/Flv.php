@@ -20,12 +20,12 @@
 	 */
 	class VideoFormat_Flv extends VideoFormat
 	{
+		protected $_post_process_meta_data_injection;
+		protected $_enforce_meta_data_success;
+		
 		public function __construct($input_output_type, Config $config=null)
 		{
 			parent::__construct($input_output_type, $config);
-			
-			// TODO validate.
-			$this->_temp_directory = $temp_directory;
 			
 //			default by forcing the audio codec to use mp3
 			if($input_output_type === 'output')
@@ -38,6 +38,30 @@
 			$this->_restricted_audio_codecs = array('mp3');
 			$this->_restricted_video_codecs = array('flv1');
 			$this->_restricted_audio_sample_frequencies = array(44100, 22050, 11025);
+
+//			both enable meta data injection and then force 
+			$this->forceMetaDataInjectionSuccess();
+			$this->enableMetaDataInjection();
+		}
+		
+		public function enableMetaDataInjection()
+		{
+			$this->_post_process_meta_data_injection = true;
+		}
+		
+		public function disableMetaDataInjection()
+		{
+			$this->_post_process_meta_data_injection = false;
+		}
+		
+		public function allowMetaDataInjectionFailure()
+		{
+			$this->_enforce_meta_data_success = false;
+		}
+		
+		public function forceMetaDataInjectionSuccess()
+		{
+			$this->_enforce_meta_data_success = true;
 		}
 		
 		public function updateFormatOptions()
@@ -70,7 +94,10 @@
 			}
 			
 //			assign a post process so that yamdil (http://yamdi.sourceforge.net/) injects the meta data into to the flv.
-			$this->_media_object->registerOutputPostProcess(array($this, 'postProcessMetaData'));
+			if($this->_post_process_meta_data_injection === true)
+			{
+				$this->_media_object->registerOutputPostProcess(array($this, 'postProcessMetaData'));
+			}
 			
 			return $this;
 		}
@@ -91,9 +118,10 @@
 			$temp_output = $output.'.yamdi.flv';
 
 //			build the yamdi process
-			$yamdi_process = new ProcessBuilder('/opt/local/bin/yamdi', $this->_temp_directory);
+			$yamdi_process = new ProcessBuilder('yamdi', $this->_config);
 			$exec = $yamdi_process
-						  ->add('-i', $output)
+						  ->add('-i')->add($output)
+						  // ->add('-i', $output)
 						  ->add('-o')->add($temp_output)
 						  ->add('-s')
 						  ->add('-k')
@@ -106,6 +134,16 @@
 //			check for any yamdi errors
 			if($exec->hasError() === true)
 			{
+				if(is_file($temp_output) === true)
+				{
+					@unlink($temp_output);
+				}
+				if($this->_enforce_meta_data_success === true)
+				{
+					@unlink($output);
+					throw new FfmpegProcessPostProcessException('Yamdi post processing of "'.$output.'" failed. The output file has been removed. Any additional Yamdi message follows: 
+'.$exec->getBuffer());
+				}
 				// TODO, log or exception not sure as the original file is ok.
 			}
 			else
