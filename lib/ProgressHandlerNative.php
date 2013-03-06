@@ -20,17 +20,17 @@
 	 */
 	class ProgressHandlerNative extends ProgressHandlerAbstract
 	{
-		public function __construct($callback=null)
+		public function __construct($callback=null, Config $config=null)
 		{
 //			check that the "-progress" function is available.
-			$parser = Factory::ffmpegParser();
+			$parser = new FfmpegParser($config);
 			$available_commands = $parser->getCommands();
 			if(isset($available_commands['progress']) === false)
 			{
 				throw new Exception('Your version of FFmpeg cannot support the Native progress handler. Please use ProgressHandlerOutput instead.');
 			}
 
-			parent::__construct($callback);
+			parent::__construct($callback, $config);
 			
 			$this->_progress_file = null;
 		}
@@ -111,7 +111,7 @@
 		{
 			parent::attachFfmpegProcess($process, $temp_directory);
 
-			$this->_progress_file = tempnam($this->getTempDirectory(), 'phpvideotoolkit_progress_');
+			$this->_progress_file = tempnam($this->_config->temp_directory, 'phpvideotoolkit_progress_');
 			$this->_ffmpeg_process->addCommand('-progress', $this->_progress_file);
 		}
 	 }

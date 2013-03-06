@@ -20,6 +20,8 @@
 	 */
 	abstract class ProgressHandlerAbstract
 	{
+		protected $_config;
+		
 		protected $_is_non_blocking_comaptible = true;
 		 
 		protected $_ffmpeg_process;
@@ -32,19 +34,16 @@
 		
 		public $completed;
 				 
-		public function __construct($callback=null, $temp_directory=null)
+		public function __construct($callback=null, Config $config=null)
 		{
 			if($callback !== null && is_callable($callback) === false)
 			{
 				throw new Exception('The progress handler callback is not callable.');
 			}
-			if($temp_directory !== null)
-			{
-				$this->setTempDirectory($temp_directory);
-			}
+			
+			$this->_config = $config === null ? Config::getInstance() : $config;
 			
 			$this->completed = null;
-			
 			$this->_callback = $callback;
 			$this->_total_duration = 0;
 			$this->_ffmpeg_process = null;
@@ -56,34 +55,6 @@
 			{
 				$this->_is_non_blocking_comaptible = false;
 			}
-		}
-		
-		public function setTempDirectory($temp_directory=null)
-		{
-			if(is_dir($temp_directory) === false)
-			{
-				throw new Exception('The temp directory does not exist or is not a directory.');
-			}
-			else if(is_readable($temp_directory) === false)
-			{
-				throw new Exception('The temp directory is not readable.');
-			}
-			else if(is_writable($temp_directory) === false)
-			{
-				throw new Exception('The temp directory is not writeable.');
-			}
-			$this->_temp_directory = $temp_directory;
-			
-			return $this;
-		}
-		
-		public function getTempDirectory()
-		{
-			if($this->_temp_directory === null)
-			{
-				return $this->_temp_directory = sys_get_temp_dir();
-			}
-			return $this->_temp_directory;
 		}
 		
 		public function getNonBlockingCompatibilityStatus()
