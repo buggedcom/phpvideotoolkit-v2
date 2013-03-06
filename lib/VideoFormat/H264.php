@@ -153,7 +153,7 @@
 			$temp_output = $output.'.qtfaststart.'.pathinfo($output, PATHINFO_EXTENSION);
 
 //			build the qtfaststart process
-			$qtfaststart_process = new ProcessBuilder('qt-faststart', $this->_config);
+			$qtfaststart_process = new ProcessBuilder('qtfaststart', $this->_config);
 			$exec = $qtfaststart_process
 						  ->add($output)
 						  ->add($temp_output)
