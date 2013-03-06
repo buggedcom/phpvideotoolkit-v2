@@ -18,13 +18,13 @@
 	 * @author Oliver Lillie
 	 * @package default
 	 */
-	abstract class CacheAbstract
+	abstract class CacheAbstract implements CacheInterface
 	{
 		protected $_cache_object;
 		
 		private $_key_prefix = 'phpvideotoolkit_v2/';
 		
-		final public function __construct($cache_object)
+		final public function __construct(CacheInterface $cache_object)
 		{
 			$this->_cache_object = $cache_object;
 		}
@@ -36,7 +36,7 @@
 			return $this->_set($this->_key_prefix.$key, $value, $expiration);
 		}
 		
-		public function get($key, $default_value=null)
+		final public function get($key, $default_value=null)
 		{
 			$key = $this->_key_prefix.$key;
 			
@@ -47,7 +47,7 @@
 			return $this->_get($key);
 		}
 		
-		abstract private function _get($key);
-		abstract private function _isMiss($key);
-		abstract private function _set($key, $value, $expiration=null);
+		abstract protected function _get($key);
+		abstract protected function _isMiss($key);
+		abstract protected function _set($key, $value, $expiration=null);
 	}
