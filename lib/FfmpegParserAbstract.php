@@ -78,7 +78,7 @@
 				return $data;
 			}
 			
-			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$exec = new FfmpegProcess('ffmpeg', $this->_config);
 			$data = $exec->addCommand('-pix_fmt', 'list')
 				 		 ->addCommand('-pix_fmts')
 						 ->execute()
@@ -104,7 +104,7 @@
 				return $data;
 			}
 			
-			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$exec = new FfmpegProcess('ffmpeg', $this->_config);
 			$data = $exec->addCommand('-h', 'long')
 						 ->execute()
 						 ->getBuffer();
@@ -231,7 +231,7 @@
 //			get the version from -version
 			if($version === null)
 			{
-				$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+				$exec = new FfmpegProcess('ffmpeg', $this->_config);
 				$data = $exec->addCommand('-version')
 					 		 ->execute()
 							 ->getBuffer();

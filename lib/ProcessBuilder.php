@@ -21,112 +21,20 @@
 	 * @author Oliver Lillie
 	 * @package default
 	 */
-	class ProcessBuilder
+	class ProcessBuilder //extends Loggable
 	{
-	    protected $_binary_path;
+	    protected $_program_path;
 	    protected $_arguments;
-	    protected $_temp_directory;
 
-	    public function __construct($binary_path='ffmpeg', $temp_directory=null)
+	    public function __construct($program, $config=null)
 	    {
-//			if a binary path is not supplied to a lookup
-			if(empty($binary_path) === true || strpos($binary_path, DIRECTORY_SEPARATOR) !== 0)
-			{
-				$binary_path = $this->_findBinary($binary_path);
-			}
+			$this->_config = $config === null ? Config::getInstance() : $config;
 			
-//			validate we have a path
-			if($binary_path === false)
-			{
-				throw new Exception('Unable to locate the binary at "'.$binary_path.'".');
-			}
-			else if(is_executable($binary_path) === false)
-			{
-				throw new Exception($binary_path.' is not executable.');
-			}
-	        $this->_binary_path = $binary_path;
-			
-			$this->_temp_directory = $temp_directory;
+			$path = $this->_config->{$program};
+			$program = $path !== null ? $path : $program;
+	        $this->_program_path = $program;
 
 	        $this->_arguments = array();
-	    }
-		
-	    /**
-	     * The "which" command (show the full path of a command).
-		 * This function heavily borrows from Pear::System::which
-	     *
-	     * @param string $program The command to search for
-	     * @param mixed  $fallback Value to return if $program is not found
-	     *
-	     * @return mixed A string with the full path or false if not found
-	     * @static
-	     * @author Stig Bakken <ssb@php.net>
-	     * @author Oliver Lillie
-	     */
-	    protected function _findBinary($program, $fallback=false)
-	    {
-// 			enforce API
-	        if(is_string($program) === false || empty($program) === true)
-			{
-	            return $fallback;
-	        }
-
-// 			full path given
-	        if(basename($program) !== $program)
-			{
-	           	$path_elements = array(dirname($program));
-	            $program = basename($program);
-	        }
-			else
-			{
-// 				Honor safe mode
-	            if(!ini_get('safe_mode') || !($path = ini_get('safe_mode_exec_dir')))
-				{
-	                $path = getenv('PATH');
-	                if(!$path)
-					{
-	                    $path = getenv('Path'); // some OSes are just stupid enough to do this
-	                }
-	            }
-				
-//				if we have no path to guess with, throw exception.
-				if(empty($path) === true)
-				{
-					throw new Exception('Unable to guess environment paths. Please set the absolute path to the program "'.$program.'"');
-				}
-				
-	            $path_elements = explode(PATH_SEPARATOR, $path);
-	        }
-
-	        if(substr(PHP_OS, 0, 3) === 'WIN')
-			{
-				$env_pathext = getenv('PATHEXT');
-	            $exe_suffixes = empty($env_pathext) === false ? explode(PATH_SEPARATOR, $env_pathext) : array('.exe','.bat','.cmd','.com');
-// 				allow passing a command.exe param
-	            if(strpos($program, '.') !== false)
-				{
-	                array_unshift($exe_suffixes, '');
-	            }
-	        }
-			else
-			{
-	            $exe_suffixes = array('');
-	        }
-			
-//			loop and fine path.
-	        foreach($exe_suffixes as $suff)
-			{
-	            foreach($path_elements as $dir)
-				{
-	                $file = $dir.DIRECTORY_SEPARATOR.$program.$suff;
-	                if(@is_executable($file) === true)
-					{
-	                    return $file;
-	                }
-	            }
-	        }
-			
-	        return $fallback;
 	    }
 		
 	    protected function _add(&$add_to, $command, $argument=null, $allow_command_repetition=false)
@@ -220,7 +128,7 @@
 		 */
 		public function getCommandString()
 		{
-			return $this->_binary_path.' '.$this->_combineArgumentList($this->_arguments);
+			return $this->_program_path.' '.$this->_combineArgumentList($this->_arguments);
 		}
 		
 		/**
@@ -232,6 +140,7 @@
 		 */
 	    public function getExecBuffer()
 	    {
-	        return new ExecBuffer($this->getCommandString(), $this->_temp_directory);
+	        $exec = new ExecBuffer($this->getCommandString(), $this->_config->temp_directory);
+			return $exec;
 	    }
 	}

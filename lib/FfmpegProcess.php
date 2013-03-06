@@ -22,8 +22,6 @@
 	 */
 	class FfmpegProcess extends ProcessBuilder
 	{
-		protected $_temp_directory;
-		
 		protected $_exec;
 		protected $_pre_input_commands;
 		protected $_post_input_commands;
@@ -44,24 +42,10 @@
 		 *	executing the command on.
 		 * @param string $temp_directory The path of the temp directory.
 		 */
-		public function __construct($binary_path, $temp_directory)
+		public function __construct($program, Config $config=null)
 		{
-			parent::__construct($binary_path);
+			parent::__construct($program, $config);
 			
-			if(is_dir($temp_directory) === false)
-			{
-				throw new Exception('The temp directory does not exist or is not a directory.');
-			}
-			else if(is_readable($temp_directory) === false)
-			{
-				throw new Exception('The temp directory is not readable.');
-			}
-			else if(is_writable($temp_directory) === false)
-			{
-				throw new Exception('The temp directory is not writeable.');
-			}
-			$this->_temp_directory = $temp_directory;
-
 			$this->_pre_input_commands = array();
 			$this->_post_input_commands = array();
 			$this->_post_output_commands = array();

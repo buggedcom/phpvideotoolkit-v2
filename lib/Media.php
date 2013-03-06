@@ -60,7 +60,7 @@
 
 		public function __construct($media_file_path, Format $input_format=null, Config $config=null)
 		{
-			parent::__construct('convert', $config);
+			parent::__construct($config, 'ffmpeg');
 			
 			if($media_file_path !== null)
 			{
@@ -110,7 +110,7 @@
 			
 			$this->_post_process_callbacks = array();
 			
-			$this->_process = new FfmpegProcessProgressable($ffmpeg_path, $temp_directory);
+			$this->_process = new FfmpegProcessProgressable('ffmpeg', $this->_config);
 		}
 		
 		public function setInputFormat(Format $input_format=null)
@@ -187,7 +187,7 @@
 				throw new Exception('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
 			}
 			
-			return new $class_name($type, $this->_program_path, $this->_temp_directory);
+			return new $class_name($type, $this->_config);
 		}
 		
 		/**

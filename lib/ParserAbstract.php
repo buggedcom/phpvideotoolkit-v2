@@ -21,14 +21,14 @@
 	 * @author Jorrit Schippers
 	 * @package default
 	 */
-	abstract class ParserAbstract
+	abstract class ParserAbstract //extends Loggable
 	{
 		protected $_program_path;
 		protected $_temp_directory;
 		protected $_cacher;
 		static $_cache = array();
 		
-		public function __construct(Config $config=null, $program_config_key='convert')
+		public function __construct(Config $config=null, $program_config_key='ffmpeg')
 		{
 			$this->_config = $config === null ? Config::getInstance() : $config;
 			

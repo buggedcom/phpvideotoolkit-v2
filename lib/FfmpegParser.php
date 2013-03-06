@@ -23,9 +23,10 @@
 	 * @author Jorrit Schippers
 	 * @package default
 	 */
-	class FfmpegParser
+	class FfmpegParser //extends Loggable
 	{
 		protected $_parser;
+		protected $_config;
 		
 		/**
 		 * @access public
@@ -35,15 +36,28 @@
 		 */
 		public function __construct(Config $config=null)
 		{
-			$parser = new Parser($config);
+			$this->_config = $config === null ? Config::getInstance() : $config;
+			$this->_parser = null;
+		}
+		
+		/**
+		 * Gets the specific ffmpeg parser to use.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return void
+		 */
+		protected function _getParser()
+		{
+			$parser = new Parser($this->_config);
 			$format_data = $parser->getRawFormatData();
 			if(strpos($format_data, 'Codecs:') !== false)
 			{
-				$this->_parser = new FfmpegParserFormatsArgumentOnly($config);
+				$this->_parser = new FfmpegParserFormatsArgumentOnly($this->_config);
 			}
 			else
 			{
-				$this->_parser = new FfmpegParserGeneric($config);
+				$this->_parser = new FfmpegParserGeneric($this->_config);
 			}
 		}
 		
@@ -58,13 +72,18 @@
 		 */
 		public function __call($name, $arguments)
 		{
+			if($this->_parser === null)
+			{
+				$this->_getParser();
+			}
+			
 			if(method_exists($this->_parser, $name) === true)
 			{
 				return call_user_func_array(array($this->_parser, $name), $arguments);
 			}
 			else
 			{
-				// TODO error
+				throw new Exception('`'.$name.'` is not a valid parser function.');
 			}
 		}
 	}

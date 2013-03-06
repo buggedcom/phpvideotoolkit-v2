@@ -41,7 +41,7 @@
 		 */
 		public function setProcessTimelimit($timelimit_in_seconds)
 		{
-			$parser = new FfmpegParser($this->_binary_path, $this->_temp_directory);
+			$parser = new FfmpegParser($this->_config);
 			$commands = $parser->getCommands();
 			if(isset($commands['timelimit']) === false)
 			{
@@ -275,7 +275,7 @@
 //				get the media class from the output.
 //				create the object from the class name and return the new object.
 				$media_class = $this->_findMediaClass($output);
-				$output = new $media_class($output, null, $this->_binary_path, $this->_temp_directory);
+				$output = new $media_class($output, null, $this->_config);
 				
 //				do any post processing callbacks
 				if($post_process_callback !== null)
@@ -302,7 +302,7 @@
 //			read the output to determine what it is so it can be post processed.
 			try
 			{
-				$parser = new MediaParser($this->_binary_path, $this->_temp_directory);
+				$parser = new MediaParser($this->_config);
 				$output_information = $parser->getFileInformation($path, false);
 			}
 			catch(Exception $e)

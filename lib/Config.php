@@ -28,7 +28,10 @@
 	     */
 	    public static $instance = null;
 		
-		protected $_default_options;
+		protected $_ffmpeg;
+		protected $_ffprobe;
+		protected $_yamdi;
+		protected $_temp_directory;
 
 	    /**
 	     * Get the Instance of self
@@ -56,9 +59,9 @@
 	        if(empty($options) === true)
 			{
 	            $options = array(
-					'convert' => 'ffmpeg',
-					'probe' => 'ffprobe',
-					'yamdi' => 'yamdi', // http://yamdi.sourceforge.net/
+					'ffmpeg' 		 => 'ffmpeg',
+					'ffprobe' 		 => 'ffprobe',
+					'yamdi' 		 => null, //'yamdi', // http://yamdi.sourceforge.net/ for flv meta injection
 					'temp_directory' => sys_get_temp_dir(),
 				);
 	        }
@@ -95,38 +98,47 @@
 	    {
 			switch($key)
 			{
-				case 'convert' :
-				case 'probe' :
+				case 'ffmpeg' :
+				case 'ffprobe' :
 				case 'yamdi' :
-					if(strpos($value, '/') !== 0)
+				
+					if($value !== null)
 					{
-						try
+						if(strpos($value, '/') !== 0)
 						{
-							$value = Binary::locate($value);
-						}
-						catch(BinaryLocateException $e)
-						{
-							throw new ConfigSetException('Unable to locate the '.$value.' binary. Please specify the full path instead.');
+							try
+							{
+								$value = Binary::locate($value);
+							}
+							catch(BinaryLocateException $e)
+							{
+								throw new ConfigSetException('Unable to locate the '.$value.' binary. Please specify the full path instead.');
+							}
 						}
 					}
+					
 					$this->{'_'.$key} = $value;
+					
 					return;
 					
 				case 'temp_directory' :
+				
 					$value = realpath($value);
-					if(empty($value) === true || is_dir($temp_directory) === false)
+					if(empty($value) === true || is_dir($value) === false)
 					{
-						throw new ConfigSetException('`temp_directory` "'.$temp_directory.'" does not exist or is not a directory.');
+						throw new ConfigSetException('`temp_directory` "'.$value.'" does not exist or is not a directory.');
 					}
-					else if(is_readable($temp_directory) === false)
+					else if(is_readable($value) === false)
 					{
-						throw new ConfigSetException('`temp_directory` "'.$temp_directory.'" is not readable.');
+						throw new ConfigSetException('`temp_directory` "'.$value.'" is not readable.');
 					}
-					else if(is_writable($temp_directory) === false)
+					else if(is_writable($value) === false)
 					{
-						throw new ConfigSetException('`temp_directory` "'.$temp_directory.'" is not writeable.');
+						throw new ConfigSetException('`temp_directory` "'.$value.'" is not writeable.');
 					}
+					
 					$this->{'_'.$key} = $value;
+					
 					return;
 			}
 			

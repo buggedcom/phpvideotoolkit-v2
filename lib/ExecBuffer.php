@@ -20,7 +20,7 @@
 	 * @author Oliver Lillie
 	 * @package default
 	 */
-	class ExecBuffer
+	class ExecBuffer //extends Loggable
 	{
 		protected $_failure_tracking;
 		protected $_blocking;

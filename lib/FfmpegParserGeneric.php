@@ -41,7 +41,7 @@
 				return $data;
 			}
 			
-			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$exec = new FfmpegProcess('ffmpeg', $this->_config);
 			$data = $exec->addCommand('-codecs')
 						 ->execute()
 						 ->getBuffer();
@@ -66,7 +66,7 @@
 				return $data;
 			}
 			
-			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$exec = new FfmpegProcess('ffmpeg', $this->_config);
 			$data = $exec->addCommand('-filters')
 						 ->execute()
 						 ->getBuffer();
@@ -91,7 +91,7 @@
 				return $data;
 			}
 			
-			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$exec = new FfmpegProcess('ffmpeg', $this->_config);
 			$data = $exec->addCommand('-bsfs')
 						 ->execute()
 						 ->getBuffer();
@@ -116,7 +116,7 @@
 				return $data;
 			}
 			
-			$exec = new FfmpegProcess($this->_program_path, $this->_temp_directory);
+			$exec = new FfmpegProcess('ffmpeg', $this->_config);
 			$data = $exec->addCommand('-protocols')
 						 ->execute()
 						 ->getBuffer();
