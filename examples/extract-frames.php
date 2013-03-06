@@ -4,9 +4,7 @@
 	
 	try
 	{
-		\PHPVideoToolkit\Factory::setDefaultVars('./tmp', '/opt/local/bin');
-
- 		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
+ 		$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
 		$output = $video->extractFrames(new \PHPVideoToolkit\Timecode(40), new \PHPVideoToolkit\Timecode(50))
 			   			->save('./output/big_buck_bunny_frame_%timecode.jpg');
 		

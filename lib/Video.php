@@ -213,7 +213,7 @@
 				$save_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-%12index.png';
 				
 //				register the post process for tidying up stuff.
-				//$gif = Factory::animatedGif();
+				//$gif = new AnimatedGif();
 				//$this->_registerSavePostProcess(array($gif, 'createFrom'), 'toolkit');
 			}
 

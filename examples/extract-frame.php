@@ -4,12 +4,10 @@
 	
 	try
 	{
-		\PHPVideoToolkit\Factory::setDefaultVars('./tmp', '/opt/local/bin');
-
-		$output_format = \PHPVideoToolkit\Factory::videoFormat('output');
+		$output_format = new \PHPVideoToolkit\VideoFormat('output');
 		//$output_format->setVideoFormat('ljpeg');
 		
- 		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
+ 		$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
 		
 		$video->extractFrame(new \PHPVideoToolkit\Timecode(50));
 		

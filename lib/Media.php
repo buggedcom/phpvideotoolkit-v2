@@ -58,7 +58,7 @@
 		
 		protected $_process;
 
-		public function __construct($media_file_path, Format $input_format=null, Config $config=null)
+		public function __construct($media_file_path, Config $config=null, Format $input_format=null)
 		{
 			parent::__construct($config, 'ffmpeg');
 			
@@ -439,7 +439,7 @@
 		public function split($split_by, $time_delta=0, $output_list_path=null)
 		{
 //			check that segment is available to ffmpeg
-			$ffmpeg = Factory::ffmpegParser();
+			$ffmpeg = new FfmpegParser($this->_config);
 			$formats = $ffmpeg->getFormats();
 			if(isset($formats['segment']) === false)
 			{

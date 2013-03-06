@@ -25,9 +25,9 @@
 	 */
 	class Image extends Media
 	{
-		public function __construct($image_file_path, ImageFormat $image_input_format=null, $ffmpeg_path, $temp_directory)
+		public function __construct($video_file_path, Config $config=null, ImageFormat $video_input_format=null)
 		{
-			parent::__construct($image_file_path, $image_input_format, $ffmpeg_path, $temp_directory);
+			parent::__construct($video_file_path, $video_input_format, $config);
 			
 //			validate this media file is a image file
 			$type = $this->readType();

@@ -4,9 +4,7 @@
 	
 	try
 	{
-		\PHPVideoToolkit\Factory::setDefaultVars('./tmp', '/opt/local/bin');
-
- 		$video = \PHPVideoToolkit\Factory::video('media/BigBuckBunny_320x180.mp4');
+ 		$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
 		$process = $video->getProcess();
 	//	$process->setProcessTimelimit(1);
 		$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
