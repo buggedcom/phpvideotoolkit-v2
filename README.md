@@ -24,13 +24,23 @@ Whilst the extensive documentation covers just about everything, here are a few 
 
 ###Configuring PHPVideoToolkit
 
-PHPVideoToolkit requires some basic configuration and is one through the Factory class.
+PHPVideoToolkit requires some basic configuration and is one through the Config class. The Config class is then used in the constructor of most PHPVideoToolkit classes. Any child object initialised within an already configured class will inherit the configuration options of the parent.
 
 ```php
 namespace PHPVideoToolkit;
 
-Factory::setDefaultVars('./tmp', '/opt/local/bin', 'ffmpeg', 'ffprobe');
+$config = new \PHPVideoToolkit\Config(array(
+	'temp_directory' => './tmp',
+	'ffmpeg' => '/opt/local/bin/ffmpeg',
+	'ffprobe' => '/opt/local/bin/ffprobe',
+	'yamdi' => '/opt/local/bin/yamdi',
+	'qt-faststart' => '/opt/local/bin/qt-faststart',
+));
 ```
+
+If a config object is not defined and supplied to the PHPVideoToolkit classes, then a default Config object is created and assigned to the class.
+
+Every example below uses ```$config``` as the configuration object.
 ###Accessing Data About FFmpeg
 
 Simple demonstration about how to access information about FfmpegParser object.
@@ -38,7 +48,7 @@ Simple demonstration about how to access information about FfmpegParser object.
 ```php
 namespace PHPVideoToolkit;
 
-$ffmpeg = Factory::ffmpegParser();
+$ffmpeg = new FfmpegParser($config);
 $is_available = $ffmpeg->isAvailable(); // returns boolean
 $ffmpeg_version = $ffmpeg->getVersion(); // outputs something like - array('version'=>1.0, 'build'=>null)
 	
@@ -50,7 +60,7 @@ Simple demonstration about how to access information about media files using the
 ```php
 namespace PHPVideoToolkit;
 
-$parser = Factory::mediaParser();
+$parser = MediaParser($config);
 $data = $parser->getFileInformation('BigBuckBunny_320x180.mp4');
 echo '<pre>'.print_r($data, true).'</pre>';
 	
@@ -62,7 +72,7 @@ The code below extracts a frame from the video at the 40 second mark.
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrame(new Timecode(40))
 	   			->save('./output/big_buck_bunny_frame.jpg');
 ```
@@ -73,7 +83,7 @@ The code below extracts frames at the parent videos' frame rate from between 40 
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrames(new Timecode(40), new Timecode(50))
 	   			->save('./output/big_buck_bunny_frame_%timecode.jpg');
 ```
@@ -85,10 +95,22 @@ There are two ways you can export at a differing frame rate from that of the par
 ```php
 namespace PHPVideoToolkit;
 
-$output_format = Factory::videoFormat('output');
-$output_format->setFrameRate(1);
+$output_format = new ImageFormat_Jpeg('output');
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+/*
+OR 
+
+$output_format = new VideoFormat('output', $config);
+$output_format->setFrameRate(1);
+// optionaly also set the video and output format, however if you use the ImageFormat_Jpeg output format
+// object this is automatically done for you. If you do not add below, FFmpeg automatically guess from
+// your file extension which format and codecs you wish to use.
+$output_format->setVideoCodec('mjpeg')
+			  ->setFormat('image2');
+
+*/
+
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrames(null, new Timecode(50)) // if null then the extracted segment starts from the begining of the video
 	   			->save('./output/big_buck_bunny_frame_%timecode.jpg', $output_format);
 ```
@@ -98,7 +120,7 @@ The second is to use the $force_frame_rate option of the extractFrames function.
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrames(new Timecode(50), null, 1) // if null then the extracted segment goes from the start timecode to the end of the video
 	   			->save('./output/big_buck_bunny_frame_%timecode.jpg');
 ```
@@ -108,7 +130,7 @@ $output = $video->extractFrames(new Timecode(50), null, 1) // if null then the e
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractAudio()->save('./output/big_buck_bunny.mp3');
 // $output = $video->extractVideo()->save('./output/big_buck_bunny.mp4');
 	   			
@@ -121,7 +143,7 @@ The code below extracts a portion of the video at the from 2 minutes 22 seconds 
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractSegment(new Timecode('00:02:22.0', Timecode::INPUT_FORMAT_TIMECODE), new Timecode(180))
 	   			->save('./output/big_buck_bunny.mp4');
 ```
@@ -134,7 +156,7 @@ The code below splits a video into multiple of equal length of 45 seconds each.
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->split(45)
 	   			->save('./output/big_buck_bunny_%timecode.mp4');
 ```
@@ -145,7 +167,7 @@ Unfortunately there is no way using FFmpeg to add meta data without re-encoding 
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
 	   			->save('./output/big_buck_bunny.mp4');
@@ -161,7 +183,7 @@ The code below is an example of how to manage a non-blocking save.
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $process = $video->saveNonBlocking('./output/big_buck_bunny.mov');
 
 // do something else important, db queries etc
@@ -202,7 +224,7 @@ This example supplies the progress callback handler as a paramater to the constr
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 
 $progress_handler = new ProgressHandlerNative(function($data)
 {
@@ -221,7 +243,7 @@ This example initialises a handler but does not supply a callback function. Inst
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 
 $progress_handler = new ProgressHandlerNative();
 
@@ -247,7 +269,7 @@ There may be instances where things go wrong and PHPVideoToolkit hasn't correctl
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->save('./output/big_buck_bunny.mov');
 $process = $video->getProcess();
 
@@ -279,7 +301,7 @@ The process object is passed by reference so any changes to the object are also 
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $process = $video->getProcess();
 				
 ```
@@ -295,7 +317,7 @@ $process->addPostOutputCommand('-output-command', 'another value');
 				
 ```
 
-Now all of the example commands above will cause FFmpeg to fail, and they are jsut to illustrate a point.
+Now all of the example commands above will cause FFmpeg to fail, and they are just to illustrate a point.
 
 - The function addPreInputCommand() adds commands to be given before the input command (-i) is added to the command string.
 - The function addCommand() adds commands to be given after the input command (-i) is added to the command string.
@@ -314,7 +336,7 @@ You may wish to impose a processing timelimit on encoding. There are various rea
 ```php
 namespace PHPVideoToolkit;
 
-$video  = Factory::video('BigBuckBunny_320x180.mp4');
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
 
 $process = $video->getProcess();
 $process->setProcessTimelimit(10); // in seconds
