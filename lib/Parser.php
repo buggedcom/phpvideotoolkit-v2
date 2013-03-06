@@ -65,6 +65,8 @@
 			$exec = new FfmpegProcess('ffmpeg', $this->_config);
 			$data = $exec->execute()
 						 ->getBuffer();
+			
+			// purposley no error checking here as ffmpeg gives an error with no input given.
 
 			$this->_cacheSet($cache_key, $data);
 			return $data;
@@ -91,6 +93,12 @@
 						 ->execute()
 						 ->getBuffer();
 
+//			check the process for any errors.
+			if($exec->hasError() === true)
+			{
+				throw new FfmpegProcessException('An error was encountered with FFmpeg when attempting to read the formats that FFmpeg supports. FFmpeg reported: '.$exec->getLastLine(), null, $exec);
+			}
+			
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}

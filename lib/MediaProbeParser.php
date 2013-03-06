@@ -642,7 +642,7 @@
 			}
 
 // 			execute the ffmpeg lookup
-			$exec = new FfmpegProcess('ffmpeg', $this->_config);
+			$exec = new FfmpegProcess('ffprobe', $this->_config);
 			$raw_data = $exec->setInputPath($real_file_path)
 							 ->addCommand('-show_streams')
 							 ->addCommand('-show_format')
@@ -652,7 +652,7 @@
 //			check the process for any errors.
 			if($exec->hasError() === true)
 			{
-				throw new Exception('FFprobe encountered an error when attempting to read `'.$file_path.'`. FFprobe reported: '.$exec->getLastLine());
+				throw new FfmpegProcessException('FFprobe encountered an error when attempting to read `'.$file_path.'`. FFprobe reported: '.$exec->getLastLine(), null, $exec);
 			}
 			
 // 			check that some data has been obtained
