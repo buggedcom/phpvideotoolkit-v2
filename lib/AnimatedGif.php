@@ -66,6 +66,12 @@
 			}
 			$this->_file_path = $file_path;
 			
+//			validate the transcoder engine if set
+			if(in_array($transcoder_engine, array('gifsicle', 'convert', 'php', null)) === false)
+			{
+				throw new Exception('Unrecognised transcoder engine.');
+			}
+			
 //			auto detect a transcoder based on order of preference.
 			if($transcoder_engine === null)
 			{
@@ -83,11 +89,6 @@
 				{
 					throw new Exception('There are no available transcoders on your system.');
 				}
-			}
-//			validate the transcoder engine if set
-			else if(in_array($transcoder_engine, array('php', 'convert', 'gifsicle')) === false)
-			{
-				throw new Exception('Unrecognised transcoder engine.');
 			}
 			else
 			{
