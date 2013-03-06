@@ -643,6 +643,12 @@
 			$raw_data = $exec->setInputPath($real_file_path)
 							 ->execute()
 							 ->getBuffer();
+			
+//			check the process for any errors.
+			if($exec->hasError() === true)
+			{
+				throw new Exception('FFmpeg encountered an error when attempting to read `'.$file_path.'`. FFmpeg reported: '.$exec->getLastLine());
+			}
 
 // 			check that some data has been obtained
 		    if(empty($raw_data) === true)

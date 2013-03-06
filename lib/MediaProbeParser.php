@@ -649,6 +649,12 @@
 							 ->execute()
 							 ->getBuffer();
 			
+//			check the process for any errors.
+			if($exec->hasError() === true)
+			{
+				throw new Exception('FFprobe encountered an error when attempting to read `'.$file_path.'`. FFprobe reported: '.$exec->getLastLine());
+			}
+			
 // 			check that some data has been obtained
 			$data = array();
 		    if(empty($raw_data) === true)

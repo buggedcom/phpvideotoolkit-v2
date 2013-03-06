@@ -46,6 +46,12 @@
 						 ->execute()
 						 ->getBuffer();
 			
+//			check the process for any errors.
+			if($exec->hasError() === true)
+			{
+				throw new Exception('An error was encountered when attempting to read FFmpegs\' available codecs. FFmpeg reported: '.$exec->getLastLine());
+			}
+			
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
@@ -70,6 +76,12 @@
 			$data = $exec->addCommand('-filters')
 						 ->execute()
 						 ->getBuffer();
+			
+//			check the process for any errors.
+			if($exec->hasError() === true)
+			{
+				throw new Exception('An error was encountered when attempting to read FFmpegs\' available filters. FFmpeg reported: '.$exec->getLastLine());
+			}
 
 			$this->_cacheSet($cache_key, $data);
 			return $data;
@@ -96,6 +108,12 @@
 						 ->execute()
 						 ->getBuffer();
 			
+//			check the process for any errors.
+			if($exec->hasError() === true)
+			{
+				throw new Exception('An error was encountered when attempting to read FFmpegs\' available bitstream filters. FFmpeg reported: '.$exec->getLastLine());
+			}
+			
 			$this->_cacheSet($cache_key, $data);
 			return $data;
 		}
@@ -120,6 +138,12 @@
 			$data = $exec->addCommand('-protocols')
 						 ->execute()
 						 ->getBuffer();
+			
+//			check the process for any errors.
+			if($exec->hasError() === true)
+			{
+				throw new Exception('An error was encountered when attempting to read FFmpegs\' available protocols. FFmpeg reported: '.$exec->getLastLine());
+			}
 			
 			$this->_cacheSet($cache_key, $data);
 			return $data;
