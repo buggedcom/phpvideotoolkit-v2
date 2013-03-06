@@ -2,8 +2,8 @@
 	
 	//define('PROGRAM_PATH', null);
 	define('PROGRAM_PATH', '/opt/local/bin');
-	define('FFMPEG_PROGRAM', 'ffmpeg');
-	define('FFPROBE_PROGRAM', 'ffprobe');
+	define('FFMPEG_PROGRAM', PROGRAM_PATH.DIRECTORY_SEPARATOR.'ffmpeg');
+	define('FFPROBE_PROGRAM', PROGRAM_PATH.DIRECTORY_SEPARATOR.'ffprobe');
 	define('TEMP_PATH', '../examples/tmp');
 
 	require_once '../autoloader.php';	
@@ -19,6 +19,10 @@
     set_error_handler('__errorHandler');
     set_exception_handler('__errorHandler');
 	
-	\PHPVideoToolkit\Factory::setDefaultVars(TEMP_PATH, PROGRAM_PATH, FFMPEG_PROGRAM, FFPROBE_PROGRAM);
-	
 	require dirname(__FILE__).'/functions.php';
+	
+    $config = new \PHPVideoToolkit\Config(array(
+		'temp_directory' => TEMP_PATH,
+		'ffmpeg' => FFMPEG_PROGRAM,
+		'ffprobe' => FFPROBE_PROGRAM,
+	));

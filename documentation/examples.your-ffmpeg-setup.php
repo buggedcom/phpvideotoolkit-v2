@@ -15,13 +15,14 @@
           
 <?php
     
+	$ffmpeg_parser = null;
     $is_available = false;
     $ffmpeg_version = false;
     if(PROGRAM_PATH !== null)
     {
-        $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-        $is_available = $ffmpeg->isAvailable();
-        $ffmpeg_version = $ffmpeg->getVersion();    
+        $ffmpeg_parser = new \PHPVideoToolkit\FfmpegParser($config);
+        $is_available = $ffmpeg_parser->isAvailable();
+        $ffmpeg_version = $ffmpeg_parser->getVersion();    
     }   
     
 ?>
@@ -29,11 +30,15 @@
           <p><?php if($is_available === true): ?>Yes, you have FFmpeg installed and available. Version: <?php echo $ffmpeg_version['version'] === null ? 'unknown' : HTML($ffmpeg_version['version']); ?> (build <?php echo $ffmpeg_version['build'] === null ? 'unknown' : HTML($ffmpeg_version['build']); ?>)<?php else: ?>No, it does not appear as if you have FFmpeg installed.<?php endif ?></p>
           <pre class="prettyprint"><code>&lt;?php
               
-    \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-    $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-    $is_available = $ffmpeg->isAvailable(); // returns boolean
-    $ffmpeg_version = $ffmpeg->getVersion(); // outputs something like - array('version'=>1.0, 'build'=>null)
+  $parser = new \PHPVideoToolkit\FfmpegParser($config);
+  $is_available = $ffmpeg->isAvailable(); // returns boolean
+  $ffmpeg_version = $ffmpeg->getVersion(); // outputs something like - array('version'=>1.0, 'build'=>null)
           
 </code></pre>
           
@@ -74,22 +79,21 @@
           
 <?php
     
-        $has_ffmpeg_support = false;
-        if(PROGRAM_PATH !== null)
-        {
-            $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-            $has_ffmpeg_support = $ffmpeg->hasFfmpegPhpSupport();
-        }   
+		$has_ffmpeg_support = $ffmpeg_parser->hasFfmpegPhpSupport();
     
 ?>
           
           <p><?php if($has_ffmpeg_support !== false): ?>Yes, you have FFmpeg-PHP support. FFmpeg-PHP is provided through <?php if($has_ffmpeg_support === 'module'): ?>the PHP module<?php else: ?>PHPVideoToolkit emulation<?php endif ?><?php else: ?>No, it does not appear that you have any support for PHPVideoToolkit<?php endif ?>.</p>
           <pre class="prettyprint"><code>&lt;?php
               
-    \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-    $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-    $has_ffmpeg_support = $ffmpeg->hasFfmpegPhpSupport(); // returns either "module", "emulated" or false.
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
+  $has_ffmpeg_support = $ffmpeg->hasFfmpegPhpSupport(); // returns either "module", "emulated" or false.
           
 </code></pre>
           
@@ -100,21 +104,20 @@
           
 <?php
     
-        $basic_ffmpeg_information = false;
-        if(PROGRAM_PATH !== null)
-        {
-            $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-            $basic_ffmpeg_information = $ffmpeg->getFfmpegData();
-        }
+        $basic_ffmpeg_information = $ffmpeg_parser->getFfmpegData();
         
 ?>
           
           <pre class="prettyprint"><code>&lt;?php
               
-    \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-    $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-    $basic_ffmpeg_information = $ffmpeg->getFfmpegData(); // returns an array of data.
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
+  $basic_ffmpeg_information = $ffmpeg->getFfmpegData(); // returns an array of data.
           
 </code></pre>
           
@@ -141,22 +144,21 @@
           
 <?php
     
-    $ffmpeg_commands = false;
-    if(PROGRAM_PATH !== null)
-    {
-        $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-        $ffmpeg_commands = $ffmpeg->getCommands(true);
+	    $ffmpeg_commands = $ffmpeg_parser->getCommands(true);
 		ksort($ffmpeg_commands);
-    }
     
 ?>
           
             <pre class="prettyprint"><code>&lt;?php
               
-    \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-    $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-    $basic_ffmpeg_information = $ffmpeg->getCommands(); // returns an array of data.
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
+  $basic_ffmpeg_information = $ffmpeg->getCommands(); // returns an array of data.
           
 </code></pre>
           
@@ -196,23 +198,21 @@
           
 <?php
     
-    $ffmpeg_formats = false;
-    if(PROGRAM_PATH !== null)
-    {
-        $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-        $ffmpeg_formats = $ffmpeg->getFormats();
-    }
-    
+        $ffmpeg_formats = $ffmpeg_parser->getFormats();
     // \PHPVideoToolkit\Trace::vars($ffmpeg_formats);exit;
     
 ?>
           
             <pre class="prettyprint"><code>&lt;?php
               
-    \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
-              
-    $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-    $ffmpeg_formats = $ffmpeg->getFormats(); // returns an array of data.
+  $config = new \PHPVideoToolkit\Config(array(
+	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+   ));
+
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
+  $ffmpeg_formats = $ffmpeg->getFormats(); // returns an array of data.
           
 </code></pre>
           
@@ -253,28 +253,27 @@
           
 <?php
     
-    $ffmpeg_codecs = false;
-    if(PROGRAM_PATH !== null)
-    {
-        $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-        $ffmpeg_codecs = $ffmpeg->getCodecs();
-    }
+        $ffmpeg_codecs = $ffmpeg_parser->getCodecs();
     
 ?>
           
         <pre class="prettyprint"><code>&lt;?php
               
-    \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-    $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
     
-    // a component can be specified to return specific codec information.
-    // if left as null, all component information will be returned.
-    $component = null;
-    // $component = 'audio';
-    // $component = 'video';
-    // $component = 'subtitle';
-    $ffmpeg_codecs = $ffmpeg->getCodecs($component); // returns an array of data.
+  // a component can be specified to return specific codec information.
+  // if left as null, all component information will be returned.
+  $component = null;
+  // $component = 'audio';
+  // $component = 'video';
+  // $component = 'subtitle';
+  $ffmpeg_codecs = $ffmpeg->getCodecs($component); // returns an array of data.
           
 </code></pre>
           
@@ -318,13 +317,8 @@
           
 <?php
     
-	$ffmpeg_bitstream_filters = false;
-	if(PROGRAM_PATH !== null)
-	{
-		$ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-		$ffmpeg_bitstream_filters = $ffmpeg->getBitstreamFilters();
+		$ffmpeg_bitstream_filters = $ffmpeg_parser->getBitstreamFilters();
 		sort($ffmpeg_bitstream_filters);
-	}
     
 	//\PHPVideoToolkit\Trace::vars($ffmpeg_bitstream_filters);
     
@@ -332,9 +326,13 @@
           
           <pre class="prettyprint"><code>&lt;?php
               
-  \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-  $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
   $ffmpeg_bitstream_filters = $ffmpeg->getBitstreamFilters(); // returns an array of data.
           
 </code></pre>
@@ -364,13 +362,8 @@
           
 <?php
     
-	$ffmpeg_filters = false;
-	if(PROGRAM_PATH !== null)
-	{
-		$ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-		$ffmpeg_filters = $ffmpeg->getFilters(false);
+		$ffmpeg_filters = $ffmpeg_parser->getFilters(false);
 		ksort($ffmpeg_filters);
-	}
     
 	//\PHPVideoToolkit\Trace::vars($ffmpeg_filters);exit;
     
@@ -378,9 +371,13 @@
           
           <pre class="prettyprint"><code>&lt;?php
               
-  \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-  $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
   
   // instead of returning all the data about each filter, you can limit it to 
   // just the filter names instead.
@@ -422,13 +419,8 @@
           
 <?php
     
-	$ffmpeg_protocols = false;
-	if(PROGRAM_PATH !== null)
-	{
-		$ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-		$ffmpeg_protocols = $ffmpeg->getProtocols();
+		$ffmpeg_protocols = $ffmpeg_parser->getProtocols();
 		ksort($ffmpeg_protocols);
-	}
     
 	//\PHPVideoToolkit\Trace::vars($ffmpeg_protocols);exit;
     
@@ -436,9 +428,13 @@
           
           <pre class="prettyprint"><code>&lt;?php
               
-  \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-  $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
   $ffmpeg_protocols = $ffmpeg->getProtocols(); // returns an array of data.
           
 </code></pre>
@@ -475,13 +471,8 @@
           
 <?php
     
-	$ffmpeg_pixel_formats = false;
-	if(PROGRAM_PATH !== null)
-	{
-		$ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
-		$ffmpeg_pixel_formats = $ffmpeg->getPixelFormats();
+		$ffmpeg_pixel_formats = $ffmpeg_parser->getPixelFormats();
 		ksort($ffmpeg_pixel_formats);
-	}
     
 	//\PHPVideoToolkit\Trace::vars($ffmpeg_pixel_formats);exit;
     
@@ -489,9 +480,13 @@
           
           <pre class="prettyprint"><code>&lt;?php
               
-  \PHPVideoToolkit\Factory::setDefaultVars('<?php echo addslashes(HTML(TEMP_PATH)); ?>', '<?php echo addslashes(HTML(PROGRAM_PATH)); ?>', '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>');
+  $config = new \PHPVideoToolkit\Config(array(
+	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+  ));
               
-  $ffmpeg = \PHPVideoToolkit\Factory::ffmpegParser();
+  $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
   $ffmpeg_pixel_formats = $ffmpeg->getPixelFormats(); // returns an array of data.
           
 </code></pre>
