@@ -7,6 +7,7 @@
 			'ffmpeg' => '/opt/local/bin/ffmpeg',
 			'ffprobe' => '/opt/local/bin/ffprobe',
 			'yamdi' => '/opt/local/bin/yamdi',
+			'qt-faststart' => '/opt/local/bin/qt-faststart',
 		));
 	}
 	catch(\PHPVideoToolkit\Exception $e)

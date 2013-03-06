@@ -62,6 +62,7 @@
 					'ffmpeg' 		 => 'ffmpeg',
 					'ffprobe' 		 => 'ffprobe',
 					'yamdi' 		 => null, //'yamdi', // http://yamdi.sourceforge.net/ for flv meta injection
+					'qt-faststart' 	 => null, //'qt-faststart', // https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart for fast streaming of mp4/h264 files.
 					'temp_directory' => sys_get_temp_dir(),
 				);
 	        }
@@ -101,6 +102,7 @@
 				case 'ffmpeg' :
 				case 'ffprobe' :
 				case 'yamdi' :
+				case 'qt-faststart' :
 				
 					if($value !== null)
 					{
