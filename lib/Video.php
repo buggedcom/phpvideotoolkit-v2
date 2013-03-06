@@ -30,9 +30,9 @@
 		
 		protected $_extracting_audio;
 		
-		public function __construct($video_file_path, VideoFormat $video_input_format=null, Config $config=null)
+		public function __construct($video_file_path, Config $config=null, VideoFormat $video_input_format=null)
 		{
-			parent::__construct($video_file_path, $video_input_format, $config);
+			parent::__construct($video_file_path, $config, $video_input_format);
 			
 //			validate this media file is a video file
 			$type = $this->readType();
