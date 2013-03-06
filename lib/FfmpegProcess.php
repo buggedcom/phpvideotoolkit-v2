@@ -49,34 +49,53 @@
 			$this->_pre_input_commands = array();
 			$this->_post_input_commands = array();
 			$this->_post_output_commands = array();
-			$this->_input = null;
+			$this->_input = array();
 			$this->_exec = null;
 			$this->_progress_handler = null;
 			$this->_combined = false;
 		}
 		
 		/**
-		 * Sets the input.
+		 * Sets the input at the given index. If -1 is used, the input is shifted
+		 * onto the begining of the input array.
 		 *
 		 * @access public
 		 * @param string $input
+		 * @param integer $index
 		 * @return self
 		 */
-		public function setInputPath($input)
+		public function setInputPath($input, $index=null)
 		{
-			$this->_input = $input;
+			if($index === null)
+			{
+				array_push($this->_input, $input);
+			}
+			else if($index === -1)
+			{
+				array_unshift($this->_input, $input);
+			}
+			else
+			{
+				$this->_input[$index] = $input;
+			}
 			return $this;
 		}
 
 		/**
-		 * Gets the output.
+		 * Gets the input path at the given index.
 		 *
 		 * @access public
+		 * @param integer $index The index of which to return the input for.
 		 * @return string
 		 */
-		public function getInputPath()
+		public function getInputPath($index=0)
 		{
-			return $this->_input;
+			if(isset($this->_input[$index]) === true)
+			{
+				return $this->_input[$index];
+			}
+			
+			throw new InvalidArgumentException('No input existed for given index `'.$index.'`');
 		}
 		
 		/**
@@ -261,8 +280,11 @@
 //			add in the input
 			if(empty($this->_input) === false)
 			{
-				$this->add('-i')
-					 ->add($this->_input);
+				foreach ($this->_input as $input)
+				{
+					$this->add('-i')
+						 ->add($input);
+				}
 			}
 			
 //			build the post input commands
@@ -359,12 +381,12 @@
 		{
 			if(empty($this->_exec) === true)
 			{
-				throw new Exception('The ExecBuffer object has not yet been generated. Please call getExecBuffer() before calling '.$function.'.');
+				throw new FfmpegProcessException('The ExecBuffer object has not yet been generated. Please call getExecBuffer() before calling '.$function.'.', null, $this);
 			}
 			
 			if(is_callable(array($this->_exec, $function)) === false)
 			{
-				throw new Exception('This function is not callable within ExecBuffer.');
+				throw new FfmpegProcessException('This function is not callable within ExecBuffer.', $this->_exec, $this);
 			}
 			
 			return call_user_func_array(array($this->_exec, $function), $arguments);

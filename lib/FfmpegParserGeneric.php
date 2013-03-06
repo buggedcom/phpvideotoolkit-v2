@@ -49,7 +49,7 @@
 //			check the process for any errors.
 			if($exec->hasError() === true)
 			{
-				throw new Exception('An error was encountered when attempting to read FFmpegs\' available codecs. FFmpeg reported: '.$exec->getLastLine());
+				throw new FfmpegProcessException('An error was encountered when attempting to read FFmpegs\' available codecs. FFmpeg reported: '.$exec->getLastLine(), null, $exec);
 			}
 			
 			$this->_cacheSet($cache_key, $data);
@@ -80,7 +80,7 @@
 //			check the process for any errors.
 			if($exec->hasError() === true)
 			{
-				throw new Exception('An error was encountered when attempting to read FFmpegs\' available filters. FFmpeg reported: '.$exec->getLastLine());
+				throw new FfmpegProcessException('An error was encountered when attempting to read FFmpegs\' available filters. FFmpeg reported: '.$exec->getLastLine(), null, $exec);
 			}
 
 			$this->_cacheSet($cache_key, $data);
@@ -111,7 +111,7 @@
 //			check the process for any errors.
 			if($exec->hasError() === true)
 			{
-				throw new Exception('An error was encountered when attempting to read FFmpegs\' available bitstream filters. FFmpeg reported: '.$exec->getLastLine());
+				throw new FfmpegProcessException('An error was encountered when attempting to read FFmpegs\' available bitstream filters. FFmpeg reported: '.$exec->getLastLine(), null, $exec);
 			}
 			
 			$this->_cacheSet($cache_key, $data);
@@ -142,7 +142,7 @@
 //			check the process for any errors.
 			if($exec->hasError() === true)
 			{
-				throw new Exception('An error was encountered when attempting to read FFmpegs\' available protocols. FFmpeg reported: '.$exec->getLastLine());
+				throw new FfmpegProcessException('An error was encountered when attempting to read FFmpegs\' available protocols. FFmpeg reported: '.$exec->getLastLine(), null, $exec);
 			}
 			
 			$this->_cacheSet($cache_key, $data);

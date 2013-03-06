@@ -87,7 +87,7 @@
 //			check the process for any errors.
 			if($exec->hasError() === true)
 			{
-				throw new Exception('An error was encountered when attempting to read the pixel format data. FFmpeg reported: '.$exec->getLastLine());
+				throw new FfmpegProcessException('An error was encountered when attempting to read the pixel format data. FFmpeg reported: '.$exec->getLastLine(), null, $exec);
 			}
 			
 			$this->_cacheSet($cache_key, $data);
@@ -118,7 +118,7 @@
 //			check the process for any errors.
 			if($exec->hasError() === true)
 			{
-				throw new Exception('An error was encountered when attempting to read FFmpegs\' available commands. FFmpeg reported: '.$exec->getLastLine());
+				throw new FfmpegProcessException('An error was encountered when attempting to read FFmpegs\' available commands. FFmpeg reported: '.$exec->getLastLine(), null, $exec);
 			}
 			
 			$this->_cacheSet($cache_key, $data);
@@ -251,7 +251,7 @@
 //				check the process for any errors.
 				if($exec->hasError() === true)
 				{
-					throw new Exception('An error was encountered when attempting to read FFmpegs\' version. FFmpeg reported: '.$exec->getLastLine());
+					throw new FfmpegProcessException('An error was encountered when attempting to read FFmpegs\' version. FFmpeg reported: '.$exec->getLastLine(), null, $exec);
 				}
 				
 				if(preg_match('/FFmpeg version ([0-9\.]+)/i', $data, $matches) > 0)

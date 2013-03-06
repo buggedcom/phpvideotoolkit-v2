@@ -21,6 +21,26 @@
 	 * @author Jorrit Schippers
 	 * @package default
 	 */
-	class FfmpegProcessPostProcessException extends FfmpegProcessException
+	class FfmpegProcessException extends Exception
 	{
+		protected $process;
+		protected $exec;
+		
+		public function __construct($message = null, ExceBuffer $exec=null, FfmpegProcess $process=null, $code = 0, Exception $previous=null)
+		{
+			parent::__construct($message, $code, $previous);
+			
+			$this->process = $process;
+			$this->exec = $exec;
+		}
+		
+		final public function getFfmpegProcess()
+		{
+			return $this->process;
+		}
+		
+		final public function getExecBuffer()
+		{
+			return $this->exec;
+		}
 	}

@@ -21,6 +21,6 @@
 	 * @author Jorrit Schippers
 	 * @package default
 	 */
-	class FfmpegProcessOutputException extends Exception
+	class FfmpegProcessOutputException extends FfmpegProcessException
 	{
 	}
