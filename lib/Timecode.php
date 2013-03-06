@@ -77,6 +77,35 @@
 		}
 		
 		/**
+		 * When the object is converted to a string it is converted in a timecode string.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return string
+		 */
+		public function __toString()
+		{
+			return $this->full_timecode;
+		}
+		
+		/**
+		 * Sets the timecodes seconds value but setting and parsing a timecode in the
+		 * given format.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $timecode_string A timecode string in the format given by $timecode_format.
+		 * @param string $timecode_format 
+		 * @return self
+		 */
+		public function setTimecode($timecode_string, $timecode_format='%hh:%mm:%ss.%ms')
+		{
+			$seconds = $this->_convertTimeInputToSeconds($timecode_string, Timecode::INPUT_FORMAT_TIMECODE, $timecode_format);
+			$this->setSeconds($seconds);
+			return $this;
+		}
+		
+		/**
 		 * Set the total seconds value of the timecode and recalculate the timecode values.
 		 *
 		 * @access public
@@ -91,7 +120,12 @@
 			$this->_total_seconds = $seconds;
 			$this->_total_minutes = $seconds/60;
 			$this->_total_hours = $this->_total_minutes/60;
-			
+
+			$this->_milliseconds =
+			$this->_seconds =
+			$this->_minutes =
+			$this->_hours = 0;
+
 //			convert to grouped
 			while($seconds > 60)
 			{
@@ -203,6 +237,9 @@
 			{
 				case 'timecode' :
 					return $this->getTimecode('%hh:%mm:%ss', true);
+					
+				case 'full_timecode' :
+					return $this->getTimecode('%hh:%mm:%ss.%ms', true);
 					
 				case 'total_hours' :
 					return $this->_total_hours;

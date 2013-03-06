@@ -60,11 +60,50 @@ Simple demonstration about how to access information about media files using the
 ```php
 namespace PHPVideoToolkit;
 
-$parser = MediaParser($config);
+$parser = new MediaParser($config);
 $data = $parser->getFileInformation('BigBuckBunny_320x180.mp4');
 echo '<pre>'.print_r($data, true).'</pre>';
 	
 ```
+###PHPVideoToolkit Timecodes
+PHPVideoToolkit utilises Timecode objects when extracting data such as duration or start points, or when extracting portions of a media file. They are fairly simple to understand. All of the example timecodes created below are the same time. 
+
+```php
+namespace PHPVideoToolkit;
+
+$timecode = new Timecode(102.34);
+$timecode = new Timecode(102.34, Timecode::INPUT_FORMAT_SECONDS);
+$timecode = new Timecode(1.705666667, Timecode::INPUT_FORMAT_MINUTES);
+$timecode = new Timecode(.028427778, Timecode::INPUT_FORMAT_HOURS);
+$timecode = new Timecode('00:01:42.34', Timecode::INPUT_FORMAT_TIMECODE);
+
+```
+
+You can manipulate timecodes fairly simply.
+
+```php
+namespace PHPVideoToolkit;
+
+$timecode = new Timecode('00:01:42.34', Timecode::INPUT_FORMAT_TIMECODE);
+$timecode->hours += 15; // 15:01:42.34
+$timecode->seconds -= 54125.5; // 00:00:18.84
+$timecode->milliseconds -= 18840; // 00:00:00.00
+
+// ...
+
+$timecode->setSeconds(193.7);
+echo $timecode; // Outputs '00:03:13.70'
+
+// ...
+
+$timecode->setTimecode('12:45:39.01');
+echo $timecode->total_seconds; // Outputs 45939.01
+echo $timecode->seconds; // Outputs 39
+
+```
+
+It's very important to note, as in the last example, that there is a massive difference between accessing ```$timecode->seconds``` and ```$timecode->total_seconds```. `seconds` is the number of seconds in the remaining minute of the timecode. `total_seconds` is the total number of seconds of the timecode. The same logic applies to minutes, hours, milliseconds and theire total_ prefixed counterparts.
+
 ###Extract a Single Frame of a Video
 
 The code below extracts a frame from the video at the 40 second mark.
@@ -102,9 +141,9 @@ OR
 
 $output_format = new VideoFormat('output', $config);
 $output_format->setFrameRate(1);
-// optionaly also set the video and output format, however if you use the ImageFormat_Jpeg output format
-// object this is automatically done for you. If you do not add below, FFmpeg automatically guess from
-// your file extension which format and codecs you wish to use.
+// optionaly also set the video and output format, however if you use the ImageFormat_Jpeg 
+// output format object this is automatically done for you. If you do not add below, FFmpeg
+// automatically guesses from your output file extension which format and codecs you wish to use.
 $output_format->setVideoCodec('mjpeg')
 			  ->setFormat('image2');
 
@@ -138,7 +177,7 @@ $output = $video->extractAudio()->save('./output/big_buck_bunny.mp3');
 
 ###Extracting a Segment of an Audio or Video file
 
-The code below extracts a portion of the video at the from 2 minutes 22 seconds to 3 minutes. *Note the different settings for constructing a timecode.*
+The code below extracts a portion of the video at the from 2 minutes 22 seconds to 3 minutes (ie 180 seconds). *Note the different settings for constructing a timecode.* The timecode object can accept different formats to create a timecode from.
 
 ```php
 namespace PHPVideoToolkit;
