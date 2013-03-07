@@ -37,7 +37,7 @@
 		 * @access public
 		 * @author Oliver Lillie
 		 * @param string $timelimit_in_seconds 
-		 * @return void
+		 * @return self
 		 */
 		public function setProcessTimelimit($timelimit_in_seconds)
 		{
@@ -54,6 +54,8 @@
 			}
 			
 			$this->addCommand('-timelimit', $timelimit_in_seconds);
+			
+			return $this;
 		}
 		
 		/**
@@ -64,7 +66,7 @@
 		 * @access public
 		 * @author Oliver Lillie
 		 * @param string $callback 
-		 * @return void
+		 * @return self
 		 */
 		public function attachProgressHandler($callback)
 		{
@@ -83,6 +85,8 @@
 			}
 			
 			array_push($this->_progress_callbacks, $callback);
+			
+			return $this;
 		}
 		
 		/**
@@ -116,7 +120,7 @@
 		 * @access public
 		 * @author Oliver Lillie
 		 * @param mixed $callback If given it must be a valid function that is callable.
-		 * @return void
+		 * @return self
 		 */
 		public function execute($callback=null)
 		{
@@ -213,25 +217,25 @@
 			}
 			
 //			get the output of the process
-			$output = $this->getOutputPath();
+			$output_path = $this->getOutputPath();
 			
 //			we have the output path but we now need to treat differently dependant on if we have multiple file output.
-			if(preg_match('/\.(\%([0-9]*)d)\.([0-9\.]+_[0-9\.]+\.)?_(i|t)\./', $output, $matches) > 0)
+			if(preg_match('/\.(\%([0-9]*)d)\.([0-9\.]+_[0-9\.]+\.)?_(i|t)\./', $output_path, $matches) > 0)
 			{
 //				determine what we have to rename all the files to.
 				$convert_back_to = $matches[4] === 't' ? 'timecode' : (int) $matches[2];
 				
 //				get the glob path and then find all the files from this output
-				$output_glob_path = str_replace($matches[0], '.*.'.$matches[3].'_'.$matches[4].'.', $output);
-				$output = glob($output_glob_path);
+				$output_glob_path = str_replace($matches[0], '.*.'.$matches[3].'_'.$matches[4].'.', $output_path);
+				$outputted_files = glob($output_glob_path);
 				
 //				sort the output naturally so that if there is no index padding that we get the frames in the correct order.
-				natsort($output);
+				natsort($outputted_files);
 
-//				loop and rename the output.
-				$rename = array();
+//				loop to rename the file and then create each output object.
+				$output = array();
 				$timecode = null;
-				foreach ($output as $path)
+				foreach ($outputted_files as $path)
 				{
 					$actual_path = preg_replace('/\._u\.[0-9]{5}_[a-z0-9]{5}_[0-9]+\.u_\./', '.', $path);
 					if($convert_back_to === 'timecode')
@@ -254,38 +258,48 @@
 						$actual_path = preg_replace('/\.([0-9]+)\._i\./', '$1', $actual_path);
 					}
 					rename($path, $actual_path);
+					
+					$media_class = $this->_findMediaClass($actual_path);
+					$output_object = new $media_class($actual_path, $this->_config, null, false);
+					
+					array_push($output, $output_object);
+					
+					unset($output_object);
 				}
+				unset($outputted_files);
+				
+				// TODO create the multiple image output
 			}
 			else
 			{
 //				check for a none multiple file existence
-				if(empty($output) === true)
+				if(empty($output_path) === true)
 				{
 					throw new FfmpegProcessOutputException('Unable to find output for the process as it was not set.');
 				}
-				else if(is_file($output) === false)
+				else if(is_file($output_path) === false)
 				{
-					throw new FfmpegProcessOutputException('The output "'.$output.'", of the Ffmpeg process does not exist.');
+					throw new FfmpegProcessOutputException('The output "'.$output_path.'", of the Ffmpeg process does not exist.');
 				}
-				else if(filesize($output) <= 0)
+				else if(filesize($output_path) <= 0)
 				{
-					throw new FfmpegProcessOutputException('The output "'.$output.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
+					throw new FfmpegProcessOutputException('The output "'.$output_path.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
 				}
 				
 //				get the media class from the output.
 //				create the object from the class name and return the new object.
-				$media_class = $this->_findMediaClass($output);
-				$output = new $media_class($output, $this->_config, null);
-				
-//				do any post processing callbacks
-				if($post_process_callback !== null)
-				{
-					$output = call_user_func($post_process_callback, $output, $this);
-				}
-				
-//				finally return the output to the user.
-				return $output;
+				$media_class = $this->_findMediaClass($output_path);
+				$output = new $media_class($output, $this->_config, null, false);
 			}
+				
+//			do any post processing callbacks
+			if($post_process_callback !== null)
+			{
+				$output = call_user_func($post_process_callback, $output, $this);
+			}
+				
+//			finally return the output to the user.
+			return $output;
 		}
 		
 		/**
@@ -300,19 +314,22 @@
 		protected function _findMediaClass($path)
 		{
 //			read the output to determine what it is so it can be post processed.
-			try
+			$data = getimagesize($path);
+			if(!$data)
 			{
-				$parser = new MediaParser($this->_config);
-				$output_information = $parser->getFileInformation($path, false);
+				$type = 'audio';
 			}
-			catch(Exception $e)
+			else if(strpos($data['mime'], 'image/') !== false)
 			{
-				throw new Exception('The output "'.$output.'", of the Ffmpeg process could not be read by MediaParser.', 0, $e);
+				$type = 'image';
+			}
+			else
+			{
+				$type = 'video';
 			}
 			
 //			now we have the information switch between the types and create the return object.
 			$class = 'Media';
-			$type = $output_information['type'];
 			switch($type)
 			{
 				case 'audio' :

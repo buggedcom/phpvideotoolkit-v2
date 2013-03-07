@@ -22,9 +22,6 @@
 	{
 		protected $_restricted_video_presets;
 		
-		protected $_post_process_qt_faststart;
-		protected $_enforce_qt_faststart_success;
-
 		public function __construct($input_output_type, Config $config=null)
 		{
 			parent::__construct($input_output_type, $config);
@@ -46,7 +43,7 @@
 			{
 				$this->setAudioCodec('mp3')
 					 ->setVideoCodec('h264')
-					 ->setFormat('h264');
+ 					 ->setFormat('h264');
 			}
 			
 //			both enable meta data injection and then force 
@@ -54,26 +51,6 @@
 			$this->enableQtFastStart();
 		}
 		
-		public function enableQtFastStart()
-		{
-			$this->_post_process_qt_faststart = true;
-		}
-		
-		public function disableQtFastStart()
-		{
-			$this->_post_process_qt_faststart = false;
-		}
-		
-		public function allowQtFastStartFailure()
-		{
-			$this->_enforce_qt_faststart_success = false;
-		}
-		
-		public function forceQtFastStartSuccess()
-		{
-			$this->_enforce_qt_faststart_success = true;
-		}
-
 		public function setH264Preset($preset=null)
 		{
 			$this->_blockSetOnInputFormat('h264 preset');
@@ -122,69 +99,5 @@
 		{
 			$this->_format['h264_constant_quantization'] = null;
 			return $this;
-		}
-		
-		public function updateFormatOptions()
-		{
-			parent::updateFormatOptions();
-			
-//			assign a post process so that qt-faststart (https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart) changes the qt atom to allow fast streaming.
-			if($this->_post_process_meta_data_injection === true)
-			{
-				$this->_media_object->registerOutputPostProcess(array($this, 'postProcessFastStart'));
-			}
-			
-			return $this;
-		}
-		
-		/**
-		 * Specifically for creating fast starting files.
-		 * however it can also be used as a standalone function call from the H264Format object.
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param Media $media 
-		 * @return Media
-		 */
-		public function postProcessMetaData(Media $media)
-		{
-//			set the yamdi input and output options.
-			$output = $media->getMediaPath();
-			$temp_output = $output.'.qtfaststart.'.pathinfo($output, PATHINFO_EXTENSION);
-
-//			build the qtfaststart process
-			$qtfaststart_process = new ProcessBuilder('qtfaststart', $this->_config);
-			$exec = $qtfaststart_process
-						  ->add($output)
-						  ->add($temp_output)
-						  ->getExecBuffer();
-				
-//			execute the process.
-			$exec->setBlocking(true)
-				 ->execute();
-				
-//			check for any qt-faststart errors
-			if($exec->hasError() === true)
-			{
-				if(is_file($temp_output) === true)
-				{
-					@unlink($temp_output);
-				}
-				if($this->_enforce_qt_faststart_success === true)
-				{
-					@unlink($output);
-					throw new FfmpegProcessPostProcessException('qt-faststart post processing of "'.$output.'" failed. The output file has been removed. Any additional qt-faststart message follows: 
-'.$exec->getBuffer());
-				}
-				// TODO, log or exception not sure as the original file is ok.
-			}
-			else
-			{
-//				nope everything went ok. so delete ffmpeg file, and then rename yamdi file to that of the original.
-				unlink($output);
-				rename($temp_output, $output);
-			}
-			
-			return $media;
 		}
 	}

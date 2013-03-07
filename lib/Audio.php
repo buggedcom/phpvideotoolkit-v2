@@ -25,13 +25,12 @@
 	 */
 	class Audio extends Media
 	{
-		public function __construct($audio_file_path, Config $config=null, AudioFormat $audio_input_format=null)
+		public function __construct($audio_file_path, Config $config=null, AudioFormat $audio_input_format=null, $ensure_audio_file=true)
 		{
 			parent::__construct($audio_file_path, $config, $audio_input_format);
 			
 //			validate this media file is an audio file
-			$type = $this->readType();
-			if($type !== 'audio')
+			if($ensure_audio_file === true && $this->_validateMedia('audio') === false)
 			{
 				throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$audio_file_path.'" as the file is not an audio file. It is reported to be a '.$type);
 			}

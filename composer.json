@@ -14,7 +14,8 @@
         "sybio/gif-creator": "dev-master"
     },
     "suggest": {
-        "tedivm/stash": "Stash is required to utilise PHPVideoToolkits Default Cache classes, however you can build your own caching classes so that Stash is not required."
+        "tedivm/stash": "Stash is required to utilise PHPVideoToolkits Default Cache class 'Cache_Stash', however you can build your own caching classes so that Stash is not required.",
+        "monolog/monolog" : "Monolog is required to utilise PHPVideoToolkits Default Logging class 'Logger_Monolog', however you can build your own logger classes so that Monolog is not required."
     },
     "autoload": {
         "psr-0": {

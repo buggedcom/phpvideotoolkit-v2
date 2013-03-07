@@ -258,7 +258,7 @@
 		 * Combines the commands stored into a string
 		 *
 		 * @access protected
-		 * @return string
+		 * @return void
 		 */
 		protected function _combineCommands()
 		{
@@ -328,7 +328,7 @@
 		 *
 		 * @access protected
 		 * @author Oliver Lillie
-		 * @return void
+		 * @return ExecBuffer
 		 */
 	    protected function _getExecBuffer()
 	    {
@@ -341,7 +341,7 @@
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @return void
+		 * @return ExecBuffer
 		 */
 	    public function &getExecBuffer()
 	    {
@@ -397,7 +397,7 @@
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @return void
+		 * @return array
 		 */
 		public function getMessages()
 		{

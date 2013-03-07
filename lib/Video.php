@@ -30,13 +30,12 @@
 		
 		protected $_extracting_audio;
 		
-		public function __construct($video_file_path, Config $config=null, VideoFormat $video_input_format=null)
+		public function __construct($video_file_path, Config $config=null, VideoFormat $video_input_format=null, $ensure_video_file=true)
 		{
 			parent::__construct($video_file_path, $config, $video_input_format);
 			
 //			validate this media file is a video file
-			$type = $this->readType();
-			if($type !== 'video')
+			if($ensure_video_file === true && $this->_validateMedia('video') === false)
 			{
 				throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$video_file_path.'" as the file is not a video file. It is reported to be a '.$type);
 			}
@@ -188,33 +187,6 @@
 					
 					$output_format->setVideoFrameRate($this->_extracting_frames);
 				}
-			}
-
-//			check to see if output is a gif, if that is the case we need to change the output format and path so that
-//			we output multiple images and then after the output, post process them into a single animated gif.
-//			Reason being ffmpeg is let down by crappy animated gif output.
-			if((empty($options['format']) === true && strtolower(pathinfo($save_path, PATHINFO_EXTENSION)) === 'gif') || $options['format'] === 'gif')
-			{
-//				if the frame rate has not been set, set a sane frame rate for an animated gif.
-				if(empty($options['video_frame_rate']) === true)
-				{
-					$frame_rate = $this->getFrameRate();
-					if($frame_rate > 12)
-					{
-						$output_format->setVideoFrameRate(12);
-					}
-				}
-				
-//				as we are outputting frames we want the jpeg format for each frame
-				$output_format->setFormat(null);
-				
-//				update the pathway to include indexed output so that it outputs multiple frames.
-				$pathinfo = pathinfo($save_path);
-				$save_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-%12index.png';
-				
-//				register the post process for tidying up stuff.
-				//$gif = new AnimatedGif();
-				//$this->_registerSavePostProcess(array($gif, 'createFrom'), 'toolkit');
 			}
 
 // 			check to see if an aspect ratio is set, if it is correct the width and heights to reflect that aspect ratio.
@@ -458,7 +430,7 @@
 		public function getFrameRate($read_from_cache=true)
 		{
 			$video_data = parent::readVideoComponent($read_from_cache);
-			return $video_data['frame_rate'];
+			return $video_data['frames']['rate'];
 		}
 	}
 

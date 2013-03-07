@@ -25,13 +25,12 @@
 	 */
 	class Image extends Media
 	{
-		public function __construct($video_file_path, Config $config=null, ImageFormat $video_input_format=null)
+		public function __construct($video_file_path, Config $config=null, ImageFormat $video_input_format=null, $ensure_image_file=true)
 		{
-			parent::__construct($video_file_path, $video_input_format, $config);
+			parent::__construct($video_file_path, $config, $video_input_format);
 			
 //			validate this media file is a image file
-			$type = $this->readType();
-			if($type !== 'image')
+			if($ensure_image_file === true && $this->_validateMedia('image') === false)
 			{
 				throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$image_file_path.'" as the file is not a image file. It is reported to be a '.$type);
 			}

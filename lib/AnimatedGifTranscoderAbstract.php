@@ -21,8 +21,19 @@
 	 * @author Jorrit Schippers
 	 * @package default
 	 */
-	abstract class AnimatedGifTranscoderAbstract
+	abstract class AnimatedGifTranscoderAbstract//implements AnimatedGifTranscoderInterface
 	{
+		protected $_config;
+		protected $_frames;
+		protected $_loop_count;
+		
+		public function __construct(Config $config=null)
+		{
+			$this->_config = $config === null ? Config::getInstance() : $config;
+			$this->_frames = array();
+			$this->_loop_count = AnimatedGif::UNLIMITED_LOOPS;
+		}
+		
 		/**
 		 * Adds a frame to the current timeline.
 		 *
@@ -32,28 +43,57 @@
 		 * @param string $frame_delay 
 		 * @return boolean
 		 */
-		abstract public function addFrame($file_path, $frame_delay);
+		public function addFrame(Image $image)
+		{
+			array_push($this->_frames, $image->getMediaPath());
+			
+			return $this;
+		}
 		
 		/**
-		 * Creates a new animated gif object from a selection of files.
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param string $file_paths 
-		 * @param string $frame_delay 
-		 * @param string $loop_count 
-		 * @return mixed Returns an AnimatedGif object on success, otherwise returns false.
-		 */
-		abstract public static function createFrom($file_paths, $frame_delay, $loop_count);
-		
-		/**
-		 * Expands an animated gif into a list of files.
+		 * Adds a frame to the current timeline.
 		 *
 		 * @access public
 		 * @author Oliver Lillie
 		 * @param string $file_path 
-		 * @param string $to_path 
-		 * @return mixed Returns an array of file paths on success, otherwise false.
+		 * @param string $frame_delay 
+		 * @return boolean
 		 */
-		abstract public static function expand($file_path, $to_path);
+		public function setLoopCount($loop_count)
+		{
+			if($loop_count !== null && $loop_count < -1)
+			{
+				throw new Exception('The loop count cannot be less than -1. (-1 specifies unlimited looping)');
+			}
+			$this->_loop_count = (int) $loop_count;
+			
+			return $this;
+		}
+		
+		/**
+		 * Saves the animated gif.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $save_path
+		 * @param float $frame_delay The delay of each frame.
+		 * @return Image
+		 */
+		public function save($save_path, $frame_delay=0.1)
+		{
+			if(empty($this->_frames) === true)
+			{
+				throw new Exception('At least one frame must be added in order to save an animated gif.');
+			}
+			
+			if($frame_delay < 0.001)
+			{
+				throw new Exception('The frame delay must at least be 0.001.');
+			}
+			
+			if(is_file($save_path) === true)
+			{
+				throw new Exception('The save path "'.$save_path.'" already exists.');
+			}
+		}
 	}

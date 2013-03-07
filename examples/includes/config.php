@@ -8,6 +8,9 @@
 			'ffprobe' => '/opt/local/bin/ffprobe',
 			'yamdi' => '/opt/local/bin/yamdi',
 			'qtfaststart' => '/opt/local/bin/qt-faststart',
+			'gif_transcoder' => 'php',
+			'convert' => '/opt/local/bin/convert',
+			'gifsicle' => '/opt/local/bin/gifsicle',
 		));
 	}
 	catch(\PHPVideoToolkit\Exception $e)

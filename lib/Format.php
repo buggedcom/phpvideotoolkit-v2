@@ -73,6 +73,54 @@
 			
 		}
 		
+		/**
+		 * Gets a default format for the related path.
+		 * If a default format is not found then the fallback_format_class is used.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @package default
+		 * @param $path
+		 * @param $config Config
+		 * @param $fallback_format_class
+		 * @param $type
+		 * @return Format
+		 */
+		public static function getFormatFor($path, $config, $fallback_format_class='Format', $type='output')
+		{
+			if(in_array($type, array('input', 'output')) === false)
+			{
+				throw new Exception('Unrecognised format type "'.$type.'".');
+			}
+			
+			$format = null;
+			$ext = pathinfo($path, PATHINFO_EXTENSION);
+			if(empty($ext) === false)
+			{
+				$format = Extensions::toBestGuessFormat($ext);
+			}
+			
+//			check the requested class exists
+			$class_name = '\\PHPVideoToolkit\\'.$fallback_format_class.(empty($format) === false ? '_'.ucfirst(strtolower($format)) : '');
+			if(class_exists($class_name) === false)
+			{
+				$requested_class_name = $class_name;
+				$class_name = '\\PHPVideoToolkit\\'.$fallback_format_class;
+				if(class_exists($class_name) === false)
+				{
+					throw new Exception('Requested default format class does not exist, "'.($requested_class_name === $class_name ? $class_name : $requested_class_name.'" and "'.$class_name.'"').'".');
+				}
+			}
+			
+//			check that it extends from the base Format class.
+			if($class_name !== '\\PHPVideoToolkit\\Format' && is_subclass_of($class_name, '\\PHPVideoToolkit\\Format') === false)
+			{
+				throw new Exception('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
+			}
+			
+			return new $class_name($type, $config);
+		}
+		
 		protected function _setFilter($format_key, FilterAbstract $filter)
 		{
 			if(isset($this->_format[$format_key]) === false)
@@ -138,7 +186,7 @@
 		 * @author Oliver Lillie
 		 * @return void
 		 */
-		public function updateFormatOptions()
+		public function updateFormatOptions(&$save_path)
 		{
 			if(empty($this->_media_object) === true)
 			{
@@ -279,6 +327,10 @@
 				
 //				get the full command option string
 				$full_command = $this->_format_to_command[$option];
+				if(empty($full_command) === true)
+				{
+					continue;
+				}
 				
 //				if the command is an array, that means it has differing options depending on whether or not
 //				this is an input or output format.

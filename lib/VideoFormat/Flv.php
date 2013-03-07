@@ -64,9 +64,9 @@
 			$this->_enforce_meta_data_success = true;
 		}
 		
-		public function updateFormatOptions()
+		public function updateFormatOptions(&$save_path)
 		{
-			parent::updateFormatOptions();
+			parent::updateFormatOptions($save_path);
 			
 //			ffmpeg moans about audio sample frequencies on videos that aren't one of the following
 //			audio sample rates. 44100, 22050, 11025

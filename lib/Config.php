@@ -33,6 +33,9 @@
 		protected $_yamdi;
 		protected $_temp_directory;
 		protected $_qtfaststart;
+		protected $_gif_transcoder;
+		protected $_gifsicle;
+		protected $_convert;
 
 	    /**
 	     * Get the Instance of self
@@ -65,6 +68,9 @@
 					'yamdi' 		 => null, //'yamdi', // http://yamdi.sourceforge.net/ for flv meta injection
 					'qtfaststart' 	 => null, //'qt-faststart', // https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart for fast streaming of mp4/h264 files.
 					'temp_directory' => sys_get_temp_dir(),
+					'gif_transcoder' => null,
+					'gifsicle' => null,
+					'convert' => null,
 				);
 	        }
 	        $this->setConfig($options);
@@ -104,6 +110,8 @@
 				case 'ffprobe' :
 				case 'yamdi' :
 				case 'qtfaststart' :
+				case 'gifsicle' :
+				case 'convert' :
 				
 					if($value !== null)
 					{
@@ -120,6 +128,17 @@
 						}
 					}
 					
+					$this->{'_'.$key} = $value;
+					
+					return;
+					
+				case 'gif_transcoder' :
+					
+					if(in_array($value, array('gifsicle', 'convert', 'php', null)) === false)
+					{
+						throw new ConfigSetException('Unrecognised gif transcoder engine.');
+					}
+				
 					$this->{'_'.$key} = $value;
 					
 					return;
@@ -164,7 +183,7 @@
 				return $this->{'_'.$key};
 			}
 			
-//			TODO trigger error instead of jsut returning null
+//			TODO trigger error instead of just returning null
 			return null;
 //	        throw new Exception('Call to undefined property: '.$name);
 	    }

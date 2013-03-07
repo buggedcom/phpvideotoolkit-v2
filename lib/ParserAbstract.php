@@ -32,10 +32,6 @@
 		{
 			$this->_config = $config === null ? Config::getInstance() : $config;
 			
-			// TODO remove reliance on these.
-			$this->_program_path = $this->_config->{$program_config_key};
-			$this->_temp_directory = $this->_config->temp_directory;
-			
 			if($this->isAvailable() === false)
 			{
 				throw new Exception('FFmpeg appears to be unavailable on your system.');

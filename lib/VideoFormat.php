@@ -107,9 +107,9 @@
 		 * @author Oliver Lillie
 		 * @return void
 		 */
-		public function updateFormatOptions()
+		public function updateFormatOptions(&$save_path)
 		{
-			parent::updateFormatOptions();
+			parent::updateFormatOptions($save_path);
 			
 //			if we have a rotation and it's set to true then we must autodetect the rotation according to the
 //			meta data available.
@@ -577,7 +577,7 @@
 		 * @param string $pixel_format 
 		 * @return void
 		 */
-		public function setPixelFormat($pixel_format)
+		public function setVideoPixelFormat($pixel_format)
 		{
 			if($pixel_format === null)
 			{
@@ -590,7 +590,7 @@
 			{
 				if(in_array($video_codec, $this->_restricted_video_pixel_formats) === false)
 				{
-					throw new Exception('The video pixel format "'.$pixel_format.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setPixelFormat. Please select one of the following pixel formats: '.implode(', ', $this->_restricted_video_pixel_formats));
+					throw new Exception('The video pixel format "'.$pixel_format.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoPixelFormat. Please select one of the following pixel formats: '.implode(', ', $this->_restricted_video_pixel_formats));
 				}
 			}
 			
@@ -601,7 +601,7 @@
 				return $this;
 			}
 			
-			throw new Exception('Unrecognised pixel format "'.$pixel_format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setPixelFormat');
+			throw new Exception('Unrecognised pixel format "'.$pixel_format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoPixelFormat');
 		}
 		
 		/**

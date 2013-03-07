@@ -55,6 +55,15 @@
 		
 		protected $_process;
 
+		/**
+		 * Constructs a media object.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $media_file_path The file path of a media file.
+		 * @param Config $config A PHPVideoToolkit Config object
+		 * @param Format $input_format An input Format object
+		 */
 		public function __construct($media_file_path, Config $config=null, Format $input_format=null)
 		{
 			parent::__construct($config, 'ffmpeg');
@@ -107,6 +116,20 @@
 			$this->_process = new FfmpegProcessProgressable('ffmpeg', $this->_config);
 		}
 		
+		protected function _validateMedia($media_type)
+		{
+			$type = $this->readType();
+			return $media_type === $type;
+		}
+		
+		/**
+		 * Sets the input Format of the input file.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param Format $input_format 
+		 * @return self
+		 */
 		public function setInputFormat(Format $input_format=null)
 		{
 //			create a default input format if none is set.
@@ -126,8 +149,17 @@
 			{
 				$this->_media_input_format = $input_format;
 			}
+			
+			return $this;
 		}
 		
+		/**
+		 * Returns the input format.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @return Format
+		 */
 		public function getInputFormat()
 		{
 			return $this->_media_input_format;
@@ -150,7 +182,7 @@
 		/**
 		 * Returns a format class set to the specific output/input type.
 		 *
-		 * @access public
+		 * @access protected
 		 * @author Oliver Lillie
 		 * @param string $type Either input for an input format or output for an output format.
 		 * @param string $class_name The class name of the Format instance to return.
@@ -158,6 +190,7 @@
 		 */
 		protected function _getDefaultFormat($type, $default_class_name, $format)
 		{
+			// TODO replace with reference to Format::getFormatFor
 			if(in_array($type, array('input', 'output')) === false)
 			{
 				throw new Exception('Unrecognised format type "'.$type.'".');
@@ -189,7 +222,7 @@
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @return void
+		 * @return string
 		 */
 		public function getMediaPath()
 		{
@@ -201,7 +234,7 @@
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @return void
+		 * @return self
 		 */
 		public function setMediaPath($media_file_path)
 		{
@@ -230,7 +263,7 @@
 		 * @param string $key 
 		 * @param string $value 
 		 * @param boolean $force 
-		 * @return void
+		 * @return self
 		 */
 		public function setMetaData($key, $value=null, $force=false)
 		{
@@ -265,7 +298,7 @@
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @return void
+		 * @return self
 		 */
 		public function purgeMetaData()
 		{
@@ -377,7 +410,7 @@
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @return void
+		 * @return self
 		 */
 		public function split($split_by, $time_delta=0, $output_list_path=null)
 		{
@@ -506,11 +539,11 @@
 		}
 		
 		/**
-		 * Returns the exec buffer object by reference.
+		 * Returns the FfmpegProcess object by reference.
 		 *
 		 * @access public
 		 * @author Oliver Lillie
-		 * @return void
+		 * @return FfmpegProcess
 		 */
 		public function &getProcess()
 		{
@@ -574,8 +607,7 @@
 		 * @access protected
 		 * @author Oliver Lillie
 		 * @param Function $callback 
-		 * @param string $callback_type
-		 * @return void
+		 * @return self
 		 */
 		public function registerOutputPostProcess($callback)
 		{
@@ -587,6 +619,8 @@
 
 //			if a callback has been supplied then the process becomes blocking and must be set.		
 			$this->_blocking = true;
+			
+			return $this;
 		}
 		
 		/**
@@ -705,41 +739,10 @@
 		}
 		
 		/**
-		 * Generates the command sent through to exec to invoke ffmpeg. This can be useful if you
-		 * want to manage the execution of the command yourself, for instance using a transcode queue.
-		 *
-		 * If you need to monitor the output for completion or processing then you can supplied a Processor
-		 * object that will setup monitoring dependant on which processor is supplied.
-	 	 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param Format $output_format 
-		 * @param string $save_path 
-		 * @param string $overwrite 
-		 * @param Processor $processor
-		 * @return string
-		 */
-		public function getExecutionCommand($save_path, Format $output_format=null, $overwrite=self::OVERWRITE_FAIL)
-		{
-//			pre process all of the common functionality and pre process the output format.
-			$this->_savePreProcess($output_format, $save_path, $overwrite);
-			
-//			add the commands from the output format to the exec buffer
-//			NOTE; this cannot be done in _savePreProcess as it must be done after, to ensure all the subclass
-//			_savePreProcess functionality and main media class functionality is properly executed.
-			$this->_saveAddOutputFormatCommands($output_format);
-
-//			generate a processing address within the temp directory
-			$this->_process->setOutputPath($this->_processing_path);
-
-			Trace::vars($this->_process->getExecutableString());
-		}
-		
-		/**
 		 * All three save functions, save, saveNonBlocking and getExecutionCommand have common things they 
 		 * have to do before they are processed. This function contains those execution "warm-up" procedures.
 		 *
-		 * @access public
+		 * @access protected
 		 * @author Oliver Lillie
 		 * @param Format $output_format 
 		 * @param string $save_path 
@@ -844,7 +847,7 @@
 //				insert a unique id into the save path
 		    	case self::OVERWRITE_UNIQUE :
 					$pathinfo = pathinfo($save_path);
-					$save_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-u_'.$this->_generateRandomString().'.'.$pathinfo['extension'];
+					$save_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-u_'.String::generateRandomString().'.'.$pathinfo['extension'];
 					break;
 			}
 			$this->_output_path = 
@@ -962,14 +965,14 @@
 				
 //				add a unique identifier to the processing path to prevent overwrites.
 				$pathinfo = pathinfo($processing_path);
-				$this->_processing_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'._u.'.$this->_generateRandomString().'.u_.'.$pathinfo['extension'];
+				$this->_processing_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'._u.'.String::generateRandomString().'.u_.'.$pathinfo['extension'];
 			}
 		}
 		
 		/**
 		 * Process the output format just before the it is compiled into commands.
 		 *
-		 * @access public
+		 * @access protected
 		 * @author Oliver Lillie
 		 * @param Format &$output_format 
 		 * @return void
@@ -991,9 +994,17 @@
 //			set the media into the format object so that we can update the format options that
 //			require a media object to process.
 			$output_format->setMedia($this)
-						  ->updateFormatOptions();
+						  ->updateFormatOptions($save_path);
 		}
 		
+		/**
+		 * Adds the output format commands from the Format object to the FfmpegProcess
+		 *
+		 * @access protected
+		 * @author Oliver Lillie
+		 * @param Format $output_format 
+		 * @return void
+		 */
 		protected function _saveAddOutputFormatCommands(Format $output_format=null)
 		{
 			if($output_format !== null)
@@ -1004,22 +1015,6 @@
 					$this->_process->addCommands($commands);
 				}
 			}
-		}
-		
-		protected function _generateRandomString()
-		{
-			return (rand(10000, 99999).'_'.$this->_generateRandomAlphaString(5).'_'.time());
-		}
-		
-		protected function _generateRandomAlphaString($length) 
-		{
-		    $characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-		    $randomString = '';
-		    for ($i = 0; $i < $length; $i++)
-			{
-		        $randomString .= $characters[rand(0, strlen($characters) - 1)];
-		    }
-		    return $randomString;
 		}
 		
 //		The below functions override the MediaParser functions so to automatically provide

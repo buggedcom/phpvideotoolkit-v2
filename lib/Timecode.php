@@ -170,7 +170,6 @@
 		{
 			switch($property)
 			{
-				case 'hour' :
 				case 'hours' :
 				
 					$this->_total_seconds += ($value * 60 * 60);
@@ -209,7 +208,7 @@
 				
 					if($this->_frame_rate === null)
 					{
-						throw new Exception('You cannot set '.$var.' because the frame rate has not been set.');
+						throw new Exception('You cannot set '.$property.' because the frame rate has not been set.');
 					}
 					$this->_total_seconds += ($value / $this->_frame_rate);
 					
@@ -217,7 +216,7 @@
 					
 				default: 
 				
-					throw new Exception('You cannot set '.$var.'.');
+					throw new Exception('You cannot set '.$property.'.');
 			}
 			
 			$this->setSeconds($this->_total_seconds);
