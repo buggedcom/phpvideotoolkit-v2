@@ -40,7 +40,6 @@
 		public $last_error_message;
 		public $error_messages;
 		
-		protected $_layers;
 		protected $_extract_segment;
 		protected $_split_options;
 		
@@ -70,7 +69,6 @@
 			$this->last_error_message = null;
 			$this->error_messages = array();
 			
-			$this->_layers = array();
 			$this->_extract_segment = array();
 			$this->_split_options = array();
 			$this->_metadata = array();
@@ -282,25 +280,6 @@
 				}
 			}
 			
-			return $this;
-		}
-		
-		/**
-		 * Adds a media object ontop of the current
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param Media $media 
-		 * @param Format $input_format 
-		 * @param Timecode $timecode_start 
-		 * @param Timecode $timecode_end 
-		 * @param mixed $layer_index If null then the layered media object is added to the top of the list.
-		 *	If an index is given then it is inserted at that index. If a layer already exists at the specified index
-		 *	then the layers above and including the index are all moved up one.
-		 * @return Media
-		 */
-		public function layer(Media $media, Format $input_format=null, Timecode $timecode_start=null, Timecode $timecode_end=null, $layer_index=null)
-		{
 			return $this;
 		}
 		
