@@ -298,11 +298,11 @@
 		 * @access public
 		 * @author Oliver Lillie
 		 * @param Media $media 
-		 * @param Format $input_format 
 		 * @return Media
 		 */
-		public function append(Media $media, Format $input_format=null)
+		public function append(Media $media)
 		{
+			array_push($this->_appends, $media->getMediaPath());
 			return $this;
 		}
 		
@@ -313,11 +313,11 @@
 		 * @access public
 		 * @author Oliver Lillie
 		 * @param Media $media 
-		 * @param Format $input_format 
 		 * @return Media
 		 */
-		public function prepend(Media $media, Format $input_format=null)
+		public function prepend(Media $media)
 		{
+			array_unshift($this->_prepends, $media->getMediaPath());
 			return $this;
 		}
 		
@@ -888,8 +888,26 @@
 				}
 			}
 			
+//			do we have any files to prepend to the main input?
+			if(empty($this->_prepends) === false)
+			{
+				foreach ($this->_prepends as $path)
+				{
+					$this->_process->setInputPath($path);
+				}
+			}
+			
 //			set the input files.
 			$this->_process->setInputPath($this->_media_file_path);
+			
+//			do we have any files to append to the main input?
+			if(empty($this->_appends) === false)
+			{
+				foreach ($this->_appends as $path)
+				{
+					$this->_process->setInputPath($path);
+				}
+			}
 			
 //			process the overwrite status
 			switch($overwrite)
