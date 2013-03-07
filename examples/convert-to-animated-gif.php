@@ -2,6 +2,8 @@
 
 	include_once './includes/bootstrap.php';
 	
+	ini_set('memory_limit', '1024M');
+	
 	function microtime_float()
 	{
 	    list($usec, $sec) = explode(" ", microtime());
@@ -36,10 +38,10 @@
 			}
 		
 			$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
-			$output_format->setVideoFrameRate(5);
+			$output_format->setVideoFrameRate(12);
 		
 	 		$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-			$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+			$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(70))
 							->save($output_path, $output_format);
 			
 			$length = microtime_float()-$start;
