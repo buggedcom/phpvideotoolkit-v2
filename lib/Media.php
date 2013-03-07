@@ -41,8 +41,6 @@
 		public $error_messages;
 		
 		protected $_layers;
-		protected $_prepends;
-		protected $_appends;
 		protected $_extract_segment;
 		protected $_split_options;
 		
@@ -73,8 +71,6 @@
 			$this->error_messages = array();
 			
 			$this->_layers = array();
-			$this->_prepends = array();
-			$this->_appends = array();
 			$this->_extract_segment = array();
 			$this->_split_options = array();
 			$this->_metadata = array();
@@ -286,38 +282,6 @@
 				}
 			}
 			
-			return $this;
-		}
-		
-		// http://ffmpeg.org/faq.html 3.13 for append, prepend and overlay options.
-		
-		/**
-		 * Appends a media item to the current Media object by joining the specified media
-		 * object after this file, ie new Media + this Media.
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param Media $media 
-		 * @return Media
-		 */
-		public function append(Media $media)
-		{
-			array_push($this->_appends, $media->getMediaPath());
-			return $this;
-		}
-		
-		/**
-		 * Prepends a media item to the current Media object by joining the specified media
-		 * object before this file, ie this Media + new Media.
-		 *
-		 * @access public
-		 * @author Oliver Lillie
-		 * @param Media $media 
-		 * @return Media
-		 */
-		public function prepend(Media $media)
-		{
-			array_unshift($this->_prepends, $media->getMediaPath());
 			return $this;
 		}
 		
@@ -888,26 +852,8 @@
 				}
 			}
 			
-//			do we have any files to prepend to the main input?
-			if(empty($this->_prepends) === false)
-			{
-				foreach ($this->_prepends as $path)
-				{
-					$this->_process->setInputPath($path);
-				}
-			}
-			
 //			set the input files.
 			$this->_process->setInputPath($this->_media_file_path);
-			
-//			do we have any files to append to the main input?
-			if(empty($this->_appends) === false)
-			{
-				foreach ($this->_appends as $path)
-				{
-					$this->_process->setInputPath($path);
-				}
-			}
 			
 //			process the overwrite status
 			switch($overwrite)
