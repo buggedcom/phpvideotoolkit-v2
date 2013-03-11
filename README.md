@@ -164,6 +164,91 @@ $output = $video->extractFrames(new Timecode(50), null, 1) // if null then the e
 	   			->save('./output/big_buck_bunny_frame_%timecode.jpg');
 ```
 
+###Extracting an Animated Gif
+Now, FFmpeg's animated gif support is a pile of doggy do do. I can't understand why. However what PHPVideoToolkit does is bypass the native gif exporting of FFmpeg and provide it's own much better alternative.
+
+There are several options available to you when exporting an animated gif. You can use Gifsicle, Imagemagicks convert, or native PHP GD with the symbio/gif-creator composer library.
+
+For high quality, but very slow encoding a combination of Gifsicle with Convert pre processing is suggested, alternatively for a quicker encode but lower quality, you can use native PHP GD or Convert. The examples below show you how to differentiate between the different methods.
+
+Regards to performance. High frame rates greatly impact how fast a high quality encoding completes. It's suggested that if you need a high quality animated gif, that you limit your frame rate to around 5 frames per second.
+
+**High Quality**
+
+*Gifsicle with Imagemagick Convert*
+```php
+namespace PHPVideoToolkit;
+
+$config->convert = '/opt/local/bin/convert';
+$config->gif_transcoder = 'gifsicle';
+
+$output_path = './output/big_buck_bunny.gif';
+
+$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format->setVideoFrameRate(5);
+		
+$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+				->save($output_path, $output_format);
+	   			
+```
+
+**Quick Encoding, but lower quality (still better than FFmpeg mind)**
+
+The examples below are listed in order of performance.
+
+*Imagemagick Convert*
+```php
+namespace PHPVideoToolkit;
+
+$config->gif_transcoder = 'convert';
+
+$output_path = './output/big_buck_bunny.gif';
+
+$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format->setVideoFrameRate(5);
+		
+$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+				->save($output_path, $output_format);
+	   			
+```
+
+*Native PHP GD with symbio/gif-creator library*
+```php
+namespace PHPVideoToolkit;
+
+$config->gif_transcoder = 'php';
+
+$output_path = './output/big_buck_bunny.gif';
+
+$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format->setVideoFrameRate(5);
+		
+$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+				->save($output_path, $output_format);
+	   			
+```
+
+*Gifsicle with native PHP GD*
+```php
+namespace PHPVideoToolkit;
+
+$config->convert = null; // This disables the imagemagick convert path so gifsicle transcoder falls back to GD
+$config->gif_transcoder = 'gifsicle';
+
+$output_path = './output/big_buck_bunny.gif';
+
+$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format->setVideoFrameRate(5);
+		
+$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+				->save($output_path, $output_format);
+	   			
+```
+
 ###Extracting Audio or Video Channels from a Video
 
 ```php
