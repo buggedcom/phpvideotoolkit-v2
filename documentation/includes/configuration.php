@@ -5,6 +5,8 @@
 	define('FFMPEG_PROGRAM', PROGRAM_PATH.DIRECTORY_SEPARATOR.'ffmpeg');
 	define('FFPROBE_PROGRAM', PROGRAM_PATH.DIRECTORY_SEPARATOR.'ffprobe');
 	define('TEMP_PATH', '../examples/tmp');
+	
+	define('BASE', dirname(dirname(dirname(__FILE__))).DIRECTORY_SEPARATOR);
 
 	require_once '../autoloader.php';	
 	require_once '../vendor/autoload.php';
@@ -26,3 +28,6 @@
 		'ffmpeg' => FFMPEG_PROGRAM,
 		'ffprobe' => FFPROBE_PROGRAM,
 	));
+	
+	$example_video_path = BASE.'examples/media/BigBuckBunny_320x180.mp4';
+	$example_audio_path = BASE.'examples/media/Ballad_of_the_Sneak.mp3';

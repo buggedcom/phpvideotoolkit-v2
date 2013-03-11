@@ -89,7 +89,7 @@
 						<li class="divider"></li>
 						<li class="nav-header">Examples</li>
 						<li<?php echo $current_page === 'examples.your-ffmpeg-setup.php' ? ' class="active"' : ''; ?>><a href="./examples.your-ffmpeg-setup.php">Your FFmpeg Setup</a></li>
-						<li<?php echo $current_page === 'examples.export-a-single-frame.ph' ? ' class="active"' : ''; ?>><a href="./examples.export-a-single-frame.php">Export a Single Frame</a></li>
+						<li<?php echo $current_page === 'examples.export-a-single-frame.php' ? ' class="active"' : ''; ?>><a href="./examples.export-a-single-frame.php">Export a Single Frame</a></li>
 						<li<?php echo $current_page === 'examples.export-a-series-of-frames.php' ? ' class="active"' : ''; ?>><a href="./examples.export-a-series-of-frames.php">Export a Series of Frames</a></li>
 						<li<?php echo $current_page === 'examples.export-animated-gif.php' ? ' class="active"' : ''; ?>><a href="./examples.export-animated-gif.php">Export an Animated Gif</a></li>
 						<li<?php echo $current_page === 'examples.extract-a-segment.php' ? ' class="active"' : ''; ?>><a href="./examples.extract-a-segment.php">Extract a Segment</a></li>
@@ -117,6 +117,22 @@
 				<div class="alert alert-error">
 				  	<strong>Configuration Not Configured!</strong> 
 					<p>In order for some of the examples in the documentation to work you need set the configuration options in <?php echo dirname(__FILE__); ?>/configuration.php.</p>
+				</div>
+			</div>
+
+<?php
+
+	}
+	
+	if(is_file($example_video_path) === false)
+	{
+		
+?>
+
+			<div class="span9">
+				<div class="alert alert-error">
+				  	<strong>BigBuckBunny_320x180.mp4 Does not exist</strong> 
+					<p>In order for the supplied examples to work, you need to download a version of the animated short Big Buck Bunny. <a href="http://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_320x180.mp4">You can download the file here.</a> Once downloaded please move or copy the mp4 to the <?php echo HTML(BASE); ?>examples/media directory. This message will then dissapear.</p>
 				</div>
 			</div>
 

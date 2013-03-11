@@ -4,12 +4,11 @@
 	
 	try
 	{
- 		$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+ 		$video = new \PHPVideoToolkit\Video($example_video_path, $config);
 		$output = $video->extractFrames(new \PHPVideoToolkit\Timecode(40), new \PHPVideoToolkit\Timecode(50))
 			   			->save('./output/big_buck_bunny_frame_%timecode.jpg');
 		
-		echo '<hr /><h1>Executed Command</h1>'.($video->getProcess()->getExecutedCommand());
-		echo '<hr /><h1>Buffer Output</h1><pre>'.($video->getProcess()->getBuffer()).'</pre>';
+		// $output is an array of \PHPVideoToolkit\Image objects upon success.
 	}
 	catch(\PHPVideoToolkit\Exception $e)
 	{

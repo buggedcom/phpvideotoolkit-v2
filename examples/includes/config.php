@@ -19,3 +19,7 @@
 		\PHPVideoToolkit\Trace::vars($e);
 		exit;
 	}
+
+	$example_video_path = BASE.'examples/media/BigBuckBunny_320x180.mp4';
+	$example_audio_path = BASE.'examples/media/Ballad_of_the_Sneak.mp3';
+	
