@@ -40,7 +40,7 @@
 			));
 			$this->_format_to_command = array_merge($this->_format_to_command, array(
 				'disable_audio' 			=> '-an',
-				'audio_quality' 			=> '-q:a <setting>',
+				'audio_quality' 			=> '-qscale:a <setting>',
 				'audio_codec' 				=> '-acodec <setting>',
 				'audio_bitrate' 			=> '-ab <setting>',
 				'audio_sample_frequency' 	=> '-ar <setting>',

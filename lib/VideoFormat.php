@@ -79,7 +79,7 @@
 			));
 			$this->_format_to_command = array_merge($this->_format_to_command, array(
 				'disable_video' 			=> '-vn',
-				'video_quality' 			=> '-q:v <setting>',
+				'video_quality' 			=> '-qscale:v <setting>',
 				'video_codec' 				=> '-vcodec <setting>',
 				'video_dimensions' 			=> '-s <width>x<height>',
 				'video_scale' 				=> '-vf scale=<width>:<height>',
