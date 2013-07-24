@@ -49,7 +49,7 @@
 				'threads' => null,
 			);
 			$this->_format_to_command = array(
-				'quality' => '-q <setting>',
+				'quality' => '-qscale <setting>',
 				'format'  => '-f <setting>',
 				'strictness'  => '-strict <setting>',
 				'preset_options_file'  => '-fpre <setting>',
