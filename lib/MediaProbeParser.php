@@ -229,7 +229,7 @@
 						$type = $codec_type;
 					}
 				}
-				if($type === 'video' && strpos(mime_content_type($file_path), 'image/') !== false)
+				if($type === 'video' && strpos(Mime::get($file_path), 'image/') !== false)
 				{
 					$type = 'image';
 				}

@@ -219,7 +219,7 @@
 			if(preg_match('/Stream.*: Video: .*/', $raw_data, $matches) > 0)
 			{
 //				special check to see if the file is actually an image and not a video.
-				if(strpos(mime_content_type($file_path), 'image/') !== false)
+				if(strpos(Mime::get($file_path), 'image/') !== false)
 				{
 					$data = 'image';
 				}
