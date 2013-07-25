@@ -60,20 +60,17 @@
 	     */
 	    public function __construct(array $options=array())
 	    {
-	        if(empty($options) === true)
-			{
-	            $options = array(
-					'ffmpeg' 		 => 'ffmpeg',
-					'ffprobe' 		 => 'ffprobe',
-					'yamdi' 		 => null, //'yamdi', // http://yamdi.sourceforge.net/ for flv meta injection
-					'qtfaststart' 	 => null, //'qt-faststart', // https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart for fast streaming of mp4/h264 files.
-					'temp_directory' => sys_get_temp_dir(),
-					'gif_transcoder' => null,
-					'gifsicle' => null,
-					'convert' => null,
-				);
-	        }
-	        $this->setConfig($options);
+			$default_options = array(
+				'ffmpeg' 		 => 'ffmpeg',
+				'ffprobe' 		 => 'ffprobe',
+				'yamdi' 		 => null, //'yamdi', // http://yamdi.sourceforge.net/ for flv meta injection
+				'qtfaststart' 	 => null, //'qt-faststart', // https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart for fast streaming of mp4/h264 files.
+				'temp_directory' => sys_get_temp_dir(),
+				'gif_transcoder' => null,
+				'gifsicle' => null,
+				'convert' => null,
+			);
+	        $this->setConfig(array_merge($default_options, $options));
 	    }
 
 	    /**
