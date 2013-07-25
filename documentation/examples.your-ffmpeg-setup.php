@@ -15,7 +15,7 @@
           
 <?php
     
-	$ffmpeg_parser = null;
+    $ffmpeg_parser = null;
     $is_available = false;
     $ffmpeg_version = false;
     if(PROGRAM_PATH !== null)
@@ -31,9 +31,9 @@
           <pre class="prettyprint"><code>&lt;?php
               
   $config = new \PHPVideoToolkit\Config(array(
-	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
-	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
-	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
   ));
               
   $parser = new \PHPVideoToolkit\FfmpegParser($config);
@@ -43,8 +43,8 @@
 </code></pre>
           
         </div><!--/span-->
-		
-		<hr />
+        
+        <hr />
         
 <?php
     
@@ -69,17 +69,17 @@
 ?>      
         <div class="span9 pull-right">
           <h4>Do you have FFmpeg-PHP support?</h4>
-		  
+          
               <div class="alert">
                   <strong>FFmpeg-PHP is no longer maintained</strong> 
                   <p>FFmpeg-PHP is no longer being maintained by the authors. There are several forks of the project, which you can find with a quick search on Google, however we recommend that you use PHPVideoToolkits emulation of FFmpeg-PHP instead.</p>
               </div>
           
-		  <p>To learn more about what FFmpeg-PHP is please read the <a href="http://ffmpeg-php.sourceforge.net/">FFmpeg-PHP documentation</a>.</p>
+          <p>To learn more about what FFmpeg-PHP is please read the <a href="http://ffmpeg-php.sourceforge.net/">FFmpeg-PHP documentation</a>.</p>
           
 <?php
     
-		$has_ffmpeg_support = $ffmpeg_parser->hasFfmpegPhpSupport();
+        $has_ffmpeg_support = $ffmpeg_parser->hasFfmpegPhpSupport();
     
 ?>
           
@@ -87,9 +87,9 @@
           <pre class="prettyprint"><code>&lt;?php
               
   $config = new \PHPVideoToolkit\Config(array(
-	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
-	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
-	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
   ));
               
   $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
@@ -144,17 +144,17 @@
           
 <?php
     
-	    $ffmpeg_commands = $ffmpeg_parser->getCommands(true);
-		ksort($ffmpeg_commands);
+        $ffmpeg_commands = $ffmpeg_parser->getCommands(true);
+        ksort($ffmpeg_commands);
     
 ?>
           
             <pre class="prettyprint"><code>&lt;?php
               
   $config = new \PHPVideoToolkit\Config(array(
-	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
-	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
-	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
   ));
               
   $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
@@ -193,8 +193,8 @@
         
         <div class="span9 pull-right">
           <h4>What formats can you decode/encode?</h4>
-		  
-		  <p>To understand more about formats please read the <a href="http://ffmpeg.org/ffmpeg-formats.html">FFmpeg documentation</a>.</p>
+          
+          <p>To understand more about formats please read the <a href="http://ffmpeg.org/ffmpeg-formats.html">FFmpeg documentation</a>.</p>
           
 <?php
     
@@ -206,9 +206,9 @@
             <pre class="prettyprint"><code>&lt;?php
               
   $config = new \PHPVideoToolkit\Config(array(
-	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
-	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
-	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
    ));
 
   $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
@@ -248,8 +248,8 @@
         
         <div class="span9 pull-right">
           <h4>Which codecs are available to you?</h4>
-		  
-		  <p>To understand more about codecs please read the <a href="http://ffmpeg.org/ffmpeg-codecs.html">FFmpeg documentation</a>.</p>
+          
+          <p>To understand more about codecs please read the <a href="http://ffmpeg.org/ffmpeg-codecs.html">FFmpeg documentation</a>.</p>
           
 <?php
     
@@ -260,9 +260,9 @@
         <pre class="prettyprint"><code>&lt;?php
               
   $config = new \PHPVideoToolkit\Config(array(
-	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
-	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
-	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
   ));
               
   $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
@@ -312,15 +312,15 @@
         
         <div class="span9 pull-right">
           <h4>Available bitstream filters</h4>
-		  
-		  <p>To understand more about bitstream filters please read the <a href="http://ffmpeg.org/ffmpeg-bitstream-filters.html">FFmpeg documentation</a>.</p>
+          
+          <p>To understand more about bitstream filters please read the <a href="http://ffmpeg.org/ffmpeg-bitstream-filters.html">FFmpeg documentation</a>.</p>
           
 <?php
     
-		$ffmpeg_bitstream_filters = $ffmpeg_parser->getBitstreamFilters();
-		sort($ffmpeg_bitstream_filters);
+        $ffmpeg_bitstream_filters = $ffmpeg_parser->getBitstreamFilters();
+        sort($ffmpeg_bitstream_filters);
     
-	//\PHPVideoToolkit\Trace::vars($ffmpeg_bitstream_filters);
+    //\PHPVideoToolkit\Trace::vars($ffmpeg_bitstream_filters);
     
 ?>
           
@@ -357,15 +357,15 @@
         
         <div class="span9 pull-right">
           <h4>Available Filters</h4>
-		  
-		  <p>To understand more about filters please read the <a href="http://ffmpeg.org/ffmpeg-filters.html">FFmpeg documentation</a>.</p>
+          
+          <p>To understand more about filters please read the <a href="http://ffmpeg.org/ffmpeg-filters.html">FFmpeg documentation</a>.</p>
           
 <?php
     
-		$ffmpeg_filters = $ffmpeg_parser->getFilters(false);
-		ksort($ffmpeg_filters);
+        $ffmpeg_filters = $ffmpeg_parser->getFilters(false);
+        ksort($ffmpeg_filters);
     
-	//\PHPVideoToolkit\Trace::vars($ffmpeg_filters);exit;
+    //\PHPVideoToolkit\Trace::vars($ffmpeg_filters);exit;
     
 ?>
           
@@ -414,24 +414,24 @@
         
         <div class="span9 pull-right">
           <h4>Protocols that FFmpeg supports</h4>
-		 
-		  <p>To understand more about the protocols that FFmpeg can use please read the <a href="http://ffmpeg.org/ffmpeg-protocols.html">FFmpeg documentation</a>.</p>
+         
+          <p>To understand more about the protocols that FFmpeg can use please read the <a href="http://ffmpeg.org/ffmpeg-protocols.html">FFmpeg documentation</a>.</p>
           
 <?php
     
-		$ffmpeg_protocols = $ffmpeg_parser->getProtocols();
-		ksort($ffmpeg_protocols);
+        $ffmpeg_protocols = $ffmpeg_parser->getProtocols();
+        ksort($ffmpeg_protocols);
     
-	//\PHPVideoToolkit\Trace::vars($ffmpeg_protocols);exit;
+    //\PHPVideoToolkit\Trace::vars($ffmpeg_protocols);exit;
     
 ?>
           
           <pre class="prettyprint"><code>&lt;?php
               
   $config = new \PHPVideoToolkit\Config(array(
-	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
-	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
-	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
   ));
               
   $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);
@@ -466,24 +466,24 @@
         
         <div class="span9 pull-right">
           <h4>Pixel formats that FFmpeg supports</h4>
-		 
-		  <p>To understand more about the pixel formats that FFmpeg supports please read the <a href="http://ffmpeg.org/ffmpeg.html">FFmpeg documentation</a>.</p>
+         
+          <p>To understand more about the pixel formats that FFmpeg supports please read the <a href="http://ffmpeg.org/ffmpeg.html">FFmpeg documentation</a>.</p>
           
 <?php
     
-		$ffmpeg_pixel_formats = $ffmpeg_parser->getPixelFormats();
-		ksort($ffmpeg_pixel_formats);
+        $ffmpeg_pixel_formats = $ffmpeg_parser->getPixelFormats();
+        ksort($ffmpeg_pixel_formats);
     
-	//\PHPVideoToolkit\Trace::vars($ffmpeg_pixel_formats);exit;
+    //\PHPVideoToolkit\Trace::vars($ffmpeg_pixel_formats);exit;
     
 ?>
           
           <pre class="prettyprint"><code>&lt;?php
               
   $config = new \PHPVideoToolkit\Config(array(
-	'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
-	'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
-	'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
+    'temp_directory' => '<?php echo addslashes(HTML(TEMP_PATH)); ?>', 
+    'ffmpeg' => '<?php echo addslashes(HTML(FFMPEG_PROGRAM)); ?>', 
+    'ffprobe' => '<?php echo addslashes(HTML(FFPROBE_PROGRAM)); ?>',
   ));
               
   $ffmpeg = new \PHPVideoToolkit\FfmpegParser($config);

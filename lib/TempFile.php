@@ -1,18 +1,18 @@
 <?php
 
-	/**
-	 * This file is part of the PHP Video Toolkit v2 package.
-	 *
-	 * @author Oliver Lillie (aka buggedcom) <publicmail@buggedcom.co.uk>
-	 * @license Dual licensed under MIT and GPLv2
-	 * @copyright Copyright (c) 2008 Oliver Lillie <http://www.buggedcom.co.uk>
-	 * @package PHPVideoToolkit V2
-	 * @version 2.0.0.a
-	 * @uses ffmpeg http://ffmpeg.sourceforge.net/
-	 */
-	 
-	namespace PHPVideoToolkit;
-	 
+    /**
+     * This file is part of the PHP Video Toolkit v2 package.
+     *
+     * @author Oliver Lillie (aka buggedcom) <publicmail@buggedcom.co.uk>
+     * @license Dual licensed under MIT and GPLv2
+     * @copyright Copyright (c) 2008 Oliver Lillie <http://www.buggedcom.co.uk>
+     * @package PHPVideoToolkit V2
+     * @version 2.0.0.a
+     * @uses ffmpeg http://ffmpeg.sourceforge.net/
+     */
+     
+    namespace PHPVideoToolkit;
+     
     class TempFile
     {
         protected $_delete_temp_registered = false; 
@@ -20,29 +20,29 @@
         protected $_sid; 
         protected $_temp_directory; 
         protected $_time; 
-		
+        
         public $clean = true; 
-		
-		public function __construct($temp_directory, $id=null)
-		{
-			if(is_dir($temp_directory) === false)
-			{
-				throw new Exception('The temp directory does not exist or is not a directory.');
-			}
-			else if(is_readable($temp_directory) === false)
-			{
-				throw new Exception('The temp directory is not readable.');
-			}
-			else if(is_writable($temp_directory) === false)
-			{
-				throw new Exception('The temp directory is not writeable.');
-			}
-			$this->_temp_directory = $temp_directory;
-			
-			$this->_time = time();
-			
-			$this->_sid = uniqid((empty($id) === false ? $id.'_' : '').md5(__FILE__).'_');
-		}
+        
+        public function __construct($temp_directory, $id=null)
+        {
+            if(is_dir($temp_directory) === false)
+            {
+                throw new Exception('The temp directory does not exist or is not a directory.');
+            }
+            else if(is_readable($temp_directory) === false)
+            {
+                throw new Exception('The temp directory is not readable.');
+            }
+            else if(is_writable($temp_directory) === false)
+            {
+                throw new Exception('The temp directory is not writeable.');
+            }
+            $this->_temp_directory = $temp_directory;
+            
+            $this->_time = time();
+            
+            $this->_sid = uniqid((empty($id) === false ? $id.'_' : '').md5(__FILE__).'_');
+        }
         
         /**
          * Is actually a private function as is registered to cleanup any temp files
