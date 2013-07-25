@@ -289,7 +289,7 @@
 //				get the media class from the output.
 //				create the object from the class name and return the new object.
 				$media_class = $this->_findMediaClass($output_path);
-				$output = new $media_class($output, $this->_config, null, false);
+				$output = new $media_class($output_path, $this->_config, null, false);
 			}
 				
 //			do any post processing callbacks
