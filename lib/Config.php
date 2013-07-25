@@ -36,6 +36,7 @@
 		protected $_gif_transcoder;
 		protected $_gifsicle;
 		protected $_convert;
+		protected $_php_exec_infinite_timelimit;
 
 	    /**
 	     * Get the Instance of self
@@ -67,8 +68,9 @@
 				'qtfaststart' 	 => null, //'qt-faststart', // https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart for fast streaming of mp4/h264 files.
 				'temp_directory' => sys_get_temp_dir(),
 				'gif_transcoder' => null,
-				'gifsicle' => null,
-				'convert' => null,
+				'gifsicle' 		 => null,
+				'convert' 		 => null,
+				'php_exec_infinite_timelimit' => true,
 			);
 	        $this->setConfig(array_merge($default_options, $options));
 	    }
@@ -134,6 +136,17 @@
 					if(in_array($value, array('gifsicle', 'convert', 'php', null)) === false)
 					{
 						throw new ConfigSetException('Unrecognised gif transcoder engine.');
+					}
+				
+					$this->{'_'.$key} = $value;
+					
+					return;
+					
+				case 'php_exec_infinite_timelimit' :
+					
+					if(in_array($value, array(true, false)) === false)
+					{
+						throw new ConfigSetException('Unrecognised php_infinite_timelimit value. It must be a boolean value, either true or false.');
 					}
 				
 					$this->{'_'.$key} = $value;

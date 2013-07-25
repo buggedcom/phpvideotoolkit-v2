@@ -42,6 +42,8 @@
 		protected $_completion_boundary;
 		protected $_error_code_boundary;
 		
+		protected $_php_exec_infinite_timelimit;
+		
 		protected $_tmp_files;
 		
 		const DEV_NULL = '/dev/null';
@@ -49,7 +51,7 @@
 
 		protected static $_is_windows = null;
 		
-		public function __construct($exec_command_string, $temp_directory=null)
+		public function __construct($exec_command_string, $temp_directory=null, $php_exec_infinite_timelimit=true)
 		{
 			if(self::$_is_windows === null)
 			{
@@ -68,6 +70,8 @@
 			$this->_start_time = null;
 			$this->_end_time = null;
 			$this->_callback_period_interval = 1;
+			
+			$this->_php_exec_infinite_timelimit = $php_exec_infinite_timelimit;
 			
 			$this->_tmp_files = array();
 			
@@ -143,12 +147,25 @@
 //			get the execution string
 			$this->_executed_command = $this->getExecString();
 
+//			prevent the script timing out if the configuration allows.
+			$previous_time_limit = ini_get('max_execution_time');
+			if($this->_php_exec_infinite_timelimit === true)
+			{
+				set_time_limit(0);
+			}
+
 //			do the execution.
 			$this->_running = true;
 			$this->_start_time = time()+microtime();
 			exec($this->_executed_command, $buffer, $err); // note error cannot be replied upon because of the output options.
 			$buffer = implode(PHP_EOL, $buffer);
 			$this->_error_code = $err;
+			
+//			reset the timelimit if required
+			if($previous_time_limit > 0 && $this->_php_exec_infinite_timelimit === true)
+			{
+				set_time_limit($previous_time_limit);
+			}
 			
 //			do we need to process output buffer
 			if(empty($this->_output) === false)

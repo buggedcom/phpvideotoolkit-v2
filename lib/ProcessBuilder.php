@@ -140,7 +140,7 @@
 		 */
 	    public function getExecBuffer()
 	    {
-	        $exec = new ExecBuffer($this->getCommandString(), $this->_config->temp_directory);
+	        $exec = new ExecBuffer($this->getCommandString(), $this->_config->temp_directory, $this->_config->php_exec_infinite_timelimit);
 			return $exec;
 	    }
 	}

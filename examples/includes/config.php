@@ -3,14 +3,15 @@
 	try
 	{
 		$config = new \PHPVideoToolkit\Config(array(
-			'temp_directory' => './tmp',
-			'ffmpeg' => '/opt/local/bin/ffmpeg',
-			'ffprobe' => '/opt/local/bin/ffprobe',
-			'yamdi' => '/opt/local/bin/yamdi',
-			'qtfaststart' => '/opt/local/bin/qt-faststart',
-			'gif_transcoder' => 'php',
-			'convert' => '/opt/local/bin/convert',
-			'gifsicle' => '/opt/local/bin/gifsicle',
+			'temp_directory' 			  => './tmp',
+			'ffmpeg' 					  => '/opt/local/bin/ffmpeg',
+			'ffprobe' 					  => '/opt/local/bin/ffprobe',
+			'yamdi' 					  => '/opt/local/bin/yamdi',
+			'qtfaststart' 				  => '/opt/local/bin/qt-faststart',
+			'gif_transcoder' 			  => 'php',
+			'convert' 					  => '/opt/local/bin/convert',
+			'gifsicle' 					  => '/opt/local/bin/gifsicle',
+			'php_exec_infinite_timelimit' => true,
 		));
 	}
 	catch(\PHPVideoToolkit\Exception $e)
