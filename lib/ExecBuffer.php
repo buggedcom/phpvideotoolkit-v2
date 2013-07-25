@@ -285,7 +285,7 @@
 		 */
 		public function getBuffer()
 		{
-			return rtrim(preg_replace(array('/'.$this->_failure_boundary.'/', '/'.$this->_completion_boundary.'/', '/'.$this->_error_code_boundary.'([0-9]+)/'), '', $this->getRawBuffer()));
+			return rtrim(preg_replace(array('/'.$this->_failure_boundary.'/', '/'.$this->_completion_boundary.'/', '/'.$this->_error_code_boundary.(self::$_is_windows === false ? '([0-9]+)' : '').'/'), '', $this->getRawBuffer()));
 		}
 		
 		/**
