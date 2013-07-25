@@ -46,9 +46,16 @@
 		
 		const DEV_NULL = '/dev/null';
 		const TEMP = -1;
+
+		protected static $_is_windows = null;
 		
 		public function __construct($exec_command_string, $temp_directory=null)
 		{
+			if(self::$_is_windows === null)
+			{
+				self::$_is_windows = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN';
+			}
+
 			$this->setTempDirectory($temp_directory);
 			
 			$this->_failure_tracking = true;
@@ -446,16 +453,29 @@
 			if($this->_failure_tracking === true)
 			{
 				$completion_boundary_open = '((';
-				$completion_boundary_close = ' && echo '.escapeshellarg($this->_completion_boundary).') || echo '.escapeshellarg($this->_failure_boundary).' '.escapeshellarg($this->_completion_boundary).' '.escapeshellarg($this->_error_code_boundary).'$?) 2>&1';
+				$completion_boundary_close = ' && echo '.$this->_escapeBoundaryInEcho($this->_completion_boundary).') || echo '.$this->_escapeBoundaryInEcho($this->_failure_boundary).' '.$this->_escapeBoundaryInEcho($this->_completion_boundary).' '.$this->_escapeBoundaryInEcho($this->_error_code_boundary).(self::$_is_windows === false ? '$?' : '').') 2>&1';
 			}
 			else
 			{
 				$completion_boundary_open = '(';
-				$completion_boundary_close = ' && echo '.escapeshellarg($this->_completion_boundary).') 2>&1';
+				$completion_boundary_close = ' && echo '.$this->_escapeBoundaryInEcho($this->_completion_boundary).') 2>&1';
 			}
 			
 //			compile the final command and track
 			return $completion_boundary_open.$command_string.$completion_boundary_close.$output.$buffer_divert;
+		}
+
+		/**
+		 * Escapes the boundaries, based on OS.
+		 *
+		 * @access public
+		 * @author Oliver Lillie
+		 * @param string $string 
+		 * @return string
+		 */
+		protected function _escapeBoundaryInEcho($boundary)
+		{
+			return self::$_is_windows === true ? str_replace(array('<', '>'), array('^<', '^>'), $boundary) : escapeshellarg($boundary);
 		}
 		
 		/**
