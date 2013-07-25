@@ -4,7 +4,7 @@
 	
 	try
 	{
- 		$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+ 		$video = new \PHPVideoToolkit\Video($example_video_path, $config);
 		$process = $video->getProcess();
 	//	$process->setProcessTimelimit(1);
 		$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))

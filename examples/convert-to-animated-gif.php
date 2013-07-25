@@ -40,7 +40,7 @@
 			$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
 			$output_format->setVideoFrameRate(12);
 		
-	 		$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+	 		$video = new \PHPVideoToolkit\Video($example_video_path, $config);
 			$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(70))
 							->save($output_path, $output_format);
 			

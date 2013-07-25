@@ -4,7 +4,7 @@ include_once './includes/bootstrap.php';
 	
 	try
 	{
- 		$audio = new \PHPVideoToolkit\Audio('media/Ballad_of_the_Sneak.mp3', $config);
+ 		$audio = new \PHPVideoToolkit\Audio($example_audio_path, $config);
 		$process = $audio->getProcess();
 		$output = $audio->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
 						->save('./output/test-'.time().'.mp3');
