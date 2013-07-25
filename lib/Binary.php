@@ -35,7 +35,7 @@
 	     * @author Stig Bakken <ssb@php.net>
 	     * @author Oliver Lillie
 	     */
-	    public static function locate($program)
+	    public static function locate($program, $fallback=null)
 	    {
 // 			enforce API
 	        if(is_string($program) === false || empty($program) === true)
