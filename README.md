@@ -296,6 +296,38 @@ $output = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
 	   			->save('./output/big_buck_bunny.mp4');
 ```
+###Changing Codecs of the audio or video stream
+
+By default PHPVideoToolkit uses the file extension of the output file to automatically generate the required ffmpeg settings (if any) of your desired file format. However if you want to specify different codecs or settings, it is nessicary to specify them within an output format container. There are three different format objects you can use, depending on the format of your output. They are AudioFormat, VideoFormat and ImageFormat.
+
+Note; the examples below are for demonstration purposes only and _may not work_.
+
+*Changing the audio and video codecs of an outputted video*
+```php
+namespace PHPVideoToolkit;
+
+$output_path = './output/big_buck_bunny.mpeg';
+
+$output_format = new VideoFormat('output', $config);
+$output_format->setAudioCodec('acc')
+			  ->setVideoCodec('ogg');
+
+$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->save($output_path, $output_format);
+
+*Changing the audio codec of an audio export*
+```php
+namespace PHPVideoToolkit;
+
+$output_path = './output/big_buck_bunny.mp3';
+
+$output_format = new AudioFormat('output', $config);
+$output_format->setAudioCodec('acc');
+
+$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->save($output_path, $output_format);
+
+```
 ###Non-Blocking Saves
 
 The default/main save() function blocks PHP untill the encoding process has completed. This means that depending on the size of the media you are encoding it could leave your script running for a long time. To combat this you can call saveNonBlocking() to start the encoding process without blocking PHP.
