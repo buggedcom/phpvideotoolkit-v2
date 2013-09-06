@@ -1,3 +1,4 @@
 .DS_Store
 examples/media/BigBuckBunny_320x180.mp4
 documentation/includes/configuration.php
+vendor
