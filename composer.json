@@ -20,8 +20,8 @@
     },
     "autoload": {
         "psr-0": {
-            "PHPVideoToolkit": "lib/",
-            "FFmpeg-PHP": "emulators/ffmpeg-php/"
+            "PHPVideoToolkit\\": "src/",
+            "FFmpeg-PHP\\": "emulators/ffmpeg-php/"
         }
     }
 }
