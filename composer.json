@@ -12,7 +12,7 @@
 	],
     "require": {
         "php": ">=5.3.0",
-        "sybio/gif-creator": "dev-master"
+        "sybio/gif-creator": "1.0.0"
     },
     "suggest": {
         "tedivm/stash": "Stash is required to utilise PHPVideoToolkits Default Cache class 'Cache_Stash', however you can build your own caching classes so that Stash is not required.",
