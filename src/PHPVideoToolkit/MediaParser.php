@@ -52,6 +52,7 @@
             $data = array(
                 'path'      => $file_path,
                 'type'      => $this->getFileType($file_path, $read_from_cache),
+                'container' => $this->getFileContainerFormat($file_path, $read_from_cache),
                 'duration'  => $this->getFileDuration($file_path, $read_from_cache),
                 'bitrate'   => $this->getFileBitrate($file_path, $read_from_cache),
                 'start'     => $this->getFileStart($file_path, $read_from_cache),
@@ -658,5 +659,36 @@
             
             $this->_cacheSet($cache_key, $raw_data);
             return $raw_data;
+        }
+
+        /**
+         * Returns the container-format.
+         *
+         * @author Andreas Heigl
+         * @param string $file_path
+         * @param boolean $read_from_cache
+         *
+         * @return string
+         */
+        public function getFileContainerFormat($file_path, $read_from_cache=true)
+        {
+            $cache_key = 'media_parser/'.md5(realpath($file_path)).'_container_format';
+            if($read_from_cache === true && ($data = $this->_cacheGet($cache_key)))
+            {
+                return $data;
+            }
+
+//          get the raw data
+            $raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
+
+//          match the audio stream info
+            $data = false;
+            if(preg_match('/Input #0, ([^\s]+), from/', $raw_data, $matches) > 0)
+            {
+                $data = true;
+            }
+
+            $this->_cacheSet($cache_key, $data);
+            return $data;
         }
     }
