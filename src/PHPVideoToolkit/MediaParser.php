@@ -372,13 +372,13 @@
                 $data['pixel_format'] = $formats[1];
                 
 //              get the codec details
-                if(preg_match('/([^\s]+)\s+(\([^\)]+\)\s+)?\(([^\s]+)\s\/\s([^\s]+)\)/', $formats[0], $codec_matches) > 0)
+                if(preg_match('/([^\s]+)(\s+\([^\)]+\))?(\s+\(([^\s]+)\s\/\s([^\s]+)\))?/', $formats[0], $codec_matches) > 0)
                 {
                     $data['codec'] = array(
                         'name'      => $codec_matches[1],
                         'profile'   => substr($codec_matches[2], 1, -2),
-                        'tag_string'=> $codec_matches[3],
-                        'tag'       => $codec_matches[4],
+                        'tag_string'=> $codec_matches[4],
+                        'tag'       => $codec_matches[5],
                         'raw'       => $codec_matches[0],
                     );
                 }
@@ -507,13 +507,13 @@
                         array_push($formats, $part);
                     }
                 }
-                if(preg_match('/([^\s]+)\s+(\([^\)]+\)\s+)?\(([^\s]+)\s\/\s([^\s]+)\)/', $formats[0], $codec_matches) > 0)
+                if(preg_match('/([^\s]+)(\s+\([^\)]+\))?(\s+\(([^\s]+)\s\/\s([^\s]+)\))?/', $formats[0], $codec_matches) > 0)
                 {
                     $data['codec'] = array(
                         'name'      => $codec_matches[1],
                         'profile'   => substr($codec_matches[2], 1, -2),
-                        'tag_string'=> $codec_matches[3],
-                        'tag'       => $codec_matches[4],
+                        'tag_string'=> $codec_matches[4],
+                        'tag'       => $codec_matches[5],
                         'raw'       => $codec_matches[0],
                     );
                 }
