@@ -682,10 +682,10 @@
             $raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
 
 //          match the audio stream info
-            $data = false;
+            $data = '';
             if(preg_match('/Input #0, ([^\s]+), from/', $raw_data, $matches) > 0)
             {
-                $data = true;
+                $data = $matches[1];
             }
 
             $this->_cacheSet($cache_key, $data);
