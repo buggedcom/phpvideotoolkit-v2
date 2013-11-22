@@ -1,3 +1,6 @@
+#[2.0.0] [22.11.2013]
+        - Fixed various bugs
+
 #[2.0.0] [25.03.2013]
         - Updated codebase to v2. Main repo is now on github https://github.com/buggedcom/phpvideotoolkit-v2
 
