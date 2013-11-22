@@ -648,7 +648,7 @@
 //          check the process for any errors.
             if($exec->hasError() === true && ($last_line = $exec->getLastLine()) !== 'At least one output file must be specified')
             {
-                throw new FfmpegProcessException('FFmpeg encountered an error when attempting to read `'.$file_path.'`. FFmpeg reported: '.$last_line, null, $exec);
+                throw new FfmpegProcessException('FFmpeg encountered an error when attempting to read `'.$file_path.'`. FFmpeg reported: '.$raw_data, null, $exec);
             }
 
 //          check that some data has been obtained
