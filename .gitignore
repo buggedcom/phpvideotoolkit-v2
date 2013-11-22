@@ -3,4 +3,5 @@ examples/media/BigBuckBunny_320x180.mp4
 documentation/includes/configuration.php
 vendor
 *.sql.gz
+examples/output/*
 examples/tmp/*
