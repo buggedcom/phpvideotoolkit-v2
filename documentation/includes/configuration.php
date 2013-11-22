@@ -9,7 +9,7 @@
     define('BASE', dirname(dirname(dirname(__FILE__))).DIRECTORY_SEPARATOR);
 
     require_once '../autoloader.php';   
-    require_once '../vendor/autoload.php';
+    if(is_file('../vendor/autoload.php')) require_once '../vendor/autoload.php';
 
 //  define the error callback
     function __errorHandler()
