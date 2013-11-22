@@ -39,6 +39,7 @@
             parent::save($save_path, $frame_delay);
             
 //          build the gif creator process
+            require_once dirname(dirname(dirname(__FILE__))).'/vendor/sybio/gif-creator/src/GifCreator/GifCreator.php';
             $gc = new \GifCreator\GifCreator();
             
 //          add in all the frames
@@ -62,6 +63,6 @@
         
         public static function available(Config $config)
         {
-            return function_exists('imagegif') && is_file(dirname(dirname(__FILE__)).'/vendor/sybio/gif-creator/src/GifCreator/GifCreator.php');
+            return function_exists('imagegif') && is_file(dirname(dirname(dirname(__FILE__))).'/vendor/sybio/gif-creator/src/GifCreator/GifCreator.php');
         }
     }
