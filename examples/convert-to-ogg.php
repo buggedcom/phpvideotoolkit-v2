@@ -17,7 +17,9 @@
         \PHPVideoToolkit\Trace::vars($process->getMessages());
         echo '<hr /><h1>Buffer Output</h1>';
         \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
-        
+        echo '<hr /><h1>Resulting Output</h1>';
+        \PHPVideoToolkit\Trace::vars($output->getOutput()->getMediaPath());
+
     }
     catch(\PHPVideoToolkit\FfmpegProcessOutputException $e)
     {

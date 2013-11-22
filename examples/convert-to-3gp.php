@@ -8,7 +8,7 @@
         $process = $video->getProcess();
     //  $process->setProcessTimelimit(1);
         $output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
-                        ->save('./output/big_buck_bunny.3gp');
+                        ->save('./output/big_buck_bunny.3gp', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
         
         
         echo '<h1>Executed Command</h1>';
@@ -17,7 +17,9 @@
         \PHPVideoToolkit\Trace::vars($process->getMessages());
         echo '<hr /><h1>Buffer Output</h1>';
         \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
-        
+        echo '<hr /><h1>Resulting Output</h1>';
+        \PHPVideoToolkit\Trace::vars($output->getOutput()->getMediaPath());
+
     }
     catch(\PHPVideoToolkit\FfmpegProcessOutputException $e)
     {
