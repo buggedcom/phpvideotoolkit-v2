@@ -39,7 +39,7 @@
             return $this->process;
         }
         
-        final public function getExecBuffer()
+        final public function &getExecBuffer()
         {
             return $this->exec;
         }
