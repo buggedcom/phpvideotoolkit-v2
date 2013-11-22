@@ -17,7 +17,8 @@
     
     $basedir = dirname(dirname(dirname(__FILE__))).DIRECTORY_SEPARATOR;
     define('BASE', $basedir);
+ 
+    if(is_file(BASE.'vendor/autoload.php')) require_once BASE.'vendor/autoload.php';
     
-    require_once BASE.'vendor/autoload.php';
     require_once BASE.'autoloader.php';
     require_once BASE.'examples/includes/config.php';
