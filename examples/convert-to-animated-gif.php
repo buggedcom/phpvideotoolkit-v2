@@ -56,6 +56,8 @@
     catch(\PHPVideoToolkit\FfmpegProcessOutputException $e)
     {
         echo '<h1>Error</h1>';
+        \PHPVideoToolkit\Trace::vars($e->getMessage());
+        echo '<h2>\PHPVideoToolkit\FfmpegProcessOutputException</h2>';
         \PHPVideoToolkit\Trace::vars($e);
 
         $process = $video->getProcess();
@@ -72,5 +74,7 @@
     catch(\PHPVideoToolkit\Exception $e)
     {
         echo '<h1>Error</h1>';
+        \PHPVideoToolkit\Trace::vars($e->getMessage());
+        echo '<h2>\PHPVideoToolkit\Exception</h2>';
         \PHPVideoToolkit\Trace::vars($e);
     }
