@@ -37,6 +37,35 @@
         }
         
         /**
+         * Returns a PHP GD resource of the image.
+         *
+         * @return GD resource
+         * @author Oliver Lillie
+         */
+        public function toGdImage()
+        {
+            return imagecreatefromstring($this->getMediaPath());
+        }
+        
+        /**
+         * Returns the binary data for the image.
+         *
+         * @return string
+         * @author Oliver Lillie
+         */
+        public function toBinaryData()
+        {
+            $gd = $this->toGdImage();
+            if($gd !== false)
+            {
+                ob_start();
+                imagegd2($gd);
+                return ob_get_clean();
+            }
+            return false;
+        }
+        
+        /**
          * Returns the default (empty) input format for the type of media object this class is.
          *
          * @access public
