@@ -343,7 +343,7 @@
                 }
 
 //              get the ratios
-                if(preg_match('/\[PAR|SAR ([0-9\:\.]+) DAR ([0-9\:\.]+)\]/', $matches[0], $ratio_matches) > 0)
+                if(preg_match('/\[[P|S]AR ([0-9\:\.]+) DAR ([0-9\:\.]+)\]/', $matches[0], $ratio_matches) > 0)
                 {
                     $data['pixel_aspect_ratio'] = $ratio_matches[1];
                     $data['display_aspect_ratio'] = $ratio_matches[2];
@@ -373,19 +373,23 @@
                 $data['pixel_format'] = $formats[1];
                 
 //              get the codec details
-                if(preg_match('/([^\s]+)\s+(\([^\)]+\)\s+)?\(([^\s]+)\s\/\s([^\s]+)\)/', $formats[0], $codec_matches) > 0)
+                $data['codec']['name'] = 
+                $data['codec']['raw'] = isset($formats[0]) === true ? $formats[0] : null;
+                if(preg_match('/([^\s]+)(\s*.*)?/', $data['codec']['raw'], $codec_matches) > 0)
                 {
-                    $data['codec'] = array(
-                        'name'      => $codec_matches[1],
-                        'profile'   => substr($codec_matches[2], 1, -2),
-                        'tag_string'=> $codec_matches[3],
-                        'tag'       => $codec_matches[4],
-                        'raw'       => $codec_matches[0],
-                    );
-                }
-                else
-                {
-                    $data['codec']['raw'] = isset($codec_matches[0]) === true ? $codec_matches[0] : null;
+                    $data['codec']['name'] = $codec_matches[1];
+                    if(isset($codec_matches[2]) === true)
+                    {
+                        if(preg_match('/\(([^\/\)]+)\)/', $codec_matches[2], $codec_sub_matches) > 0)
+                        {
+                            $data['codec']['profile'] = $codec_sub_matches[1];
+                        }
+                        if(preg_match('/\(([^\s]+)\s\/\s([^\s\)]+)\)/', $codec_matches[2], $codec_sub_matches) > 0)
+                        {
+                            $data['codec']['tag'] = $codec_sub_matches[1];
+                            $data['codec']['tag_string'] = $codec_sub_matches[2];
+                        }
+                    }
                 }
 
 //              get metadata from the video input, (if any)
@@ -441,19 +445,19 @@
                     'stream'        => null,
                     'stereo'        => null,
                     'channels'      => null,
-                    'sample'            => array(
-                        'format'            => null,
-                        'rate'              => null,
-                        'bits_per'          => null,
+                    'sample'        => array(
+                        'format'       => null,
+                        'rate'         => null,
+                        'bits_per'     => null,
                     ),
                     'bitrate'       => null,
                     'language'      => null,
                     'codec'         => array(
-                        'name'      => null,
-                        'profile'   => null,
-                        'tag_string'=> null,
-                        'tag'       => null,
-                        'raw'       => null,
+                        'name'         => null,
+                        'profile'      => null,
+                        'tag_string'   => null,
+                        'tag'          => null,
+                        'raw'          => null,
                     ),
                     'metadata'      => array(),
                 );
@@ -508,19 +512,24 @@
                         array_push($formats, $part);
                     }
                 }
-                if(preg_match('/([^\s]+)\s+(\([^\)]+\)\s+)?\(([^\s]+)\s\/\s([^\s]+)\)/', $formats[0], $codec_matches) > 0)
+//              get the codec details
+                $data['codec']['name'] = 
+                $data['codec']['raw'] = isset($formats[0]) === true ? $formats[0] : null;
+                if(preg_match('/([^\s]+)(\s*.*)?/', $data['codec']['raw'], $codec_matches) > 0)
                 {
-                    $data['codec'] = array(
-                        'name'      => $codec_matches[1],
-                        'profile'   => substr($codec_matches[2], 1, -2),
-                        'tag_string'=> $codec_matches[3],
-                        'tag'       => $codec_matches[4],
-                        'raw'       => $codec_matches[0],
-                    );
-                }
-                else
-                {
-                    $data['codec']['raw'] = isset($codec_matches[0]) === true ? $codec_matches[0] : null;
+                    $data['codec']['name'] = $codec_matches[1];
+                    if(isset($codec_matches[2]) === true)
+                    {
+                        if(preg_match('/\(([^\/\)]+)\)/', $codec_matches[2], $codec_sub_matches) > 0)
+                        {
+                            $data['codec']['profile'] = $codec_sub_matches[1];
+                        }
+                        if(preg_match('/\(([^\s]+)\s\/\s([^\s\)]+)\)/', $codec_matches[2], $codec_sub_matches) > 0)
+                        {
+                            $data['codec']['tag'] = $codec_sub_matches[1];
+                            $data['codec']['tag_string'] = $codec_sub_matches[2];
+                        }
+                    }
                 }
                 
 //              get metadata from the audio input, (if any)
