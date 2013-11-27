@@ -543,6 +543,10 @@
          */
         public function isCompleted()
         {
+            if(empty($this->_exec) === true)
+            {
+                return false;
+            }
             return $this->_callExecBufferFunction('isCompleted');
         }
     }
