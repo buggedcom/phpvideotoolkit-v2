@@ -32,7 +32,7 @@
 //          validate this media file is an audio file
             if($ensure_audio_file === true && $this->_validateMedia('audio') === false)
             {
-                throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$audio_file_path.'" as the file is not an audio file. It is reported to be a '.$type);
+                throw new Exception('You cannot use an instance of '.get_class($this).' for "'.$audio_file_path.'" as the file is not an audio file. It is reported to be a '.$this->readType());
             }
         }
         
