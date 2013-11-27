@@ -379,9 +379,10 @@
          */
         protected function _callExecBufferFunction($function, $arguments=array())
         {
+//          if no exec has been created then it has not completed.
             if(empty($this->_exec) === true)
             {
-                throw new FfmpegProcessException('The ExecBuffer object has not yet been generated. Please call getExecBuffer() before calling '.$function.'.', null, $this);
+                return false;
             }
             
             if(is_callable(array($this->_exec, $function)) === false)
@@ -543,11 +544,6 @@
          */
         public function isCompleted()
         {
-//          if no exec has been created then it has not completed.
-            if(empty($this->_exec) === true)
-            {
-                return false;
-            }
             return $this->_callExecBufferFunction('isCompleted');
         }
     }
