@@ -14,7 +14,7 @@
     
     $examples = array(
         array(
-            'path' => BASE.'examples/extract-frames.example1.php',
+            'path' => BASE.'examples/extract-frames.php',
             'name' => '',
             'description' => '',
         ),
