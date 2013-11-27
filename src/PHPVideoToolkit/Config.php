@@ -43,7 +43,7 @@
          *
          * @return App_Config
          */
-        public static function getInstance(array $options=array())
+        public static function getInstance()
         {
             if(self::$instance === null)
             {
