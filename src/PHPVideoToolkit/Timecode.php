@@ -263,6 +263,13 @@
                     
                 case 'milliseconds' :
                     return $this->_milliseconds;
+               
+                case 'frames' :
+                    return $this->_frames;
+                
+                case 'total_frames' :
+                    return $this->_total_frames;
+                
             }
         }
         
