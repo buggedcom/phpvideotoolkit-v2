@@ -543,6 +543,7 @@
          */
         public function isCompleted()
         {
+//          if no exec has been created then it has not completed.
             if(empty($this->_exec) === true)
             {
                 return false;
