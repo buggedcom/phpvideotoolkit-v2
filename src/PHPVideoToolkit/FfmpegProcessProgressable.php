@@ -24,9 +24,9 @@
     {
         private $_progress_callbacks;
         
-        public function __construct($binary_path, $temp_directory)
+        public function __construct($binary_path, Config $config=null)
         {
-            parent::__construct($binary_path, $temp_directory);
+            parent::__construct($binary_path, $config);
             
             $this->_progress_callbacks = array();
         }
@@ -77,7 +77,7 @@
                     throw new Exception('If supplying an object to attach as a progress handler, that object must inherit from ProgressHandlerAbstract.');
                 }
 
-                $callback->attachFfmpegProcess($this, $this->_temp_directory);
+                $callback->attachFfmpegProcess($this, $this->_config);
             }
             else if(is_callable($callback) === false)
             {
@@ -212,7 +212,7 @@
             {
                 if(is_callable($post_process_callback) === false)
                 {
-                    throw new Exception('The supplied post proces scallback is not callable.');
+                    throw new Exception('The supplied post process callback is not callable.');
                 }
             }
             

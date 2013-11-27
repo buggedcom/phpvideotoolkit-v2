@@ -187,7 +187,7 @@
             }
             
 //          this is the final callback
-            if($callback === null && is_callable($callback) === true)
+            if($callback !== null && is_callable($callback) === true)
             {
                 call_user_func($callback, $this, null, true);
             }
@@ -575,9 +575,7 @@
         }
         
         /**
-         * Returns the pid of an executed command.
-         * If the command has not yet been executed then it will return null, unless a pid
-         * has been set by setPid();
+         * Gets the callback period wait interval.
          *
          * @access public
          * @author Oliver Lillie

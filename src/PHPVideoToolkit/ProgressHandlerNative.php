@@ -70,6 +70,7 @@
             if(empty($parts) === false)
             {
                 $last_key = count($parts)-1;
+
                 $return_data['frame'] = $parts[$last_key]['frames'];
                 $return_data['fps'] = $parts[$last_key]['fps'];
                 $return_data['size'] = $parts[$last_key]['total_size'];
@@ -80,6 +81,7 @@
                     
                 if($parts[$last_key]['progress'] === 'end')
                 {
+                    $return_data['finished'] = true;
                     if($return_data['percentage'] < 99.5)
                     {
                         $return_data['interrupted'] = true;
@@ -87,6 +89,7 @@
                     else
                     {
                         $return_data['percentage'] = 100;
+                        $return_data['completed'] = true;
                     }
                 }
                     
@@ -105,11 +108,12 @@
                     $return_data['fps_avg'] = $total_fps/($last_key+1);
                 }
             }
+            
         }
          
-        public function attachFfmpegProcess(FfmpegProcess $process, $temp_directory)
+        public function attachFfmpegProcess(FfmpegProcess $process, Config $config=null)
         {
-            parent::attachFfmpegProcess($process, $temp_directory);
+            parent::attachFfmpegProcess($process, $config);
 
             $this->_progress_file = tempnam($this->_config->temp_directory, 'phpvideotoolkit_progress_');
             $this->_ffmpeg_process->addCommand('-progress', $this->_progress_file);

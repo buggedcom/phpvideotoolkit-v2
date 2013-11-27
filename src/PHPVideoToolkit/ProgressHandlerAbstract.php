@@ -99,11 +99,11 @@
             }
         }
         
-        public function attachFfmpegProcess(FfmpegProcess $process, $process_temp_directory)
+        public function attachFfmpegProcess(FfmpegProcess $process, Config $config=null)
         {
-            if($this->_temp_directory === null)
+            if($config !== null)
             {
-                $this->setTempDirectory($process_temp_directory);
+                $this->_config = $config;
             }
             $this->_ffmpeg_process = $process;
         }
@@ -111,12 +111,12 @@
         protected function _getDefaultData()
         {
             return array(
-                'interrupted'=> false,
                 'error'      => false,
                 'error_message' => null,
-                'started'    => false,
-                'finished'   => false,
-                'completed'  => false,
+                'started'    => false, // true when the process has started
+                'finished'   => false, // true when the process has ended by interuption or success completion
+                'completed'  => false, // true when the process has ended by success completion
+                'interrupted'=> false, // true when the process has ended by interuption, ie finished early.
                 'run_time'   => 0,
                 'percentage' => 0,
                 'fps_avg'    => 0,
@@ -140,6 +140,7 @@
 //          load up the data             
             $completed = false;
             $raw_data = $this->_getRawData();
+            
             if(empty($raw_data) === false)
             {
 //              parse the raw data into the return data
@@ -148,7 +149,6 @@
 //              check to see if the process has completed
                 if($return_data['percentage'] >= 100)
                 {
-                    $return_data['finished'] = true;
                     $return_data['percentage'] = 100;
                     $return_data['output_file'] = $this->_ffmpeg_process->getOutputPath();
                 }
@@ -164,7 +164,7 @@
             }
             
 //          has the process completed itself?
-            $this->completed = $this->_ffmpeg_process->isCompleted();
+            $this->completed = $return_data['completed'];
             
             return $return_data;
         }
