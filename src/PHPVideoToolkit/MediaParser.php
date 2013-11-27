@@ -87,7 +87,7 @@
             
 //          grab the duration
             $data = null;
-            if(preg_match('/Duration: ([^,]*)/', $raw_data, $matches) > 0)
+            if(preg_match('/Duration:\s+([^,]*)/', $raw_data, $matches) > 0)
             {
                 $data = new Timecode($matches[1], Timecode::INPUT_FORMAT_TIMECODE);
             }
@@ -120,7 +120,7 @@
             $data = null;
             if(preg_match('/Metadata:(.*)Duration:/ms', $raw_data, $meta_matches) > 0)
             {
-                if(preg_match_all('/([a-z\_]+)\s+\: (.*)/', $meta_matches[1], $meta_matches) > 0)
+                if(preg_match_all('/([a-z\_]+)\s+\:\s+(.*)/', $meta_matches[1], $meta_matches) > 0)
                 {
                     foreach ($meta_matches[2] as $key => $value)
                     {
@@ -155,7 +155,7 @@
             
 //          grab the bitrate
             $data = null;
-            if(preg_match('/bitrate: (N\/A|[0-9\.]+\s?[bkBmg\/s]+)/', $raw_data, $matches) > 0)
+            if(preg_match('/bitrate:\s+(N\/A|[0-9\.]+\s?[bkBmg\/s]+)/', $raw_data, $matches) > 0)
             {
                 $data = strtoupper($matches[1]) === 'N/A' ? -1 : (int) $matches[1];
             }
@@ -186,7 +186,7 @@
             
 //          grab the bitrate
             $data = null;
-            if(preg_match('/start: ([^,]*)/', $raw_data, $matches) > 0)
+            if(preg_match('/start:\s+([^,]*)/', $raw_data, $matches) > 0)
             {
                 $data = new Timecode($matches[1], Timecode::INPUT_FORMAT_SECONDS);
             }
@@ -217,7 +217,7 @@
 
 //          grab the type
             $data = null;
-            if(preg_match('/Stream.*: Video: .*/', $raw_data, $matches) > 0)
+            if(preg_match('/Stream.*:\s+Video:\s+.*/', $raw_data, $matches) > 0)
             {
 //              special check to see if the file is actually an image and not a video.
                 if(strpos(Mime::get($file_path), 'image/') !== false)
@@ -229,7 +229,7 @@
                     $data = 'video';
                 }
             }
-            else if(preg_match('/Stream.*: Audio: .*/', $raw_data, $matches) > 0)
+            else if(preg_match('/Stream.*:\s+Audio:\s+.*/', $raw_data, $matches) > 0)
             {
                 $data = 'audio';
             }
@@ -264,7 +264,7 @@
 
 //          match the video stream info
             $data = null;
-            if(preg_match('/Stream(.*): Video: (.*)/', $raw_data, $matches) > 0)
+            if(preg_match('/Stream(.*):\s+Video:\s+(.*)/', $raw_data, $matches) > 0)
             {
                 $data = array(
                     'stream'                => null,
@@ -321,7 +321,7 @@
 
 //              get the timebases
                 $data['time_bases'] = array();
-                if(preg_match_all('/([0-9\.k]+) (fps|tbr|tbc|tbn)/', $matches[0], $timebase_matches) > 0)
+                if(preg_match_all('/([0-9\.k]+)\s+(fps|tbr|tbc|tbn)/', $matches[0], $timebase_matches) > 0)
                 {
                     foreach ($timebase_matches[2] as $key => $abrv)
                     {
@@ -343,14 +343,14 @@
                 }
 
 //              get the ratios
-                if(preg_match('/\[[P|S]AR ([0-9\:\.]+) DAR ([0-9\:\.]+)\]/', $matches[0], $ratio_matches) > 0)
+                if(preg_match('/\[[P|S]AR\s+([0-9\:\.]+)\s+DAR\s+([0-9\:\.]+)\]/', $matches[0], $ratio_matches) > 0)
                 {
                     $data['pixel_aspect_ratio'] = $ratio_matches[1];
                     $data['display_aspect_ratio'] = $ratio_matches[2];
                 }
                 
 //              get the bit rate
-                if(preg_match('/([0-9]{1,4}) (kb|mb)\/s/i', $matches[0], $bitrate_matches) > 0)
+                if(preg_match('/([0-9]{1,4})\s+(kb|mb)\/s/i', $matches[0], $bitrate_matches) > 0)
                 {
                     $bit_rate = (float) $bitrate_matches[1];
                     $bit_rate_type = strtolower($bitrate_matches[2]);
@@ -397,7 +397,7 @@
                 $meta_data_search = trim(substr($raw_data, $meta_data_search_from+strlen($matches[0])));
                 if(strpos($meta_data_search, 'Metadata:') === 0 && preg_match('/Metadata:(.*)Stream/ms', $meta_data_search, $meta_matches) > 0)
                 {
-                    if(preg_match_all('/([a-z\_]+)\s+\: (.*)/', $meta_matches[1], $meta_matches) > 0)
+                    if(preg_match_all('/([a-z\_]+)\s+\:\s+(.*)/', $meta_matches[1], $meta_matches) > 0)
                     {
                         foreach ($meta_matches[2] as $key => $value)
                         {
@@ -439,7 +439,7 @@
             
 //          match the audio stream info
             $data = null;
-            if(preg_match('/Stream(.*): Audio: (.*)/', $raw_data, $matches) > 0)
+            if(preg_match('/Stream(.*):\s+Audio:\s+(.*)/', $raw_data, $matches) > 0)
             {
                 $data = array(
                     'stream'        => null,
@@ -485,14 +485,14 @@
                 }
                 
 //              get the sample_rate
-                if(preg_match('/([0-9]{3,6}) Hz/', $matches[0], $sample_matches) > 0)
+                if(preg_match('/([0-9]{3,6})\s+Hz/', $matches[0], $sample_matches) > 0)
                 {
                     $data['sample']['rate'] = (float) $sample_matches[1];
                     array_push($other_parts, $sample_matches[0]);
                 }
 
 //              get the bit rate
-                if(preg_match('/([0-9]{1,4}) (kb|mb)\/s/i', $matches[0], $bitrate_matches) > 0)
+                if(preg_match('/([0-9]{1,4})\s+(kb|mb)\/s/i', $matches[0], $bitrate_matches) > 0)
                 {
                     $bit_rate = (float) $bitrate_matches[1];
                     $bit_rate_type = strtolower($bitrate_matches[2]);
@@ -536,11 +536,11 @@
 //              however if we have a video source in the media it is outputted differently than just pure audio.
                 $meta_data_search_from = strpos($raw_data, $matches[0]);
                 $meta_data_search = trim(substr($raw_data, $meta_data_search_from+strlen($matches[0])));
-                if(strpos($meta_data_search, 'Metadata:') === 0 && preg_match('/Metadata:(.*)(?:Stream|At least)/ms', $meta_data_search, $meta_matches) > 0)
+                if(strpos($meta_data_search, 'Metadata:') === 0 && preg_match('/Metadata:(.*)(?:Stream|At\sleast)/ms', $meta_data_search, $meta_matches) > 0)
                 {
-                    if(preg_match('/Metadata:(.*)(?:Stream|At least)/ms', $meta_data_search, $meta_matches) > 0)
+                    if(preg_match('/Metadata:(.*)(?:Stream|At\sleast)/ms', $meta_data_search, $meta_matches) > 0)
                     {
-                        if(preg_match_all('/([a-z\_]+)\s+\: (.*)/', $meta_matches[1], $meta_matches) > 0)
+                        if(preg_match_all('/([a-z\_]+)\s+\:\s+(.*)/', $meta_matches[1], $meta_matches) > 0)
                         {
                             foreach ($meta_matches[2] as $key => $value)
                             {
@@ -551,7 +551,7 @@
 //                  this is just pure audio and is essnetially id3 data.
                     else if(preg_match('/Metadata:(.*)(?:Duration)/ms', $raw_data, $meta_matches) > 0)
                     {
-                        if(preg_match_all('/([a-z\_]+)\s+\: (.*)/', $meta_matches[1], $meta_matches) > 0)
+                        if(preg_match_all('/([a-z\_]+)\s+\:\s+(.*)/', $meta_matches[1], $meta_matches) > 0)
                         {
                             foreach ($meta_matches[2] as $key => $value)
                             {
@@ -693,7 +693,7 @@
 
 //          match the audio stream info
             $data = '';
-            if(preg_match('/Input #0, ([^\s]+), from/', $raw_data, $matches) > 0)
+            if(preg_match('/Input\s#0,\s+([^\s]+),\s+from/', $raw_data, $matches) > 0)
             {
                 $data = $matches[1];
             }
