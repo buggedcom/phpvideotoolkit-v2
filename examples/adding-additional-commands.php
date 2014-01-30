@@ -4,7 +4,7 @@
 
     try
     {
-        Trace::vars('Note, this process will not work as the commands are invalid.');
+        \PHPVideoToolkit\Trace::vars('Note, this process will not work as the commands are invalid.');
         
         $video = new \PHPVideoToolkit\Video($example_video_path, $config);
         $process = $video->getProcess();
