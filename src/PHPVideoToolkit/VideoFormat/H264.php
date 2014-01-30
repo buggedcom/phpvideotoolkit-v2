@@ -45,10 +45,6 @@
                      ->setVideoCodec('h264')
                      ->setFormat('h264');
             }
-            
-//          both enable meta data injection and then force 
-            $this->forceQtFastStartSuccess();
-            $this->enableQtFastStart();
         }
         
         public function setH264Preset($preset=null)
