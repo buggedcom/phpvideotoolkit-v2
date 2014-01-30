@@ -430,7 +430,7 @@ namespace PHPVideoToolkit;
 session_start();
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$process = $video->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING, $progress_handler);
+$process = $video->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING);
 				
 $_SESSION['phpvideotoolkit_portable_process_id'] = $process->getPortableId();
 
