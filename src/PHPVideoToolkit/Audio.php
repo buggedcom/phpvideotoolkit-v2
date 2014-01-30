@@ -45,7 +45,7 @@
          * @param string $format A specific output format (if any to use)
          * @return Format
          */
-        public function getDefaultFormat($type, $format)
+        public function getDefaultFormat($type, $format=null)
         {
             return $this->_getDefaultFormat($type, 'AudioFormat', $format);
         }
