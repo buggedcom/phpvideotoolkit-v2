@@ -28,7 +28,6 @@
         protected $_post_output_commands;
         protected $_input;
         protected $_output;
-        protected $_non_blocking;
         protected $_progress_handler;
         protected $_detect_error;
         protected $_combined;
@@ -545,5 +544,24 @@
         public function isCompleted()
         {
             return $this->_callExecBufferFunction('isCompleted');
+        }
+        
+        /**
+         * Returns a boolean value determining if the process has completed.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @see ExecBuffer::isCompleted
+         * @return boolean
+         */
+        public function getPortableId()
+        {
+            if($this->_callExecBufferFunction('getBlocking') === true)
+            {
+                throw new Exception('It is not possible to get a portable id as the exec process has been made blocking. To get a portable id make the process unblocking or call getPortableId() before the save occurs.');
+            }
+            
+            $output = $this->_callExecBufferFunction('getBufferOutput');
+            return substr($output, strrpos($output, 'phpvideotoolkit_')+16).'.'.$this->_callExecBufferFunction('getBoundary').'.'.time();
         }
     }

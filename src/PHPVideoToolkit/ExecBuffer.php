@@ -618,6 +618,18 @@
         }
         
         /**
+         * Returns the boundary placeholder for this exec call.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @return string
+         */
+        public function getBoundary()
+        {
+            return $this->_boundary;
+        }
+        
+        /**
          * Sets the output of the exec call.
          *
          * @access public

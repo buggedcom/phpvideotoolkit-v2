@@ -18,7 +18,7 @@
      * @author Oliver Lillie
      * @package default
      */
-    abstract class ProgressHandlerAbstract
+    abstract class ProgressHandlerAbstract extends ProgressHandlerDefaultData
     {
         protected $_config;
         
@@ -108,29 +108,6 @@
             $this->_ffmpeg_process = $process;
         }
 
-        protected function _getDefaultData()
-        {
-            return array(
-                'error'      => false,
-                'error_message' => null,
-                'started'    => false, // true when the process has started
-                'finished'   => false, // true when the process has ended by interuption or success completion
-                'completed'  => false, // true when the process has ended by success completion
-                'interrupted'=> false, // true when the process has ended by interuption, ie finished early.
-                'run_time'   => 0,
-                'percentage' => 0,
-                'fps_avg'    => 0,
-                'size'       => 0,
-                'frame'      => 0,
-                'duration'   => 0,
-                'expected_duration' => $this->_total_duration,
-                'fps'        => 0,
-                'dup'        => 0,
-                'drop'       => 0,
-                'output_file'=> null,
-            );
-        }
-        
         protected function _processOutputFile()
         {
 //          setup the data to return.
