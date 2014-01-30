@@ -493,7 +493,7 @@ To help explain it further, here is a simplified command string using the above 
 HOWEVER, there is an important caveat you need to be aware of, the above command is just and example to show you the position of the added commands. Using the same additional commands as above, the actual executed command looks like this:
 
 ```
-((/opt/local/bin/ffmpeg '-custom-command' '-i' '/Users/ollie/Sites/@Projects/PHPVideoToolkit/v2/git/examples/media/BigBuckBunny_320x180.mp4' '-custom-command-with-arg' 'arg value' '-y' '-qscale' '4' '-f' 'mp4' '-strict' 'experimental' '-threads' '1' '-acodec' 'mp3' '-vcodec' 'h264' '/Users/ollie/Sites/@Projects/PHPVideoToolkit/v2/git/examples/output/big_buck_bunny.mp4' '-output-command' 'another value' && echo '<c-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>') || echo '<f-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>' '<c-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>' '<e-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>'$?) 2>&1 > '/Users/ollie/Sites/@Projects/PHPVideoToolkit/v2/git/examples/tmp/phpvideotoolkit_lvsukB' 2>&1 &
+((/opt/local/bin/ffmpeg '-custom-command' '-i' '/your/input/file.mp4' '-custom-command-with-arg' 'arg value' '-y' '-qscale' '4' '-f' 'mp4' '-strict' 'experimental' '-threads' '1' '-acodec' 'mp3' '-vcodec' 'h264' '/your/output/file.mp4' '-output-command' 'another value' && echo '<c-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>') || echo '<f-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>' '<c-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>' '<e-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>'$?) 2>&1 > '/tmp/phpvideotoolkit_lvsukB' 2>&1 &
 ```
 
 ###Imposing a processing timelimit
