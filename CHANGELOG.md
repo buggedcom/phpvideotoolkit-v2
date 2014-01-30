@@ -1,3 +1,7 @@
+#[2.1.0] [30.01.2014]
+        - Added ProgressHandlerPortable to provide portable accessibility to encoding 
+        progress information
+
 #[2.0.0] [22.11.2013]
         - Fixed various bugs
 
