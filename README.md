@@ -418,6 +418,43 @@ while($progress_handler->completed !== true)
 
 So you see whilst the two examples look very similar and both block PHP, the second example does not need to block at all.
 
+**Example 3. Non Blocking Save with Remove Progress Handling**
+
+This example (a better example is found in /examples/progress-handler-portability.php) shows that a non blocking save can be made in one request, and then subsequent requests (i.e. ajax) can be made to a different script to probe the encoding progress.
+
+Encoding script:
+```php
+
+namespace PHPVideoToolkit;
+
+session_start();
+
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$process = $video->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING, $progress_handler);
+				
+$_SESSION['phpvideotoolkit_portable_process_id'] = $process->getPortableId();
+
+```
+
+Probing script:
+```php
+
+namespace PHPVideoToolkit;
+
+session_start();
+
+$handler = new \PHPVideoToolkit\ProgressHandlerPortable($_SESSION['phpvideotoolkit_portable_process_id'], $config);
+
+$probe = $handler->probe();
+
+echo json_encode(array(
+    'finished' => $probe['finished'], // true when the process has ended by interuption, error or success
+    'completed' => $probe['completed'], // true when the process has ended with a successfull encoding that encountered no errors.
+    'percentage' => $probe['percentage']
+));
+exit;
+
+```
 
 ###Accessing Executed Commands and the Command Line Buffer
 
