@@ -34,7 +34,7 @@
             
 //          both enable meta data injection and then force 
             $this->forceQtFastStartSuccess();
-            $this->enableQtFastStart();
+            $this->disableQtFastStart();
         }
         
         public function enableQtFastStart()
