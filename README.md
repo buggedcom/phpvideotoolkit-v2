@@ -443,7 +443,7 @@ namespace PHPVideoToolkit;
 
 session_start();
 
-$handler = new \PHPVideoToolkit\ProgressHandlerPortable($_SESSION['phpvideotoolkit_portable_process_id'], $config);
+$handler = new ProgressHandlerPortable($_SESSION['phpvideotoolkit_portable_process_id'], $config);
 
 $probe = $handler->probe();
 
