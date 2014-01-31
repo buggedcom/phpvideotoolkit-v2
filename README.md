@@ -370,9 +370,17 @@ else
 
 Whilst the code above from Non-Blocking Saves looks like it is a progress handler (and it is in a sense, but it doesn't provide data on the encode), progress handlers provide much more detailed information about the current encoding process.
 
-PHPVideoToolkit allows you to monitor the encoding process of FFmpeg. This is done by using ProgressHandler objects. There are two types of progress handlers. ProgressHandlerNative and ProgressHandlerOutput. If your copy of FFmpeg is recent you will be able to use ProgressHandlerNative which uses FFmpegs '-progress' command to provide data, where was ProgressHandlerOutput relies on only the output of the command line buffer. Apart from that difference both handlers return the same data and act in the same way.
+PHPVideoToolkit allows you to monitor the encoding process of FFmpeg. This is done by using ProgressHandler objects. There are three types of progress handlers. 
 
-Progress Handlers can be made to block PHP or can be used in a non blocking fashion. They can even be utilized to work from a seperate script once the encoding has been initialised. However for purposes of this example the progress handlers are in the same script essentially blocking the PHP process. Again however, the two examples shown function very differently.
+- ProgressHandlerNative
+- ProgressHandlerOutput
+- ProgressHandlerPortable
+
+ProgressHandlerNative and ProgressHandlerOutput work and function in the same way, however one uses a native ffmpeg command, and the out outputs ffmpeg output buffer to a temp file. If your copy of FFmpeg is recent you will be able to use ProgressHandlerNative which uses FFmpegs '-progress' command to provide data. Apart from that difference both handlers return the same data and act in the same way and there is no real need to prioritise one over another unless you version of ffmpeg does not support '-progress'. If it doesn't then when you initialise the ProgressHandlerNative an exception will be thrown.
+
+The third type of handler ProgressHandlerPortable (shown in example 3 below) operates somewhat differently and is specifically design to work with separate HTTP requests or threads. ProgressHandlerPortable can be initiated in a different script entirely, supplied with the PHPVideoToolkit portable process id and then probed independantly of the encoding script. This allows developers to decouple encoding and encoding status scripts.
+
+Progress Handlers can be made to block PHP or can be used in a non blocking fashion. They can even be utilized to work from a seperate script once the encoding has been initialised. However for purposes of the first two examples the progress handlers are in the same script essentially blocking the PHP process. Again however, the first two examples shown function very differently.
 
 **Example 1. Callback in the handler constructor**
 
@@ -386,7 +394,7 @@ $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $progress_handler = new ProgressHandlerNative(function($data)
 {
 	echo '<pre>'.print_r($data, true).'</pre>';
-});
+}, $config);
 
 $output = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
@@ -402,7 +410,7 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 
-$progress_handler = new ProgressHandlerNative();
+$progress_handler = new ProgressHandlerNative(null, $config);
 
 $output = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
