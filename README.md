@@ -8,7 +8,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 
 ##License
 
-PHPVideoToolkit Copyright (c) 2012-2013 Oliver Lillie
+PHPVideoToolkit Copyright (c) 2008-2014 Oliver Lillie
 
 DUAL Licensed under MIT and GPL v2
 
