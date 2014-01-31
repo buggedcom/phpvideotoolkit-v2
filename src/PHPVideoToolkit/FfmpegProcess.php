@@ -547,6 +547,19 @@
         }
         
         /**
+         * Returns the file name of the exec buffer output.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @see ExecBuffer::getBufferOutput
+         * @return string
+         */
+        public function getBufferOutput()
+        {
+            return $this->_callExecBufferFunction('getBufferOutput');
+        }
+        
+        /**
          * Returns a boolean value determining if the process has completed.
          *
          * @access public
@@ -561,7 +574,7 @@
                 throw new Exception('It is not possible to get a portable id as the exec process has been made blocking. To get a portable id make the process unblocking or call getPortableId() before the save occurs.');
             }
             
-            $output = $this->_callExecBufferFunction('getBufferOutput');
+            $output = $this->getBufferOutput();
             return substr($output, strrpos($output, 'phpvideotoolkit_')+16).'.'.$this->_callExecBufferFunction('getBoundary').'.'.time();
         }
     }

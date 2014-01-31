@@ -24,6 +24,16 @@
         {
             $return_data['started'] = true;
 
+            if(preg_match('/Input\s#0,\s+[^\s]+,\s+from\s+(.*):/', $raw_data, $input_matches) > 0)
+            {
+                $return_data['input_file'] = trim($input_matches[1], '\'"');
+            }
+            if(preg_match('/Output\s#0,\s+[^\s]+,\s+to\s+(.*):/', $raw_data, $output_matches) > 0)
+            {
+                $return_data['output_file'] = trim($output_matches[1], '\'"');
+            }
+            $return_data['process_file'] = $this->_ffmpeg_process->getBufferOutput();
+            
 //          parse out the details of the data.
             if(preg_match_all(
                 '/frame=\s*([0-9]+)\s'.

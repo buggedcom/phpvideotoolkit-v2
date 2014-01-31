@@ -20,6 +20,10 @@
      */
     class ProgressHandlerNative extends ProgressHandlerAbstract
     {
+        protected $_progress_file;
+        protected $_input_file;
+        protected $_output_file;
+        
         public function __construct($callback=null, Config $config=null)
         {
 //          check that the "-progress" function is available.
@@ -33,6 +37,8 @@
             parent::__construct($callback, $config);
             
             $this->_progress_file = null;
+            $this->_input_file = null;
+            $this->_output_file = null;
         }
         
         protected function _getRawData()
@@ -50,6 +56,8 @@
         {
             $return_data['started'] = true;
             
+            $return_data['process_file'] = $this->_progress_file;
+
 //          parse out the details of the data into the seperate chunks.
             $parts = preg_split('/frame=/', $raw_data);
             array_shift($parts);

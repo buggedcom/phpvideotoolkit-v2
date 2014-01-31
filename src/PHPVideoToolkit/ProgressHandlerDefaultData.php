@@ -40,6 +40,8 @@
                 'dup'        => 0,
                 'drop'       => 0,
                 'output_file'=> null,
+                'input_file' => null,
+                'process_file' => null,
             );
         }
         

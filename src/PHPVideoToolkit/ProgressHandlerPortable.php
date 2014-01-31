@@ -106,7 +106,6 @@
                 if($return_data['percentage'] >= 100)
                 {
                     $return_data['percentage'] = 100;
-                    $return_data['output_file'] = ''; // TODO
                     $return_data['run_time'] = filemtime($this->_output)-$this->_time_started;
                 }
 //              or if it has been interuptted 
@@ -188,6 +187,16 @@
             }            
             $total_duration = new Timecode($total_duration, Timecode::INPUT_FORMAT_TIMECODE);
 
+            if(preg_match('/Input\s#0,\s+[^\s]+,\s+from\s+(.*):/', $raw_data, $input_matches) > 0)
+            {
+                $return_data['input_file'] = trim($input_matches[1], '\'"');
+            }
+            if(preg_match('/Output\s#0,\s+[^\s]+,\s+to\s+(.*):/', $raw_data, $output_matches) > 0)
+            {
+                $return_data['output_file'] = trim($output_matches[1], '\'"');
+            }
+            $return_data['process_file'] = $this->_output;
+            
 //          parse out the details of the data.
             if(preg_match_all(
                 '/frame=\s*([0-9]+)\s'.
@@ -197,6 +206,7 @@
                 'time=\s*([0-9]{2,}:[0-9]{2}:[0-9]{2}.[0-9]+)\s'.
                 'bitrate=\s*([0-9\.]+\s?[bkBmg\/s]+)'.
                 '(\sdup=\s*([0-9]+))?'.
+                '(\sdrop=\s*([0-9]+))?'.
                 '(\sdrop=\s*([0-9]+))?'.
                 '/', $raw_data, $matches) > 0)
             {
