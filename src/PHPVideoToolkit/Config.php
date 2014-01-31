@@ -33,6 +33,7 @@
         protected $_yamdi;
         protected $_temp_directory;
         protected $_qtfaststart;
+        protected $_force_enable_qtfaststart;
         protected $_gif_transcoder;
         protected $_gifsicle;
         protected $_convert;
@@ -71,6 +72,7 @@
                 'gifsicle'       => null,
                 'convert'        => null,
                 'php_exec_infinite_timelimit' => true,
+                'force_enable_qtfaststart' => false,
             );
             $this->setConfig(array_merge($default_options, $options));
         }
@@ -142,11 +144,12 @@
                     
                     return;
                     
+                case 'force_enable_qtfaststart' :
                 case 'php_exec_infinite_timelimit' :
                     
                     if(in_array($value, array(true, false)) === false)
                     {
-                        throw new ConfigSetException('Unrecognised php_infinite_timelimit value. It must be a boolean value, either true or false.');
+                        throw new ConfigSetException('Unrecognised '.$key.' value. It must be a boolean value, either true or false.');
                     }
                 
                     $this->{'_'.$key} = $value;
