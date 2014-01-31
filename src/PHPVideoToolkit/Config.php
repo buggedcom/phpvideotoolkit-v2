@@ -72,7 +72,8 @@
                 'gifsicle'       => null,
                 'convert'        => null,
                 'php_exec_infinite_timelimit' => true,
-                'force_enable_qtfaststart' => false,
+                'force_enable_qtfaststart'    => false,
+                'force_enable_flv_meta'       => true,
             );
             $this->setConfig(array_merge($default_options, $options));
         }
@@ -146,6 +147,7 @@
                     
                 case 'force_enable_qtfaststart' :
                 case 'php_exec_infinite_timelimit' :
+                case 'force_enable_flv_meta' :
                     
                     if(in_array($value, array(true, false)) === false)
                     {

@@ -39,9 +39,15 @@
             $this->_restricted_video_codecs = array('flv1');
             $this->_restricted_audio_sample_frequencies = array(44100, 22050, 11025);
 
-//          both enable meta data injection and then force 
             $this->forceMetaDataInjectionSuccess();
-            $this->enableMetaDataInjection();
+
+//          determine if we are to inject meta data into the flv
+//          remember doing so puts any save into blocking mode so if you are using ProgressHandlerPortable
+//          you must access the $process->getPortableId() before calling save or saveNonBlocking.
+            if($config && $config->force_enable_flv_meta === true)
+            {
+                $this->enableMetaDataInjection();
+            }
         }
         
         public function enableMetaDataInjection()
