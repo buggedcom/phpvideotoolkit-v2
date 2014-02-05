@@ -29,7 +29,7 @@ PHPVideoToolkit requires some basic configuration and is one through the Config 
 ```php
 namespace PHPVideoToolkit;
 
-$config = new \PHPVideoToolkit\Config(array(
+$config = new Config(array(
 	'temp_directory' => './tmp',
 	'ffmpeg' => '/opt/local/bin/ffmpeg',
 	'ffprobe' => '/opt/local/bin/ffprobe',
