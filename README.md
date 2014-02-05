@@ -208,11 +208,11 @@ $config->gif_transcoder = 'gifsicle';
 
 $output_path = './output/big_buck_bunny.gif';
 
-$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 	   			
 ```
@@ -229,11 +229,11 @@ $config->gif_transcoder = 'convert';
 
 $output_path = './output/big_buck_bunny.gif';
 
-$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 	   			
 ```
@@ -246,11 +246,11 @@ $config->gif_transcoder = 'php';
 
 $output_path = './output/big_buck_bunny.gif';
 
-$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 	   			
 ```
@@ -264,11 +264,11 @@ $config->gif_transcoder = 'gifsicle';
 
 $output_path = './output/big_buck_bunny.gif';
 
-$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 	   			
 ```
@@ -336,7 +336,7 @@ $output_format = new VideoFormat('output', $config);
 $output_format->setAudioCodec('acc')
 			  ->setVideoCodec('ogg');
 
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->save($output_path, $output_format);
 ```
 
@@ -349,7 +349,7 @@ $output_path = './output/big_buck_bunny.mp3';
 $output_format = new AudioFormat('output', $config);
 $output_format->setAudioCodec('acc');
 
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->save($output_path, $output_format);
 
 ```
@@ -488,7 +488,7 @@ exit;
 
 ```
 
-**IMPORTANT**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolKit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
+**IMPORTANT**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolkit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
 
 ###Accessing Executed Commands and the Command Line Buffer
 
