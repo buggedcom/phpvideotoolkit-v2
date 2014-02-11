@@ -1,5 +1,5 @@
 {
-    "name": "sapzxc/phpvideotoolkit",
+    "name": "buggedcom/phpvideotoolkit",
     "description": "PHPVideoToolkit is a set of classes aimed to provide a modular, object oriented and accessible interface for interacting with videos and audio through the FFmpeg program.",
     "keywords": ["ffmpeg","video","audio","mp4","flv","mp3"],
     "license": ["GPL-3.0+","MIT"],
