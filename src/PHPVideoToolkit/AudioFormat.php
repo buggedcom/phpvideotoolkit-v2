@@ -132,7 +132,8 @@
          * @access public
          * @author Oliver Lillie
          * @param string $audio_codec 
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function setAudioCodec($audio_codec)
         {
@@ -183,7 +184,8 @@
          * @access public
          * @author Oliver Lillie
          * @param string $bitrate 
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function setAudioBitrate($bitrate)
         {
@@ -257,7 +259,8 @@
          * @access public
          * @author Oliver Lillie
          * @param string $channels 
-         * @return void
+         * @return $this
+         * @throws Exception
          */
         public function setAudioChannels($channels)
         {
@@ -267,7 +270,7 @@
                 return $this;
             }
             
-            if(in_array($channels, array(0, 1, 2, 6)) === false)
+            if(in_array($channels, array(0, 1, 2, 6)) !== false)
             {
                 $this->_format['audio_channels'] = $channels;
                 return $this;
