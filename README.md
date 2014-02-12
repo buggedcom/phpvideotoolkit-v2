@@ -6,6 +6,30 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 
 **IMPORTANT** PHPVideoToolkit has only been tested with v1.1.2 of FFmpeg. Whilst the majority of functionality should work regardless of your version of FFmpeg I cannot guarantee it. If you find a bug or have a patch please open a ticket or submit a pull request on https://github.com/buggedcom/phpvideotoolkit-v2
 
+###Table of Contents
+
+- [License](#license)
+- [Documentation](#documentation)
+- [Usage](#usage)
+- [Configuring PHPVideoToolkit](#configuring-phpvideotoolkit)
+- [Accessing Data About FFmpeg](#accessing-data-about-ffmpeg)
+- [Accessing Data About media files](#accessing-data-about-media-files)
+- [PHPVideoToolkit Timecodes](#phpvideotoolkit-timecodes)
+- [Extract a Single Frame of a Video](#extract-a-single-frame-of-a-video)
+- [Extract Multiple Frames from a Segment of a Video](#extract-multiple-frames-from-a-segment-of-a-video)
+- [Extract Multiple Frames of a Video at 1 frame per second](#extract-multiple-frames-of-a-video-at-1-frame-per-second)
+- [Extracting an Animated Gif](#extracting-an-animated-gif)
+- [Extracting Audio or Video Channels from a Video](#extracting-audio-or-video-channels-from-a-video)
+- [Extracting a Segment of an Audio or Video file](#extracting-a-segment-of-an-audio-or-video-file)
+- [Spliting a Audio or Video file into multiple parts](#spliting-a-audio-or-video-file-into-multiple-parts)
+- [Purging and then adding Meta Data](#purging-and-then-adding-meta-data)
+- [Changing Codecs of the audio or video stream](#changing-codecs-of-the-audio-or-video-stream)
+- [Non-Blocking Saves](#non-blocking-saves)
+- [Encoding with Progress Handlers](#encoding-with-progress-handlers)
+- [Accessing Executed Commands and the Command Line Buffer](#accessing-executed-commands-and-the-command-line-buffer)
+- [Supplying custom commands](#supplying-custom-commands)
+- [Imposing a processing timelimit](#imposing-a-processing-timelimit)
+
 ##License
 
 PHPVideoToolkit Copyright (c) 2008-2014 Oliver Lillie
@@ -29,7 +53,7 @@ PHPVideoToolkit requires some basic configuration and is one through the Config 
 ```php
 namespace PHPVideoToolkit;
 
-$config = new \PHPVideoToolkit\Config(array(
+$config = new Config(array(
 	'temp_directory' => './tmp',
 	'ffmpeg' => '/opt/local/bin/ffmpeg',
 	'ffprobe' => '/opt/local/bin/ffprobe',
@@ -184,11 +208,11 @@ $config->gif_transcoder = 'gifsicle';
 
 $output_path = './output/big_buck_bunny.gif';
 
-$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 	   			
 ```
@@ -205,11 +229,11 @@ $config->gif_transcoder = 'convert';
 
 $output_path = './output/big_buck_bunny.gif';
 
-$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 	   			
 ```
@@ -222,11 +246,11 @@ $config->gif_transcoder = 'php';
 
 $output_path = './output/big_buck_bunny.gif';
 
-$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 	   			
 ```
@@ -240,11 +264,11 @@ $config->gif_transcoder = 'gifsicle';
 
 $output_path = './output/big_buck_bunny.gif';
 
-$output_format = \PHPVideoToolkit\Format::getFormatFor($output_path, $config, 'ImageFormat');
+$output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$output = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 	   			
 ```
@@ -312,7 +336,7 @@ $output_format = new VideoFormat('output', $config);
 $output_format->setAudioCodec('acc')
 			  ->setVideoCodec('ogg');
 
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->save($output_path, $output_format);
 ```
 
@@ -325,7 +349,7 @@ $output_path = './output/big_buck_bunny.mp3';
 $output_format = new AudioFormat('output', $config);
 $output_format->setAudioCodec('acc');
 
-$video = new \PHPVideoToolkit\Video('media/BigBuckBunny_320x180.mp4', $config);
+$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->save($output_path, $output_format);
 
 ```
@@ -464,7 +488,7 @@ exit;
 
 ```
 
-**IMPORTANT**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolKit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
+**IMPORTANT**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolkit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
 
 ###Accessing Executed Commands and the Command Line Buffer
 
