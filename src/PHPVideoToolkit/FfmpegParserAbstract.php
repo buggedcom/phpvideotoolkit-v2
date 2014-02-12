@@ -240,6 +240,12 @@
                 $version = $matches[1];
             }
             
+//          avconv version 0.8.9-4:0.8.9-0ubuntu0.12.04.1, Copyright (c) 2000-2013 the Libav developers built on Nov 9 2013 19:08:00 with gcc 4.6.3
+            if($version === null && preg_match('/avconv version\s+([^:]+):/msUi', $raw_data, $matches) > 0)
+            {
+                $version = $matches[1];
+            }
+
 //          get the version from -version
             if($version === null)
             {
