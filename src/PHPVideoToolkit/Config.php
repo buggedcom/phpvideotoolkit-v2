@@ -31,13 +31,14 @@
         protected $_ffmpeg;
         protected $_ffprobe;
         protected $_yamdi;
-        protected $_temp_directory;
         protected $_qtfaststart;
-        protected $_force_enable_qtfaststart;
+        protected $_temp_directory;
         protected $_gif_transcoder;
         protected $_gifsicle;
         protected $_convert;
         protected $_php_exec_infinite_timelimit;
+        protected $_force_enable_qtfaststart;
+        protected $_force_enable_flv_meta;
 
         /**
          * Get the Instance of self
