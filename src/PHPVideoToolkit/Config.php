@@ -161,18 +161,19 @@
                     
                 case 'temp_directory' :
                 
+                    $original_value = $value;
                     $value = realpath($value);
                     if(empty($value) === true || is_dir($value) === false)
                     {
-                        throw new ConfigSetException('`temp_directory` "'.$value.'" does not exist or is not a directory.');
+                        throw new ConfigSetException('`temp_directory` "'.$original_value.'" does not exist or is not a directory.');
                     }
                     else if(is_readable($value) === false)
                     {
-                        throw new ConfigSetException('`temp_directory` "'.$value.'" is not readable.');
+                        throw new ConfigSetException('`temp_directory` "'.$original_value.'" is not readable.');
                     }
                     else if(is_writable($value) === false)
                     {
-                        throw new ConfigSetException('`temp_directory` "'.$value.'" is not writeable.');
+                        throw new ConfigSetException('`temp_directory` "'.$original_value.'" is not writeable.');
                     }
                     
                     $this->{'_'.$key} = $value;
