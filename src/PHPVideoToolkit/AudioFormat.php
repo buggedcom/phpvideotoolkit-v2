@@ -152,12 +152,12 @@
 //          updated. thanks to Varon for providing the research
             if(in_array($audio_codec, array('mp3', 'libmp3lame')) === true)
             {
-                $audio_codec = in_array('libmp3lame',$codecs) ? 'libmp3lame' : 'mp3';
+                $audio_codec = in_array('libmp3lame', $codecs) === true ? 'libmp3lame' : 'mp3';
             }
 //          fix vorbis
-            else if($audio_codec === 'vorbis' || $audio_codec === 'libvorbis' )
+            else if($audio_codec === 'vorbis' || $audio_codec === 'libvorbis')
             {
-                $audio_codec = isset($codecs['libvorbis']) === true ? 'libvorbis' : 'vorbis';
+                $audio_codec = in_array('libvorbis', $codecs) === true ? 'libvorbis' : 'vorbis';
             }
             
             if(in_array($audio_codec, $codecs) === false)
