@@ -152,7 +152,7 @@
 //          updated. thanks to Varon for providing the research
             if(in_array($audio_codec, array('mp3', 'libmp3lame')) === true)
             {
-                $audio_codec = isset($codecs['libmp3lame']) === true ? 'libmp3lame' : 'mp3';
+                $audio_codec = in_array('libmp3lame',$codecs) ? 'libmp3lame' : 'mp3';
             }
 //          fix vorbis
             else if($audio_codec === 'vorbis' || $audio_codec === 'libvorbis' )
