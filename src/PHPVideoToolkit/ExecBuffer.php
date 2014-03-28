@@ -230,25 +230,26 @@
          */
         protected function _run($callback)
         {
-//          get the buffer regardless of wether or not there is a callback as it updates and 
-//          checks for the completion of the command.
-            $buffer = $this->getBuffer();
-            
-//          get the buffer to give to the
-            if($callback !== null && is_callable($callback) === true)
-            {
-                call_user_func($callback, $this, $buffer, false);
+            while($this->_running !== false) {
+//              get the buffer regardless of wether or not there is a callback as it updates and 
+//              checks for the completion of the command.
+                $buffer = $this->getBuffer();
+
+//              get the buffer to give to the
+                if($callback !== null && is_callable($callback) === true)
+                {
+                    call_user_func($callback, $this, $buffer, false);
+                }
+
+//              if we have finished running the loop then break here.
+                if($this->_running === false)
+                {
+                    break;
+                }
+
+//              still running so wait and then run again.
+                $this->wait($this->_callback_period_interval);
             }
-            
-//          if we have finished running the loop then break here.
-            if($this->_running === false)
-            {
-                return;
-            }
-            
-//          still running so wait and then run again.
-            $this->wait($this->_callback_period_interval);
-            $this->_run($callback);
         }
         
         /**
