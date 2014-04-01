@@ -165,6 +165,11 @@
             return $this->_media_input_format;
         }
 
+        public function getDefaultFormatClassName()
+        {
+            return 'Format';
+        }
+
         /**
          * Returns the default (empty) input format for the type of media object this class is.
          *
@@ -176,7 +181,7 @@
         public function getDefaultFormat($type, $format=null)
         {
             // $format is purposely ignored
-            return $this->_getDefaultFormat($type, 'Format', null);
+            return $this->_getDefaultFormat($type, $this->getDefaultFormatClassName(), null);
         }
         
         /**
@@ -643,6 +648,28 @@
             
             return $output;
         }
+
+        /**
+         * Converts a string path and output format into a MultiOutput object.
+         *
+         * @access protected
+         * @author: Oliver Lillie
+         * @param  string $save_path The string based path of a MultiObject.
+         * @param  Format $output_format An output format object.
+         * @return MultiObject
+         */
+        protected function _convertOutputPathToMultiOutput($save_path=null, Format $output_format=null)
+        {
+            $class = 'MultiObject'; // prevents unneccesary autoload.
+            if($save_path instanceof $class === true)
+            {
+                return $save_path;
+            }
+            $multi_output = new MultiOutput(null, null, $this->_config);
+            $multi_output->setDefaultOutputFormat($this->getDefaultFormatClassName());
+            $multi_output->addOutput($save_path, $output_format);
+            return $multi_output;
+        }
         
         /**
          * Saves any changes to the media file to the given save path.
@@ -663,9 +690,30 @@
          */
         public function save($save_path=null, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
         {
-//          pre process all of the common functionality and pre process the output format.
-            $this->_savePreProcess($output_format, $save_path, $overwrite, $progress_handler);
-            
+//          set the input files.
+            $this->_process->setInputPath($this->_media_file_path);
+
+//          loop and process the save path to multioutput so we can loop
+            $multi_output = $this->_convertOutputPathToMultiOutput($save_path, $output_format);
+            $index = 0;
+            foreach ($multi_output as $save_path => $output_format)
+            {
+//              increment the output index so the process moves on to the next process to build if the loop continues.
+                $this->_process->setOutputIndex($index);
+                $index += 1;
+
+//              pre process all of the common functionality and pre process the output format.
+                $this->_savePreProcess($output_format, $save_path, $overwrite);
+
+//              add the commands from the output format to the exec buffer
+//              NOTE; this cannot be done in _savePreProcess as it must be done after, to ensure all the subclass
+//              _savePreProcess functionality and main media class functionality is properly executed.
+                $this->_saveAddOutputFormatCommands($output_format);
+
+//              update the output path as the processing path?
+                $this->_process->setOutputPath($this->_processing_path);
+            }
+
 //          set the progress handler 
             if($progress_handler !== null)
             {
@@ -673,17 +721,10 @@
                 $this->_process->attachProgressHandler($progress_handler);
             }
             
-//          add the commands from the output format to the exec buffer
-//          NOTE; this cannot be done in _savePreProcess as it must be done after, to ensure all the subclass
-//          _savePreProcess functionality and main media class functionality is properly executed.
-            $this->_saveAddOutputFormatCommands($output_format);
-
-//          set the processing output path
 //          exec the buffer
 //          set the blocking mode
 //          and execute the ffmpeg process.
-            $this->_process->setOutputPath($this->_processing_path)
-                           ->getExecBuffer()
+            $this->_process->getExecBuffer()
                            ->setBlocking($this->_blocking === null ? true : $this->_blocking)
                            ->execute();
             
@@ -703,9 +744,9 @@
          * will IMMEDIATELY continue. PHP will continue, in all likelyhood, exit before the ffmpeg has
          * completed the transcoding of any output.
          *
-         * If you need to monitor the output for completion or processing then you can supplied a Processor
-         * object that will setup monitoring dependant on which processor is supplied.
-         *
+         * If you need to monitor the output for completion or processing then you can supplied a progress handler to
+         * return information about the process.
+         * 
          * @access public
          * @author Oliver Lillie
          * @param string $save_path 
@@ -749,10 +790,9 @@
          * @param Format $output_format 
          * @param string $save_path 
          * @param string $overwrite 
-         * @param ProgressHandlerAbstract $progress_handler 
          * @return void
          */
-        protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)
+        protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite)
         {
 //          do some processing on the input format
             // $this->_processInputFormat();
@@ -835,9 +875,6 @@
                     throw new Exception('Un-recognised file extension. Please call setFormat() on the output format to set the format of the output media.');
                 }
             }
-            
-//          set the input files.
-            $this->_process->setInputPath($this->_media_file_path);
             
 //          process the overwrite status
             switch($overwrite)
@@ -1014,7 +1051,10 @@
                 $commands = $output_format->getCommandsHash();
                 if(empty($commands) === false)
                 {
-                    $this->_process->addCommands($commands);
+                    foreach ($commands as $key => $value)
+                    {
+                        $this->_process->addCommand($key, $value);
+                    }
                 }
             }
         }
