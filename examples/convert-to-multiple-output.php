@@ -17,7 +17,7 @@
 
         $format = new \PHPVideoToolkit\VideoFormat();
         $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_QQVGA);
-        $output->addOutput('./output/big_buck_bunny.3gp');
+        $output->addOutput('./output/big_buck_bunny.3gp', $format);
 
         $extracted_output = $video->save($output);
         
