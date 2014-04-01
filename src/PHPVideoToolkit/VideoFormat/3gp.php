@@ -24,7 +24,7 @@
         {
             parent::__construct($input_output_type, $config);
             
-            $this->_restricted_audio_codecs = array('aac', 'amr');
+            $this->_restricted_audio_codecs = array('aac', 'amr', 'mp3', 'libmp3lame');
             $this->_restricted_audio_bitrates = array('4.75k', '5.15k', '5.9k', '6.7k', '7.4k', '7.95k', '8k', '10.2k', '12k', '16k', '48k', '56k', '64k', '96k', '112k', '128k', '160k', '192k', '224k', '256k', '320k');
             $this->_restricted_audio_sample_frequencies = array(8000, 11025, 12000, 16000, 22050, 24000, 32000, 44100, 48000);
 
