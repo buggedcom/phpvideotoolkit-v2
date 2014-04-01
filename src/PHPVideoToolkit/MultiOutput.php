@@ -139,7 +139,6 @@
             
 //          check the requested class exists
             $class_name = '\\PHPVideoToolkit\\'.$default_class_name.(empty($format) === false ? '_'.ucfirst(strtolower($format)) : '');
-            Trace::vars($class_name);
             if(class_exists($class_name) === false)
             {
                 $requested_class_name = $class_name;
