@@ -728,10 +728,27 @@
 //          exec the buffer
 //          set the blocking mode
 //          and execute the ffmpeg process.
-            $this->_process->getExecBuffer()
-                           ->setBlocking($this->_blocking === null ? true : $this->_blocking)
-                           ->execute();
-            
+            $buffer = $this->_process->setOutputPath($this->_processing_path)
+                                     ->getExecBuffer()
+                                     ->setBlocking($this->_blocking === null ? true : $this->_blocking);
+
+            if($progress_handler !== null && $progress_handler->getNonBlockingCompatibilityStatus() === false)
+            {
+                $buffer->execute(
+                    function() use ($progress_handler)
+                    {
+                        if($progress_handler !== null)
+                        {
+                            $progress_handler->callback();
+                        }
+                    }
+                );
+            }
+            else
+            {
+                $buffer->execute();
+            }
+
 //          now we work out what we are returning as it depends on the blocking status.
             if($this->_blocking === true)
             {
