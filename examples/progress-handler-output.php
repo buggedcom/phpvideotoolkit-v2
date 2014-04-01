@@ -2,37 +2,53 @@
 
     include_once './includes/bootstrap.php';
     
+    echo '<a href="?method=blocking">Blocking</a> | <a href="?method=non-blocking">Non blocking</a><br />';
+    
     try
     {
         $video = new \PHPVideoToolkit\Video($example_video_path, $config);
+        $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(70));
         $process = $video->getProcess();
 
-        $progress_handler = new \PHPVideoToolkit\ProgressHandlerOutput(function($data)
+        if(isset($_GET['method']) === true && $_GET['method'] === 'blocking')
         {
-        	// echo '<pre>'.print_r($data, true).'</pre>';
-            // do something here...
+            echo '<h2>Blocking Method</h2>';
+
+            // If you use a blocking save but want to handle the progress during the block, then assign a callback within
+            // the constructor of the progress handler.
             // IMPORTANT NOTE: most modern browser don't support output buffering any more.
-        }, $config);
-        
-        /*
-         ...or...
+            $progress_data = array();
+            $progress_handler = new \PHPVideoToolkit\ProgressHandlerOutput(function($data) use (&$progress_data)
+            {
+                // do something here like log to file or db.
+                array_push($progress_data, round($data['percentage'], 2).': '.round($data['run_time'], 2));
+            }, $config);
 
-         $progress_handler = new ProgressHandlerOutput(null, $config);
+            $output = $video->purgeMetaData()
+                            ->setMetaData('title', 'Hello World')
+                            ->save('./output/big_buck_bunny.3gp', null, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
+            
+            array_unshift($progress_data, 'Percentage Completed: Time taken');
+            \PHPVideoToolkit\Trace::vars(implode(PHP_EOL, $progress_data));
+        }
+        else
+        {
+            echo '<h2>Non Blocking Method</h2>';
 
-         ...then after a call to saveNonBlocking...
+            // use a non block save to probe the progress handler after the save has been made.
+            // IMPORTANT: this method only works with ->saveNonBlocking as otherwise the progress handler
+            // probe will quit after one cycle.
+            $progress_handler = new \PHPVideoToolkit\ProgressHandlerOutput(null, $config);
+            $output = $video->purgeMetaData()
+                            ->setMetaData('title', 'Hello World')
+                            ->saveNonBlocking('./output/big_buck_bunny.3gp', null, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
+
+            while($progress_handler->completed !== true)
+            {
+                \PHPVideoToolkit\Trace::vars($progress_handler->probe(true, 1));
+            }
+        }
          
-         while($progress_handler->completed !== true)
-         {
-             // note setting true in probe() automatically tells the probe to wait after the data is returned.
-             echo '<pre>'.print_r($progress_handler->probe(true), true).'</pre>';
-         }
-         
-        */
-
-        $output = $video->purgeMetaData()
-                        ->setMetaData('title', 'Hello World')
-                        ->save('./output/big_buck_bunny.3gp', null, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
-
         echo '<h1>Executed Command</h1>';
         \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
         echo '<hr /><h1>FFmpeg Process Messages</h1>';

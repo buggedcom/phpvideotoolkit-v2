@@ -73,7 +73,7 @@
         {
             if($this->_wait_on_next_probe === true)
             {
-                if(is_int($seconds) === false)
+                if(is_int($seconds) === false && is_float($seconds) === false)
                 {
                     throw new Exception('$seconds must be an integer.');
                 }
@@ -95,7 +95,7 @@
             if(is_callable($this->_callback) === true)
             {
                 $data = $this->_processOutputFile();
-                call_user_func($this->_callback, $data, $output_object);
+                call_user_func($this->_callback, $data);
             }
         }
         
