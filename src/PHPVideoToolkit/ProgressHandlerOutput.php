@@ -57,6 +57,7 @@
                     
                 if($matches[4][$last_key] === 'L')
                 {
+                    $return_data['finished'] = true;
                     if($return_data['percentage'] < 99.5)
                     {
                         $return_data['interrupted'] = true;
@@ -64,6 +65,7 @@
                     else
                     {
                         $return_data['percentage'] = 100;
+                        $return_data['completed'] = true;
                     }
                 }
                     
