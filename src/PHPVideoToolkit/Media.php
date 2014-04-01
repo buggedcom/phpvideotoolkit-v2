@@ -651,7 +651,9 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $save_path 
+         * @param mixed $save_path If a string then it is treated as a single output and the argument is the output path
+         *  of the generated file, otherwise if a PHPVideoToolkit\MultiOutput object is given then we treat the output
+         *  as multiple output.
          * @param Format $output_format 
          * @param string $overwrite 
          * @param ProgressHandlerAbstract $progress_handler
