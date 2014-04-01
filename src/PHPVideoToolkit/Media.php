@@ -660,12 +660,12 @@
          */
         protected function _convertOutputPathToMultiOutput($save_path=null, Format $output_format=null)
         {
-            $class = 'MultiObject'; // prevents unneccesary autoload.
+            $class = 'PHPVideoToolkit\MultiOutput'; // prevents unneccesary autoload.
             if($save_path instanceof $class === true)
             {
                 return $save_path;
             }
-            $multi_output = new MultiOutput(null, null, $this->_config);
+            $multi_output = new MultiOutput($this->_config);
             $multi_output->setDefaultOutputFormat($this->getDefaultFormatClassName());
             $multi_output->addOutput($save_path, $output_format);
             return $multi_output;
@@ -678,12 +678,16 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param mixed $save_path If a string then it is treated as a single output and the argument is the output path
+         * @param MultiOutput $save_path If a string then it is treated as a single output and the argument is the output path
          *  of the generated file, otherwise if a PHPVideoToolkit\MultiOutput object is given then we treat the output
          *  as multiple output.
-         * @param Format $output_format 
-         * @param string $overwrite 
-         * @param ProgressHandlerAbstract $progress_handler
+         * @param Format $output_format It is the output format for the saved file.
+         * @param string $overwrite One of the following constants determining the overwrite status of the save.
+         *  Media::OVERWRITE_FAIL - the save call will fail with an excetion if the save path already exists.
+         *  Media::OVERWRITE_EXISTING - the save call will overwrite any existing file with the same name.
+         *  Media::OVERWRITE_UNIQUE - the save call will augment the save path with a unique hash so that if a file with
+         *      the same name exists then there is no overwrite.
+         * @param ProgressHandlerAbstract $progress_handler The progress handler object to supply to the save process.
          * @return mixed If the blocking mode of the process is set to block, the it returns a new 
          *  Media object on a successfull completion, otherwise an exception is thrown. If the blocking
          *  mode is non blocking then the underlying FfmpegProcess is returned.

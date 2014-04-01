@@ -35,17 +35,12 @@
          * @param  Format $output_format If provided then it is given as the initial output paths's output format object.
          * @param  Config $config The PHPVideoToolkit configuration options.
          */
-        public function __construct($output_path=null, Format $output_format=null, Config $config=null)
+        public function __construct(Config $config=null)
         {
             $this->_config = $config === null ? Config::getInstance() : $config;
 
             $this->_default_output_format = 'Format';
             $this->_output = array();
-
-            if(empty($output_path) === false)
-            {
-                $this->addOutput($output_path, $output_format);
-            }
         }
 
         public function getIterator()

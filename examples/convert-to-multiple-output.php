@@ -9,21 +9,25 @@
         
         $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20));
 
-        $output = new \PHPVideoToolkit\MultiOutput();
+        $multi_output = new \PHPVideoToolkit\MultiOutput($config);
 
-        $format = new \PHPVideoToolkit\VideoFormat();
+        $flv_output = './output/big_buck_bunny.multi1.ogg';
+        $format = \PHPVideoToolkit\Format::getFormatFor($flv_output, $config, 'VideoFormat');
         $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_SQCIF);
-        $output->addOutput('./output/big_buck_bunny.mp4', $format);
+        $multi_output->addOutput($flv_output, $format);
 
-        $format = new \PHPVideoToolkit\VideoFormat();
-        $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_QQVGA);
-        $output->addOutput('./output/big_buck_bunny.3gp', $format);
+        $threegp_output = './output/big_buck_bunny.multi2.3gp';
+        $format = \PHPVideoToolkit\Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+        $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_XGA);
+        $multi_output->addOutput($threegp_output, $format);
 
-        $extracted_output = $video->save($output);
+        $extracted_output = $video->save($multi_output, null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
         
         
         echo '<h1>Executed Command</h1>';
         \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
+        echo '<h1>Executed Command RAW</h1>';
+        \PHPVideoToolkit\Trace::vars($process->getExecutedCommand(true));
         echo '<hr /><h1>FFmpeg Process Messages</h1>';
         \PHPVideoToolkit\Trace::vars($process->getMessages());
         echo '<hr /><h1>Buffer Output</h1>';
@@ -42,6 +46,8 @@
         {
             echo '<hr /><h2>Executed Command</h2>';
             \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
+            echo '<h1>Executed Command RAW</h1>';
+            \PHPVideoToolkit\Trace::vars($process->getExecutedCommand(true));
             echo '<hr /><h2>FFmpeg Process Messages</h2>';
             \PHPVideoToolkit\Trace::vars($process->getMessages());
             echo '<hr /><h2>Buffer Output</h2>';
@@ -54,4 +60,11 @@
         \PHPVideoToolkit\Trace::vars($e->getMessage());
         echo '<h2>\PHPVideoToolkit\Exception</h2>';
         \PHPVideoToolkit\Trace::vars($e);
+        if($process)
+        {
+            echo '<hr /><h2>Executed Command</h2>';
+            \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
+            echo '<h1>Executed Command RAW</h1>';
+            \PHPVideoToolkit\Trace::vars($process->getExecutedCommand(true));
+        }
     }
