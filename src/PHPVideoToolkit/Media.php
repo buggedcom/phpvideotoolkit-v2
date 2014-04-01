@@ -580,7 +580,7 @@
                     }
                     if(empty($this->_extract_segment['seek']) === false)
                     {
-                        $duration_seconds -= $this->_extract_segment['preseek']->total_seconds;
+                        $duration_seconds -= $this->_extract_segment['seek']->total_seconds;
                     }
                 }
                 
@@ -814,7 +814,7 @@
             }
             $save_path = $save_dir.DIRECTORY_SEPARATOR.$basename;
             
-//          check for a regonised output format, and if one is not supplied
+//          check for a recognised output format, and if one is not supplied
 //          then check the a the format has been set in the output format, if not through an error and exit
             $ext = pathinfo($save_path, PATHINFO_EXTENSION);
             if(empty($ext) === true)
