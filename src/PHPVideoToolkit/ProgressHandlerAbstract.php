@@ -118,11 +118,11 @@
             $completed = false;
             $raw_data = $this->_getRawData();
             
+//          parse the raw data into the return data
+            $this->_parseOutputData($return_data, $raw_data);
+            
             if(empty($raw_data) === false)
             {
-//              parse the raw data into the return data
-                $this->_parseOutputData($return_data, $raw_data);
-                
 //              check to see if the process has completed
                 if($return_data['percentage'] >= 100)
                 {

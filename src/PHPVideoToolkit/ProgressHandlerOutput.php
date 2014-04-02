@@ -24,6 +24,12 @@
         {
             $return_data['status'] = 'pending';
             $return_data['started'] = true;
+
+            if(empty($raw_data) === true)
+            {
+                return;
+            }
+
             if(preg_match_all('/Input\s#[0-9]+,\s+[^\s]+,\s+from\s+(.*):/', $raw_data, $input_matches) > 0)
             {
                 array_walk($input_matches[1], function(&$value)

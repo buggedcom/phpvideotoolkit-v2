@@ -55,6 +55,14 @@
         protected function _parseOutputData(&$return_data, $raw_data)
         {
             $return_data['started'] = true;
+
+            if(empty($raw_data) === true)
+            {
+                $return_data['status'] = 'decoding';
+                return;
+            }
+
+            $return_data['status'] = 'encoding';
             
             $return_data['process_file'] = $this->_progress_file;
 
@@ -74,7 +82,7 @@
                 }
                 $parts[$key] = $data;
             }
-            
+
             if(empty($parts) === false)
             {
                 $last_key = count($parts)-1;
@@ -93,11 +101,13 @@
                     if($return_data['percentage'] < 99.5)
                     {
                         $return_data['interrupted'] = true;
+                        $return_data['status'] = 'interrupted';
                     }
                     else
                     {
                         $return_data['percentage'] = 100;
                         $return_data['completed'] = true;
+                        $return_data['status'] = 'completed';
                     }
                 }
                     
