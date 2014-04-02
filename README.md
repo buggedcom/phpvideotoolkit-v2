@@ -26,6 +26,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 - [Changing Codecs of the audio or video stream](#changing-codecs-of-the-audio-or-video-stream)
 - [Non-Blocking Saves](#non-blocking-saves)
 - [Encoding with Progress Handlers](#encoding-with-progress-handlers)
+- [Encoding Multiple Output Files](#encoding-multiple-output-files)
 - [Accessing Executed Commands and the Command Line Buffer](#accessing-executed-commands-and-the-command-line-buffer)
 - [Supplying custom commands](#supplying-custom-commands)
 - [Imposing a processing timelimit](#imposing-a-processing-timelimit)
@@ -489,6 +490,33 @@ exit;
 ```
 
 **IMPORTANT**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolkit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
+
+###Encoding Multiple Output Files
+
+FFmpeg allows you to encode multiple output formats from a single command. PHPVideoToolkit allows you to perform this functionality as well. This functionality is essentially the same process as performing multiple saves, however has the added benefit of lower overhead because the input file only has to be read into memory once before the encoding takes place. It is recommended that you use this method if you are outputting more than one version of the media. There are of course several caveats when using this method however. 
+
+When splitting files into multiple segments or extracting portions of a video the transformations that take place are performed on all the outputed media. An example of this functionality can be found in ```convert-to-multiple-output.php```. However a quick example is also shown below.
+
+```php
+namespace PHPVideoToolkit;
+
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+
+$multi_output = new MultiOutput($config);
+
+$ogg_output = './output/big_buck_bunny.multi1.ogg';
+$format = Format::getFormatFor($ogg_output, $config, 'VideoFormat');
+$format->setVideoDimensions(VideoFormat::DIMENSION_SQCIF);
+$multi_output->addOutput($ogg_output, $format);
+
+$threegp_output = './output/big_buck_bunny.multi2.3gp';
+$format = Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+$format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
+$multi_output->addOutput($threegp_output, $format);
+
+$output = $video->save($multi_output, null, Media::OVERWRITE_EXISTING);
+
+```
 
 ###Accessing Executed Commands and the Command Line Buffer
 

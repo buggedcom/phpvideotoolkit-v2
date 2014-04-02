@@ -11,10 +11,10 @@
 
         $multi_output = new \PHPVideoToolkit\MultiOutput($config);
 
-        $flv_output = './output/big_buck_bunny.multi1.ogg';
-        $format = \PHPVideoToolkit\Format::getFormatFor($flv_output, $config, 'VideoFormat');
+        $ogg_output = './output/big_buck_bunny.multi1.ogg';
+        $format = \PHPVideoToolkit\Format::getFormatFor($ogg_output, $config, 'VideoFormat');
         $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_SQCIF);
-        $multi_output->addOutput($flv_output, $format);
+        $multi_output->addOutput($ogg_output, $format);
 
         $threegp_output = './output/big_buck_bunny.multi2.3gp';
         $format = \PHPVideoToolkit\Format::getFormatFor($threegp_output, $config, 'VideoFormat');
