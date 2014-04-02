@@ -493,7 +493,7 @@ exit;
 
 ###Encoding Multiple Output Files
 
-FFmpeg allows you to encode multiple output formats from a single command. PHPVideoToolkit allows you to perform this functionality as well. This functionality is essentially the same process as performing multiple saves, however has the added benefit of lower overhead because the input file only has to be read into memory once before the encoding takes place. It is recommended that you use this method if you are outputting more than one version of the media. There are of course several caveats when using this method however. 
+FFmpeg allows you to [encode multiple output formats from a single command](https://trac.ffmpeg.org/wiki/Creating%20multiple%20outputs). PHPVideoToolkit allows you to perform this functionality as well. This functionality is essentially the same process as performing multiple saves, however has the added benefit of lower overhead because the input file only has to be read into memory once before the encoding takes place. It is recommended that you use this method if you are outputting more than one version of the media. There are of course several caveats when using this method however. 
 
 When splitting files into multiple segments or extracting portions of a video the transformations that take place are performed on all the outputed media. An example of this functionality can be found in ```convert-to-multiple-output.php```. However a quick example is also shown below.
 
