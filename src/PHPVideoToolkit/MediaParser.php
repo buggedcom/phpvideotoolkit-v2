@@ -322,19 +322,19 @@
 //                  this is a special fix for correctly reading width and height from an ffmpeg rotated video.
 //                  not entirely sure if this is the same across the board for every video or just ffmpeg rotated videos.
                     $dimensions = $dimensions_matches;
-                    if($data['pixel_aspect_ratio'] !== null)
+                    if($data['display_aspect_ratio'] !== null)
                     {
                         $pixel_ratio = false;
-                        if(preg_match('/^[0-9]+.[0-9]+$/', $data['pixel_aspect_ratio'], $_m) > 0)
+                        if(preg_match('/^[0-9]+\.[0-9]+$/', $data['display_aspect_ratio'], $_m) > 0)
                         {
                             $pixel_ratio = array(
-                                $data['pixel_aspect_ratio'],
+                                $data['display_aspect_ratio'],
                                 1
                             );
                         }
-                        else if(preg_match('/^[0-9]+:[0-9]+$/', $data['pixel_aspect_ratio'], $_m) > 0)
+                        else if(preg_match('/^[0-9]+:[0-9]+$/', $data['display_aspect_ratio'], $_m) > 0)
                         {
-                            $pixel_ratio = explode(':', $data['pixel_aspect_ratio'], 2);
+                            $pixel_ratio = explode(':', $data['display_aspect_ratio'], 2);
                         }
                         if($pixel_ratio !== false)
                         {
