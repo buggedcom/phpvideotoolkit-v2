@@ -111,12 +111,19 @@
         {
             parent::updateFormatOptions($save_path);
             
+            $video_data = $this->_media_object->readVideoComponent();
+
+//          check to see if the aspect ratio has fixed the width and heights, if so we must apply the size to any output.
+            if($video_data['dimensions']['aspect_ratio_fix_warning'] === true)
+            {
+                $this->setVideoDimensions($video_data['dimensions']['width'], $video_data['dimensions']['height']);
+            }
+
 //          if we have a rotation and it's set to true then we must autodetect the rotation according to the
 //          meta data available.
 //          !IMPORTANT that auto orientation is done before any automatic flipping.
             if(empty($this->_format['video_rotation']) === false && $this->_format['video_rotation'] === true)
             {
-                $video_data = $this->_media_object->readVideoComponent();
                 if(empty($video_data['rotation']) === false)
                 {
                     $current_rotation = (int) $video_data['rotation'];
