@@ -271,6 +271,7 @@
                     'dimensions'            =>  array(
                         'width'                 => null,
                         'height'                => null,
+                        'aspect_ratio_fix_warning'=> false,
                     ),
                     'bitrate'               => null,
                     'time_bases'            => array(),
@@ -328,12 +329,11 @@
                         {
                             $dimensions[1] = $dimensions_matches[2];
                             $dimensions[2] = $dimensions_matches[1];
+                            $data['dimensions']['aspect_ratio_fix_warning'] = true;
                         }
                     }
-                    $data['dimensions'] = array(
-                        'width' => (float) $dimensions[1],
-                        'height' => (float) $dimensions[2],
-                    );
+                    $data['dimensions']['width'] = (float) $dimensions[1];
+                    $data['dimensions']['height'] = (float) $dimensions[2];
                 }
                 $dimension_match = $dimensions_matches[0];
                 array_push($other_parts, $dimension_match);
