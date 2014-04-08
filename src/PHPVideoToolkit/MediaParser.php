@@ -324,12 +324,26 @@
                     $dimensions = $dimensions_matches;
                     if($data['pixel_aspect_ratio'] !== null)
                     {
-                        $pixel_ratio = explode(':', $data['pixel_aspect_ratio'], 2);
-                        if($pixel_ratio[0] < $pixel_ratio[1] && $dimensions_matches[1] > $dimensions_matches[2])
+                        $pixel_ratio = false;
+                        if(preg_match('/^[0-9]+.[0-9]+$/', $data['pixel_aspect_ratio'], $_m) > 0)
                         {
-                            $dimensions[1] = $dimensions_matches[2];
-                            $dimensions[2] = $dimensions_matches[1];
-                            $data['dimensions']['aspect_ratio_fix_warning'] = true;
+                            $pixel_ratio = array(
+                                $data['pixel_aspect_ratio'],
+                                1
+                            );
+                        }
+                        else if(preg_match('/^[0-9]+:[0-9]+$/', $data['pixel_aspect_ratio'], $_m) > 0)
+                        {
+                            $pixel_ratio = explode(':', $data['pixel_aspect_ratio'], 2);
+                        }
+                        if($pixel_ratio !== false)
+                        {
+                            if($pixel_ratio[0] < $pixel_ratio[1] && $dimensions_matches[1] > $dimensions_matches[2])
+                            {
+                                $dimensions[1] = $dimensions_matches[2];
+                                $dimensions[2] = $dimensions_matches[1];
+                                $data['dimensions']['aspect_ratio_fix_warning'] = true;
+                            }
                         }
                     }
                     $data['dimensions']['width'] = (float) $dimensions[1];
