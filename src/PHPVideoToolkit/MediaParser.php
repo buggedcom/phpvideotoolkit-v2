@@ -308,12 +308,31 @@
                     $data['language'] = $lang_matches[1];
                 }
 
+//              get the ratios
+                if(preg_match('/\[[P|S]AR\s+([0-9\:\.]+)\s+DAR\s+([0-9\:\.]+)\]/', $matches[0], $ratio_matches) > 0)
+                {
+                    $data['pixel_aspect_ratio'] = $ratio_matches[1];
+                    $data['display_aspect_ratio'] = $ratio_matches[2];
+                }
+                
 //              get the dimension parts
                 if(preg_match('/([1-9][0-9]*)x([1-9][0-9]*)/', $matches[2], $dimensions_matches) > 0)
                 {
+//                  this is a special fix for correctly reading width and height from an ffmpeg rotated video.
+//                  not entirely sure if this is the same across the board for every video or just ffmpeg rotated videos.
+                    $dimensions = $dimensions_matches;
+                    if($data['pixel_aspect_ratio'] !== null)
+                    {
+                        $pixel_ratio = explode(':', $data['pixel_aspect_ratio'], 2);
+                        if($pixel_ratio[0] < $pixel_ratio[1] && $dimensions_matches[1] > $dimensions_matches[2])
+                        {
+                            $dimensions[1] = $dimensions_matches[2];
+                            $dimensions[2] = $dimensions_matches[1];
+                        }
+                    }
                     $data['dimensions'] = array(
-                        'width' => (float) $dimensions_matches[1],
-                        'height' => (float) $dimensions_matches[2],
+                        'width' => (float) $dimensions[1],
+                        'height' => (float) $dimensions[2],
                     );
                 }
                 $dimension_match = $dimensions_matches[0];
@@ -342,13 +361,6 @@
                     $data['frames']['total'] = $duration_timecode !== null ? ceil($duration_timecode->seconds * $data['frames']['rate']) : null;
                 }
 
-//              get the ratios
-                if(preg_match('/\[[P|S]AR\s+([0-9\:\.]+)\s+DAR\s+([0-9\:\.]+)\]/', $matches[0], $ratio_matches) > 0)
-                {
-                    $data['pixel_aspect_ratio'] = $ratio_matches[1];
-                    $data['display_aspect_ratio'] = $ratio_matches[2];
-                }
-                
 //              get the bit rate
                 if(preg_match('/([0-9]{1,4})\s+(kb|mb)\/s/i', $matches[0], $bitrate_matches) > 0)
                 {
