@@ -689,6 +689,22 @@
             else
             {
                 $this->_format['video_rotation'] = $transpose;
+                
+//              if the aspect ratio of the rotated video is not the same as the final video we must update the final outputs
+//              aspect ratio. However, we will only automatically do this if the aspect ratio is not already set.
+                if(in_array($transpose, array(1, 2)) === true && $this->_format['video_aspect_ratio'] === null)
+                {
+                    $video_data = $this->_media_object->readVideoComponent();
+                    $aspect_ratio = $video_data['pixel_aspect_ratio'];
+                    if(preg_match('/^[0-9]+.[0-9]+$/', $aspect_ratio, $_m) > 0)
+                    {
+                        $this->setVideoAspectRatio(1/$aspect_ratio);
+                    }
+                    else if(preg_match('/^([0-9]+):([0-9]+)$/', $aspect_ratio, $matches) > 0)
+                    {
+                        $this->setVideoAspectRatio($matches[2].':'.$matches[1]);
+                    }
+                }
             }
             
             return $this;
