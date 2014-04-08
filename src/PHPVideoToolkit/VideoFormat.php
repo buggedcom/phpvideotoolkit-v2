@@ -301,7 +301,7 @@
          * @param string $force_aspect_ratio 
          * @return void
          */
-        public function setVideoDimensions($width, $height=null, $auto_adjust_dimensions_to_optimal=true, $force_aspect_ratio=false)
+        public function setVideoDimensions($width, $height=null, $auto_adjust_dimensions_to_optimal=false, $force_aspect_ratio=false)
         {
             if($width === null)
             {
