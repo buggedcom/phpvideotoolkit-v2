@@ -59,7 +59,14 @@
         $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_XGA);
         $multi_output->addOutput($threegp_output, $format);
 
-        $aac_output = './output/big_buck_bunny.multi5.aac';
+        $threegp_output = './output/big_buck_bunny.multi5.3gp';
+        $format = \PHPVideoToolkit\Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+        $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_SVGA);
+        $format->setVideoFrameRate(10);
+        $format->videoFlipVertical();
+        $multi_output->addOutput($threegp_output, $format);
+
+        $aac_output = './output/big_buck_bunny.multi6.aac';
         $format = \PHPVideoToolkit\Format::getFormatFor($aac_output, $config, 'AudioFormat');
         $multi_output->addOutput($aac_output, $format);
         
