@@ -40,20 +40,28 @@
 
         $multi_output = new \PHPVideoToolkit\MultiOutput($config);
 
-        $flv_output = './output/big_buck_bunny.multi1.ogg';
-        $format = \PHPVideoToolkit\Format::getFormatFor($flv_output, $config, 'VideoFormat');
+        $mp3_output = './output/big_buck_bunny.multi1.mp3';
+        $format = \PHPVideoToolkit\Format::getFormatFor($mp3_output, $config, 'AudioFormat');
+        $multi_output->addOutput($mp3_output, $format);
+
+        $ogg_output = './output/big_buck_bunny.multi2.ogg';
+        $format = \PHPVideoToolkit\Format::getFormatFor($ogg_output, $config, 'VideoFormat');
         $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_SQCIF);
-        $multi_output->addOutput($flv_output, $format);
+        $multi_output->addOutput($ogg_output, $format);
 
-        $threegp_output = './output/big_buck_bunny.multi2.3gp';
+        $ogg_output = './output/big_buck_bunny.multi3.ogg';
+        $format = \PHPVideoToolkit\Format::getFormatFor($ogg_output, $config, 'VideoFormat');
+        $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_XGA);
+        $multi_output->addOutput($ogg_output, $format);
+
+        $threegp_output = './output/big_buck_bunny.multi4.3gp';
         $format = \PHPVideoToolkit\Format::getFormatFor($threegp_output, $config, 'VideoFormat');
         $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_XGA);
         $multi_output->addOutput($threegp_output, $format);
 
-        $threegp_output = './output/big_buck_bunny.multi3.3gp';
-        $format = \PHPVideoToolkit\Format::getFormatFor($threegp_output, $config, 'VideoFormat');
-        $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_XGA);
-        $multi_output->addOutput($threegp_output, $format);
+        $aac_output = './output/big_buck_bunny.multi5.aac';
+        $format = \PHPVideoToolkit\Format::getFormatFor($aac_output, $config, 'AudioFormat');
+        $multi_output->addOutput($aac_output, $format);
         
         $video = new \PHPVideoToolkit\Video($example_video_path, $config);
         $process = $video->saveNonBlocking($multi_output, null, \PHPVideoToolkit\Video::OVERWRITE_EXISTING);

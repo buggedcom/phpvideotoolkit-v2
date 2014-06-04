@@ -213,17 +213,24 @@
             }
 
 //          parse out the details of the data.
+            $q_regex = '';
+            $size_regex = '';
 //          fucking non standardness in ffmpeg. I'm sure there is a reason for it but for fucks sake there has to be a better way
             if($return_data['output_count'] > 1)
             {
-                $q_regex_array = array();
-                $q_regex = '(?<lastq>L)?q=(?<q>[0-9\.]+)\s';
-                for($i=0; $i<$return_data['output_count']; $i++)
+//              determine how many video outs there are as that dictates the number of q= regexes to add.
+                $count = preg_match_all('/\s*Stream\s*\#([0-9]+):1s*\(und\)\s*:/i', substr($raw_data, strpos($raw_data, 'Output #0')), $matches);
+                if(count($count) !== 0)
                 {
-                    array_push($q_regex_array, str_replace('<q>', '<q'.$i.'>', str_replace('<lastq>', '<lastq'.$i.'>', $q_regex)));
+                    $q_regex_array = array();
+                    $q_regex = '(?<lastq>L)?q=(?<q>[0-9\.]+)\s';
+                    for($i=0; $i<$count; $i++)
+                    {
+                        array_push($q_regex_array, str_replace('<q>', '<q'.$i.'>', str_replace('<lastq>', '<lastq'.$i.'>', $q_regex)));
+                    }
+                    $q_regex = implode('', $q_regex_array);
+                    $size_regex = 'size=\s*(?<size>[0-9\.bkBmg]+)\s';
                 }
-                $q_regex = implode('', $q_regex_array);
-                $size_regex = 'size=\s*(?<size>[0-9\.bkBmg]+)\s';
             }
             else
             {
@@ -241,9 +248,6 @@
                 '(\sdup=\s*(?<dup>[0-9]+))?'.
                 '(\sdrop=\s*(?<drop>[0-9]+))?'.
                 '/';
-                // Trace::vars($raw_data);
-                // Trace::vars($regex);
-                // Trace::vars(preg_match_all($regex, $raw_data, $matches), $matches);
             if(preg_match_all($regex, $raw_data, $matches) > 0)
             {
                 $return_data['status'] = 'encoding';
