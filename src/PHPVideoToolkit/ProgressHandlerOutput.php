@@ -49,28 +49,47 @@
                 $return_data['output_file'] = $return_data['output_count'] === 1 ? $output_matches[1][0] : $output_matches[1];
             }
             $return_data['process_file'] = $this->_ffmpeg_process->getBufferOutput();
+
+//          determine how many video outs there are as that dictates the number of q= regexes to add as well as some others such as frame.
+            $video_stream_count = preg_match_all('/\s*Stream\s*\#([0-9]+):1s*\(und\)\s*:/i', substr($raw_data, strpos($raw_data, 'Output #0')));
+            $q_regex = '';
+            $size_regex = '';
+            $frame_regex = '';
+            $fps_regex = '';
+            if($video_stream_count > 0)
+            {
+                $frame_regex = 'frame=\s*(?<frame>[0-9]+)\s';
+                $fps_regex = 'fps=\s*(?<fps>[0-9\.]+)\s';
+            }
+
 //          parse out the details of the data.
 //          fucking non standardness in ffmpeg. I'm sure there is a reason for it but for fucks sake there has to be a better way
-            if($return_data['output_count'] > 1)
+            if($video_stream_count > 1)
             {
                 $q_regex_array = array();
                 $q_regex = '(?<lastq>L)?q=(?<q>[0-9\.]+)\s';
-                for($i=0; $i<$return_data['output_count']; $i++)
+                for($i=0; $i<$video_stream_count; $i++)
                 {
                     array_push($q_regex_array, str_replace('<q>', '<q'.$i.'>', str_replace('<lastq>', '<lastq'.$i.'>', $q_regex)));
                 }
                 $q_regex = implode('', $q_regex_array);
                 $size_regex = 'size=\s*(?<size>[0-9\.bkBmg]+)\s';
             }
-            else
+            else if($video_stream_count === 1)
             {
                 $q_regex = 'q=(?<q0>[0-9\.]+)\s';
                 $size_regex = '(?<lastsize>L)?size=\s*(?<size>[0-9\.bkBmg]+)\s';
             }
+            else
+            {
+                $size_regex = 'size=\s*(?<size>[0-9\.bkBmg]+)\s';
+            }
+
+//          compile the regex dependant on the numebr of video streams
             $regex = 
                 '/'.
-                'frame=\s*(?<frame>[0-9]+)\s'.
-                'fps=\s*(?<fps>[0-9\.]+)\s'.
+                $frame_regex.
+                $fps_regex.
                 $q_regex.
                 $size_regex.
                 'time=\s*(?<time>[0-9]{2,}:[0-9]{2}:[0-9]{2}.[0-9]+)\s'.
@@ -78,16 +97,14 @@
                 '(\sdup=\s*(?<dup>[0-9]+))?'.
                 '(\sdrop=\s*(?<drop>[0-9]+))?'.
                 '/';
-                // Trace::vars($raw_data);
-                // Trace::vars($regex);
-                // Trace::vars(preg_match_all($regex, $raw_data, $matches), $matches);
+
             if(preg_match_all($regex, $raw_data, $matches) > 0)
             {
                 $return_data['status'] = 'encoding';
 
                 $last_key = count($matches[0])-1;
-                $return_data['frame'] = $matches['frame'][$last_key];
-                $return_data['fps'] = $matches['fps'][$last_key];
+                $return_data['frame'] = isset($matches['frame']) === true ? $matches['frame'][$last_key] : null;
+                $return_data['fps'] = isset($matches['fps']) === true ? $matches['fps'][$last_key] : null;
                 $return_data['size'] = $matches['size'][$last_key];
                 $return_data['duration'] = new Timecode($matches['time'][$last_key], Timecode::INPUT_FORMAT_TIMECODE);
                 $return_data['percentage'] = ($return_data['duration']->total_seconds/$this->_total_duration->total_seconds)*100;
@@ -95,7 +112,7 @@
                 $return_data['drop'] = $matches['drop'][$last_key];
                 
                 $is_last = false;
-                if($return_data['output_count'] > 1)
+                if($video_stream_count > 1)
                 {
                     for($i=0; $i<$return_data['output_count']; $i++)
                     {
@@ -106,10 +123,12 @@
                         }
                     }
                 }
-                else if($matches['lastsize'][$last_key] === 'L')
+                else if(isset($matches['lastsize']) === true && $matches['lastsize'][$last_key] === 'L')
                 {
                     $is_last = true;
                 }
+
+//              if we have the last frame then signal that the process has finished.
                 if($is_last === true)
                 {
                     $return_data['finished'] = true;
