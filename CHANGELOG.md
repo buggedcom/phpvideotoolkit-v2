@@ -1,12 +1,36 @@
+#[2.1.6-beta] [08.04.2014]
+By default image rotation does not automatically modify the aspect ratio settings of rotated output, however this patch fixes that. If an aspect ratio is not already set and a rotation means that the aspect ratio is not the same as the current ratio then a new ratio will be applied.
+This patch also provides automated functionality where if the aspect ratio does not match the width and height, the ratio corrected width and height and height are returned instead of the actual width and height. This will mean that any output processed from a mis matching file will be as expected.
+Relates to issue #22.
+Marked as beta as it may have unintended consequences that could result in errors.
+
+#[2.1.5] [31.03.2014]
+Replaced _run recursive call with a while loop.
+Provides exactly the same functionality with the benefits of no longer gradually increasing memory usage of the PHP process while transcoding. No longer trips up on xdebug.max_nesting_level setting.
+Thanks petewatts.
+
+#[2.1.4] [19.03.2014]
+Bug fix point release. The AudioFormat class was incorrectly checking a comparison via isset rather than in_array. This fixes that problem and potentially any issues you may have had with mp3/vorbis audio encoding.
+
+#[2.1.3] [17.03.2014]
+A bug fix point release for systems when realpath returns false on some systems and thus the configsetexceptions thrown have no path set in the message.
+If you already successfully have PHPVideoToolkit installed or are on a system where realpath returns the directory regardless of whether it exists or not then you can skip this version.
+
+#[2.1.2] [20.02.2014]
+	- Fixes for missing protected config variable
+
+#[2.1.1-dev] [31.01.2014]
+	- Updates to examples and minor fixes to missing probe data
+
 #[2.1.0] [30.01.2014]
-        - Added ProgressHandlerPortable to provide portable accessibility to encoding 
-        progress information
+	- Added ProgressHandlerPortable to provide portable accessibility to encoding 
+	  progress information
 
 #[2.0.0] [22.11.2013]
-        - Fixed various bugs
+		- Fixed various bugs
 
 #[2.0.0] [25.03.2013]
-        - Updated codebase to v2. Main repo is now on github https://github.com/buggedcom/phpvideotoolkit-v2
+		- Updated codebase to v2. Main repo is now on github https://github.com/buggedcom/phpvideotoolkit-v2
 
 #[0.1.5] [06.06.2008] 
 	- REMOVED dependancy on buffering the exec calls to a file, parsing the file and
@@ -90,29 +114,29 @@
 	  Istvan Szakacs for pointing out the error.
 	- CHANGED the way an image sequence is outputted. %d within the naming
 	  of the output files is now for internal use only.
-	  	%index 		- is the old %d and it also accepts numerical padding.
-	  	%timecode 	- is the pattern for hh-mm-ss-fn, where fn is the frame 
+		%index 		- is the old %d and it also accepts numerical padding.
+		%timecode 	- is the pattern for hh-mm-ss-fn, where fn is the frame 
 					  number.
 	- UPDATED example02.php to reflect the changes above.
 	- ADDED ffmpeg-php adapters to provide a pure PHP implementation of the
 	  ffmpeg-php module.
 	- ADDED getID3 to the distribution.
-	 	- @link http://getid3.sourceforge.net/
+		- @link http://getid3.sourceforge.net/
 		- @author James Heinrich <info-at-getid3-dot-org>  (et al)
-	  	- @license GPL and gCL (getID3 Commerical License).
+		- @license GPL and gCL (getID3 Commerical License).
 	- ADDED GifEncoder to the distribution.
-	 	@link http://www.phpclasses.org/browse/package/3163.html
-	 	@link http://phpclasses.gifs.hu/show.php?src=GIFEncoder.class.php
-	  	@author László Zsidi
-	  	@license Freeware.
+		@link http://www.phpclasses.org/browse/package/3163.html
+		@link http://phpclasses.gifs.hu/show.php?src=GIFEncoder.class.php
+		@author László Zsidi
+		@license Freeware.
 	- ADDED example11.php, example12.php to demonstrate the ffmpeg-php
 	  adapters.
 	- CHANGED PHPVideoToolkit::getFileInfo()['audio']['frequency'] to
-      	PHPVideoToolkit::getFileInfo()['audio']['sample_rate']
+		PHPVideoToolkit::getFileInfo()['audio']['sample_rate']
 	- CHANGED PHPVideoToolkit::getFileInfo()['audio']['format'] to 
-	  	PHPVideoToolkit::getFileInfo()['audio']['codec']
+		PHPVideoToolkit::getFileInfo()['audio']['codec']
 	- CHANGED PHPVideoToolkit::getFileInfo()['video']['format'] to 
-	  	PHPVideoToolkit::getFileInfo()['video']['codec']
+		PHPVideoToolkit::getFileInfo()['video']['codec']
 	- ADDED PHPVideoToolkit::getFileInfo()['video']['pixel_format']
 	- ADDED PHPVideoToolkit::getFileInfo()['_raw_info'] which is the raw buffer output
 	- ADDED PHPVideoToolkit::getFileInfo()['duration']['start'] (re-added)
@@ -190,13 +214,13 @@
 	  $overwrite_mode. Instead of a boolean value, it now takes one of three
 	  constants
 			ffmegp::OVERWRITE_FAIL		- means that if a conflict exists the 
-									  	  process will result in and error.
+										  process will result in and error.
 			ffmegp::OVERWRITE_PRESERVE	- means that if a conflict exists the 
-									  	  process will preserve the existing
-									 	  file and report with 
+										  process will preserve the existing
+										  file and report with 
 										  PHPVideoToolkit::RESULT_OK_BUT_UNWRITABLE.
 			ffmegp::OVERWRITE_EXISTING	- means that if a conflict exists the 
-									  	  process will overwrite any existing 
+										  process will overwrite any existing 
 										  file with the new file.
 			ffmegp::OVERWRITE_UNIQUE	- means that every filename is 
 										  prepended with a unique hash to
@@ -241,28 +265,28 @@
 	- Fixed bug in setOutput.
 
 #[0.0.7] [01.08.2007] 
-    - Added FFMPEG_FORMAT_Y4MP format (yuv4mpegpipe).
-    - Added extra information to install.txt
-    - Added public function hasCommand.
+	- Added FFMPEG_FORMAT_Y4MP format (yuv4mpegpipe).
+	- Added extra information to install.txt
+	- Added public function hasCommand.
 	- Added public functions addVideo, addVideos
-    - Changed the behavior of setInputFile to take into account the addVideos
+	- Changed the behavior of setInputFile to take into account the addVideos
 	  function. It now can take multiple input files for joining as well as
 	  the high quality join flag 'FFMPEG_USE_HQ_JOIN'.
-    - Changed the behavior of setOutput. If the $output_name has a common 
-      image extension then and no %d is found then an error is raised.
-    - Changed all booleans from upper to lower case.
-    
+	- Changed the behavior of setOutput. If the $output_name has a common 
+	  image extension then and no %d is found then an error is raised.
+	- Changed all booleans from upper to lower case.
+	
 #[0.0.5] [12.03.2007] 
-    - Added FFMPEG_FORMAT_JPG format (mjpeg). Thanks Matthias.
-    - Changed the behavior of extractFrames. It now accepts a boolean FALSE
-      argument for $extract_end_timecode. 
-      If it is given then all frames are exported from the timecode specified
-      by $extract_begin_timecode. Thanks Matthias.
+	- Added FFMPEG_FORMAT_JPG format (mjpeg). Thanks Matthias.
+	- Changed the behavior of extractFrames. It now accepts a boolean FALSE
+	  argument for $extract_end_timecode. 
+	  If it is given then all frames are exported from the timecode specified
+	  by $extract_begin_timecode. Thanks Matthias.
 	- Added extra definition 'FFMPEG_WATERMARK_VHOOK' for the path to the
 	  watermark vhook.
-    - Added watermark support for both frames exports and videos. (Note: this
+	- Added watermark support for both frames exports and videos. (Note: this
 	  makes specific useage of vhook. If your ffmpeg binary has not been
 	  compiled with --enable-vhook then this will not work.
-    
+	
 #[0.0.1] [02.03.2007] 
-    - Initial version released
+	- Initial version released
