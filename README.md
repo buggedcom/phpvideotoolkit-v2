@@ -55,11 +55,11 @@ PHPVideoToolkit requires some basic configuration and is one through the Config 
 namespace PHPVideoToolkit;
 
 $config = new Config(array(
-	'temp_directory' => './tmp',
-	'ffmpeg' => '/opt/local/bin/ffmpeg',
-	'ffprobe' => '/opt/local/bin/ffprobe',
-	'yamdi' => '/opt/local/bin/yamdi',
-	'qtfaststart' => '/opt/local/bin/qt-faststart',
+    'temp_directory' => './tmp',
+    'ffmpeg' => '/opt/local/bin/ffmpeg',
+    'ffprobe' => '/opt/local/bin/ffprobe',
+    'yamdi' => '/opt/local/bin/yamdi',
+    'qtfaststart' => '/opt/local/bin/qt-faststart',
 ));
 ```
 
@@ -76,7 +76,7 @@ namespace PHPVideoToolkit;
 $ffmpeg = new FfmpegParser($config);
 $is_available = $ffmpeg->isAvailable(); // returns boolean
 $ffmpeg_version = $ffmpeg->getVersion(); // outputs something like - array('version'=>1.0, 'build'=>null)
-	
+    
 ```
 ###Accessing Data About media files
 
@@ -88,7 +88,7 @@ namespace PHPVideoToolkit;
 $parser = new MediaParser($config);
 $data = $parser->getFileInformation('BigBuckBunny_320x180.mp4');
 echo '<pre>'.print_r($data, true).'</pre>';
-	
+    
 ```
 ###PHPVideoToolkit Timecodes
 PHPVideoToolkit utilises Timecode objects when extracting data such as duration or start points, or when extracting portions of a media file. They are fairly simple to understand. All of the example timecodes created below are the same time. 
@@ -138,7 +138,7 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrame(new Timecode(40))
-				->save('./output/big_buck_bunny_frame.jpg');
+                ->save('./output/big_buck_bunny_frame.jpg');
 ```
 ###Extract Multiple Frames from a Segment of a Video
 
@@ -149,7 +149,7 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrames(new Timecode(40), new Timecode(50))
-				->save('./output/big_buck_bunny_frame_%timecode.jpg');
+                ->save('./output/big_buck_bunny_frame_%timecode.jpg');
 ```
 
 ###Extract Multiple Frames of a Video at 1 frame per second
@@ -170,13 +170,13 @@ $output_format->setFrameRate(1);
 // output format object this is automatically done for you. If you do not add below, FFmpeg
 // automatically guesses from your output file extension which format and codecs you wish to use.
 $output_format->setVideoCodec('mjpeg')
-			  ->setFormat('image2');
+              ->setFormat('image2');
 
 */
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrames(null, new Timecode(50)) // if null then the extracted segment starts from the begining of the video
-				->save('./output/big_buck_bunny_frame_%timecode.jpg', $output_format);
+                ->save('./output/big_buck_bunny_frame_%timecode.jpg', $output_format);
 ```
 
 The second is to use the $force_frame_rate option of the extractFrames function.
@@ -186,7 +186,7 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrames(new Timecode(50), null, 1) // if null then the extracted segment goes from the start timecode to the end of the video
-				->save('./output/big_buck_bunny_frame_%timecode.jpg');
+                ->save('./output/big_buck_bunny_frame_%timecode.jpg');
 ```
 
 ###Extracting an Animated Gif
@@ -211,11 +211,11 @@ $output_path = './output/big_buck_bunny.gif';
 
 $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
-		
+        
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractSegment(new Timecode(10), new Timecode(20))
-				->save($output_path, $output_format);
-				
+                ->save($output_path, $output_format);
+                
 ```
 
 **Quick Encoding, but lower quality (still better than FFmpeg mind)**
@@ -232,11 +232,11 @@ $output_path = './output/big_buck_bunny.gif';
 
 $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
-		
+        
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractSegment(new Timecode(10), new Timecode(20))
-				->save($output_path, $output_format);
-				
+                ->save($output_path, $output_format);
+                
 ```
 
 *Native PHP GD with symbio/gif-creator library*
@@ -249,11 +249,11 @@ $output_path = './output/big_buck_bunny.gif';
 
 $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
-		
+        
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractSegment(new Timecode(10), new Timecode(20))
-				->save($output_path, $output_format);
-				
+                ->save($output_path, $output_format);
+                
 ```
 
 *Gifsicle with native PHP GD*
@@ -267,11 +267,11 @@ $output_path = './output/big_buck_bunny.gif';
 
 $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
-		
+        
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractSegment(new Timecode(10), new Timecode(20))
-				->save($output_path, $output_format);
-				
+                ->save($output_path, $output_format);
+                
 ```
 
 ###Extracting Audio or Video Channels from a Video
@@ -282,7 +282,7 @@ namespace PHPVideoToolkit;
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractAudio()->save('./output/big_buck_bunny.mp3');
 // $output = $video->extractVideo()->save('./output/big_buck_bunny.mp4');
-				
+                
 ```
 
 ###Extracting a Segment of an Audio or Video file
@@ -294,7 +294,7 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractSegment(new Timecode('00:02:22.0', Timecode::INPUT_FORMAT_TIMECODE), new Timecode(180))
-				->save('./output/big_buck_bunny.mp4');
+                ->save('./output/big_buck_bunny.mp4');
 ```
 ###Spliting a Audio or Video file into multiple parts
 
@@ -307,7 +307,7 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->split(45)
-				->save('./output/big_buck_bunny_%timecode.mp4');
+                ->save('./output/big_buck_bunny_%timecode.mp4');
 ```
 ###Purging and then adding Meta Data
 
@@ -318,8 +318,8 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->purgeMetaData()
-				->setMetaData('title', 'Hello World')
-				->save('./output/big_buck_bunny.mp4');
+                ->setMetaData('title', 'Hello World')
+                ->save('./output/big_buck_bunny.mp4');
 ```
 ###Changing Codecs of the audio or video stream
 
@@ -335,7 +335,7 @@ $output_path = './output/big_buck_bunny.mpeg';
 
 $output_format = new VideoFormat('output', $config);
 $output_format->setAudioCodec('acc')
-			  ->setVideoCodec('ogg');
+              ->setVideoCodec('ogg');
 
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
 $output = $video->save($output_path, $output_format);
@@ -372,21 +372,21 @@ $process = $video->saveNonBlocking('./output/big_buck_bunny.mov');
 
 while($process->isCompleted() === false)
 {
-	// do something more stuff in a loop.
-	// doesn't have to be a loop, just an example.
-	
-	sleep(0.5);
+    // do something more stuff in a loop.
+    // doesn't have to be a loop, just an example.
+    
+    sleep(0.5);
 }
 
 if($process->hasError() === true)
 {
-	// an error was encountered, do something with it.
+    // an error was encountered, do something with it.
 }
 else
 {
-	// encoding has completed and no error was detected so 
-	// we can get the output from the process.
-	$output = $process->getOutput();
+    // encoding has completed and no error was detected so 
+    // we can get the output from the process.
+    $output = $process->getOutput();
 }
 
 ```
@@ -418,12 +418,12 @@ $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 
 $progress_handler = new ProgressHandlerNative(function($data)
 {
-	echo '<pre>'.print_r($data, true).'</pre>';
+    echo '<pre>'.print_r($data, true).'</pre>';
 }, $config);
 
 $output = $video->purgeMetaData()
-				->setMetaData('title', 'Hello World')
-				->save('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING, $progress_handler);
+                ->setMetaData('title', 'Hello World')
+                ->save('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING, $progress_handler);
 ```
 
 **Example 2. Probing the handler**
@@ -438,20 +438,20 @@ $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $progress_handler = new ProgressHandlerNative(null, $config);
 
 $output = $video->purgeMetaData()
-				->setMetaData('title', 'Hello World')
-				->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING, $progress_handler);
-				
+                ->setMetaData('title', 'Hello World')
+                ->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING, $progress_handler);
+                
 while($progress_handler->completed !== true)
 {
-	// note setting true in probe() automatically tells the probe to wait after the data is returned.
-	echo '<pre>'.print_r($progress_handler->probe(true), true).'</pre>';
+    // note setting true in probe() automatically tells the probe to wait after the data is returned.
+    echo '<pre>'.print_r($progress_handler->probe(true), true).'</pre>';
 }
-				
+                
 ```
 
 So you see whilst the two examples look very similar and both block PHP, the second example does not need to block at all.
 
-**Example 3. Non Blocking Save with Remove Progress Handling**
+**Example 3. Non Blocking Save with Remote Progress Handling**
 
 This example (a better example is found in /examples/progress-handler-portability.php) shows that a non blocking save can be made in one request, and then subsequent requests (i.e. ajax) can be made to a different script to probe the encoding progress.
 
@@ -464,7 +464,7 @@ session_start();
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $process = $video->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING);
-				
+                
 $_SESSION['phpvideotoolkit_portable_process_id'] = $process->getPortableId();
 
 ```
@@ -481,15 +481,19 @@ $handler = new ProgressHandlerPortable($_SESSION['phpvideotoolkit_portable_proce
 $probe = $handler->probe();
 
 echo json_encode(array(
-	'finished' => $probe['finished'], // true when the process has ended by interuption, error or success
-	'completed' => $probe['completed'], // true when the process has ended with a successfull encoding that encountered no errors.
-	'percentage' => $probe['percentage']
+    'finished' => $probe['finished'], // true when the process has ended by interuption, error or success
+    'completed' => $probe['completed'], // true when the process has ended with a successfull encoding that encountered no errors.
+    'percentage' => $probe['percentage']
 ));
 exit;
 
 ```
 
-**IMPORTANT**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolkit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
+**Prgress Handler Caveats**
+
+**1**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolkit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
+
+**2**: When outputting files using %timecode or %index and using the ProgressHandlerPortable system it is not possible to currently automatically renaming the resulting temporary file output to their correct output filenames.
 
 ###Encoding Multiple Output Files
 
@@ -517,6 +521,8 @@ $multi_output->addOutput($threegp_output, $format);
 $output = $video->save($multi_output, null, Media::OVERWRITE_EXISTING);
 
 ```
+
+All progress handlers also work with multiple output, however the caveats outlined for the ProgressHandlerPortable still apply.
 
 ###Accessing Executed Commands and the Command Line Buffer
 
@@ -609,13 +615,13 @@ $process->setProcessTimelimit(10); // in seconds
 
 try
 {
-	$video->save('output.mp4');
+    $video->save('output.mp4');
 }
 catch(FfmpegProcessOutputException $e)
 {
-	echo $e->getMessage(); // Imposed time limit (10 seconds) exceeded.
+    echo $e->getMessage(); // Imposed time limit (10 seconds) exceeded.
 }
-				
+                
 ```
 
 
