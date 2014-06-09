@@ -55,6 +55,7 @@ Fixed several bugs:
 - fixed issues in portability progress handler where the progress file would be prematurely deleted.
 - fixed issues where using %timecode or %index in the output would not correctly get renamed unless calling getOutput from the process object. #22
 - fixed issues with animated gifs not following the overwrite setting of the save function call
+
 [Full changelog](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/CHANGELOG.md)
 
 ##Usage
