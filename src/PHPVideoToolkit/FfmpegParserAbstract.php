@@ -146,6 +146,7 @@
             
 //          then match out the relevant data, clean and process.
             $data = array(
+                'from-cache' => true,
                 'binary' => array(
                     'configuration' => array(),
                     'vhook-support' => false,
@@ -169,6 +170,8 @@
             }
             
             $this->_cacheSet($cache_key, $data);
+
+            $data['from-cache'] = false;
             return $data;
         }
         
@@ -281,8 +284,12 @@
             $data = array(
                 'build' => $build,
                 'version' => $version, 
+                'from-cache' => true,
             );
+
             $this->_cacheSet($cache_key, $data);
+
+            $data['from-cache'] = false;
             return $data;
         }
         
