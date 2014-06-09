@@ -10,7 +10,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 
 - [License](#license)
 - [Documentation](#documentation)
-- [Latest Changes](#Latest Changes)
+- [Latest Changes](#latest-changes)
 - [Usage](#usage)
 - [Configuring PHPVideoToolkit](#configuring-phpvideotoolkit)
 - [Accessing Data About FFmpeg](#accessing-data-about-ffmpeg)
