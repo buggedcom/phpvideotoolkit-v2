@@ -48,6 +48,7 @@ Extensive documentation and examples are bundled with the download and is availa
 ##Latest Changes
 
 **[2.1.7-beta]** [09.04.2014]
+
 ***WARNING*** Potential code breaking change from Media->save. save() no longer returns the output path if saved in blocking mode. It returns as non-blocking mode does the FfmpegProcess object. So to return the output path of what has been outputed you must call $process->getOutput().
 Fixed several bugs:
 - fixed issues in portability progress handler where parsing of image only output data would fail.
