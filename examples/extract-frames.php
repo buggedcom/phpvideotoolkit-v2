@@ -5,14 +5,9 @@
     try
     {
         $video = new \PHPVideoToolkit\Video($example_video_path, $config);
-        $process = $video->getProcess();
-
-        $output = $video->extractFrames(new \PHPVideoToolkit\Timecode(40), new \PHPVideoToolkit\Timecode(50))
+        $process = $video->extractFrames(new \PHPVideoToolkit\Timecode(40), new \PHPVideoToolkit\Timecode(50))
                         ->save('./output/big_buck_bunny_frame_%timecode.jpg', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
         
-        \PHPVideoToolkit\Trace::vars($output);
-        
-
         echo '<h1>Executed Command</h1>';
         \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
         echo '<hr /><h1>FFmpeg Process Messages</h1>';
@@ -21,7 +16,7 @@
         \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
         echo '<hr /><h1>Resulting Output</h1>';
         // notice because this is mutliple frames an array is returned instead of an object.
-        $frames = $output->getOutput();
+        $frames = $process->getOutput();
         $frame_paths = array();
         if(empty($frames) === false)
         {
