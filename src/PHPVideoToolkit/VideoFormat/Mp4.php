@@ -63,9 +63,9 @@
             $this->_enforce_qt_faststart_success = true;
         }
 
-        public function updateFormatOptions(&$save_path)
+        public function updateFormatOptions(&$save_path, $overwrite)
         {
-            parent::updateFormatOptions($save_path);
+            parent::updateFormatOptions($save_path, $overwrite);
             
 //          assign a post process so that qt-faststart (https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart) changes the qt atom to allow fast streaming.
             if($this->_post_process_qt_faststart === true)

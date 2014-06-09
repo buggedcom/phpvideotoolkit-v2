@@ -34,9 +34,9 @@
          * @param float $frame_delay The delay of each frame.
          * @return Image
          */
-        public function save($save_path, $frame_delay=0.1)
+        public function save($save_path, $frame_delay=0.1, $overwrite=Media::OVERWRITE_FAIL)
         {
-            parent::save($save_path, $frame_delay);
+            $save_path = parent::save($save_path, $frame_delay, $overwrite);
             
 //          build the gif creator process
             require_once dirname(dirname(dirname(__FILE__))).'/vendor/sybio/gif-creator/src/GifCreator/GifCreator.php';
@@ -53,11 +53,15 @@
             $gif_data = $gc->getGif();
             
 //          check for errors or put the data into the file.
-            if(empty($gif_data) === true || file_put_contents($save_path, $gif_data) === false)
+            if(empty($gif_data) === true)
             {
-                throw new FfmpegProcessPostProcessException('AnimatedGif save using `php` "'.$save_path.'" failed.');
+                throw new FfmpegProcessPostProcessException('AnimatedGif using `php` generated an empty gif.');
             }
-            
+            if(file_put_contents($save_path, $gif_data) === false)
+            {
+                throw new FfmpegProcessPostProcessException('AnimatedGif save to filesystem failed using "'.$save_path.'".');
+            }
+
             return new Image($save_path, $this->_config);
         }
         

@@ -609,13 +609,17 @@
          * @param Function $callback 
          * @return self
          */
-        public function registerOutputPostProcess($callback)
+        public function registerOutputPostProcess($callback, $args=array())
         {
             if(is_callable($callback) === false)
             {
                 throw new Exception('The callback "'.$callback.'" is not callable.');
             }
-            array_push($this->_post_process_callbacks, $callback);
+            if(is_array($args) === false)
+            {
+                throw new Exception('The $args argument is not an array.');
+            }
+            array_push($this->_post_process_callbacks, array($callback, $args));
 
 //          if a callback has been supplied then the process becomes blocking and must be set.      
             $this->_blocking = true;
@@ -779,7 +783,7 @@
             }
             
 //          do some pre processing of the output format
-            $this->_processOutputFormat($output_format, $save_path);
+            $this->_processOutputFormat($output_format, $save_path, $overwrite);
 
 //          check the save path.
             $has_timecode_or_index = false;
@@ -1014,7 +1018,7 @@
          * @param Format &$output_format 
          * @return void
          */
-        protected function _processOutputFormat(Format &$output_format=null, &$save_path)
+        protected function _processOutputFormat(Format &$output_format=null, &$save_path, $overwrite)
         {
 //          check to see if we have been set and output format, if not generate an empty one.
             if($output_format === null)
@@ -1031,7 +1035,7 @@
 //          set the media into the format object so that we can update the format options that
 //          require a media object to process.
             $output_format->setMedia($this)
-                          ->updateFormatOptions($save_path);
+                          ->updateFormatOptions($save_path, $overwrite);
         }
         
         /**

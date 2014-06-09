@@ -63,9 +63,9 @@
          * @author Oliver Lillie
          * @return void
          */
-        public function updateFormatOptions(&$save_path)
+        public function updateFormatOptions(&$save_path, $overwrite)
         {
-            parent::updateFormatOptions($save_path);
+            parent::updateFormatOptions($save_path, $overwrite);
             
             // TODO expand the video_filters format data
             if(empty($this->_format['audio_filters']) === false)

@@ -24,5 +24,5 @@
     interface AnimatedGifTranscoderInterface
     {
         public function addFrame(Image $image_path, $frame_delay);
-        public function save($output_path, $frame_delay);
+        public function save($output_path, $frame_delay, $overwrite);
     }

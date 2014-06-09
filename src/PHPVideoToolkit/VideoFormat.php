@@ -107,9 +107,9 @@
          * @author Oliver Lillie
          * @return void
          */
-        public function updateFormatOptions(&$save_path)
+        public function updateFormatOptions(&$save_path, $overwrite)
         {
-            parent::updateFormatOptions($save_path);
+            parent::updateFormatOptions($save_path, $overwrite);
             
             $video_data = $this->_media_object->readVideoComponent();
 

@@ -79,7 +79,7 @@
          * @param float $frame_delay The delay of each frame.
          * @return Image
          */
-        public function save($save_path, $frame_delay=0.1)
+        public function save($save_path, $frame_delay=0.1, $overwrite=Media::OVERWRITE_FAIL)
         {
             if(empty($this->_frames) === true)
             {
@@ -93,7 +93,28 @@
             
             if(is_file($save_path) === true)
             {
-                throw new Exception('The save path "'.$save_path.'" already exists.');
+                if(empty($overwrite) === true || $overwrite === Media::OVERWRITE_FAIL)
+                {
+                    throw new Exception('The output file already exists and overwriting is disabled.');
+                }
+                else if($overwrite === Media::OVERWRITE_EXISTING && is_writeable(dirname($save_path)) === false)
+                {
+                    throw new Exception('The output file already exists, overwriting is enabled however the file is not writable.');
+                }
+
+                switch($overwrite)
+                {
+                    case Media::OVERWRITE_EXISTING :
+                        @unlink($save_path);
+                        break;
+                        
+//                  insert a unique id into the save path
+                    case Media::OVERWRITE_UNIQUE :
+                        $pathinfo = pathinfo($save_path);
+                        $save_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-u_'.String::generateRandomString().'.'.$pathinfo['extension'];
+                        break;
+                }
             }
+            return $save_path;
         }
     }

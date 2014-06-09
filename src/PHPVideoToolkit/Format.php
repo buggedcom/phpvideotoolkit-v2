@@ -186,7 +186,7 @@
          * @author Oliver Lillie
          * @return void
          */
-        public function updateFormatOptions(&$save_path)
+        public function updateFormatOptions(&$save_path, $overwrite)
         {
             if(empty($this->_media_object) === true)
             {

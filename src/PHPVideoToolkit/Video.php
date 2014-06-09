@@ -135,9 +135,9 @@
          * @param Format &$output_format 
          * @return void
          */
-        protected function _processOutputFormat(Format &$output_format=null, &$save_path)
+        protected function _processOutputFormat(Format &$output_format=null, &$save_path, $overwrite)
         {
-            parent::_processOutputFormat($output_format, $save_path);
+            parent::_processOutputFormat($output_format, $save_path, $overwrite);
             
 //          turn off the related options.
             if($this->_extracting_audio === true)
