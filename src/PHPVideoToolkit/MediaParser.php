@@ -50,6 +50,7 @@
             
 //          get the file data
             $data = array(
+                'from-cache'=> true,
                 'path'      => $file_path,
                 'type'      => $this->getFileType($file_path, $read_from_cache),
                 'container' => $this->getFileContainerFormat($file_path, $read_from_cache),
@@ -62,6 +63,8 @@
             );
 
             $this->_cacheSet($cache_key, $data);
+
+            $data['from-cache'] = false;
             return $data;
         }
         

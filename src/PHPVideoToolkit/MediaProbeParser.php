@@ -49,6 +49,7 @@
             
 //          get the file data
             $data = array(
+                'from-cache'=> true,
                 'path'      => $file_path,
                 'type'      => $this->getFileType($file_path, $read_from_cache),
                 'duration'  => $this->getFileDuration($file_path, $read_from_cache),
@@ -61,6 +62,8 @@
 
 //          cache info and return
             $this->_cacheSet($cache_key, $data);
+
+            $data['from-cache'] = false;
             return $data;
         }
         
