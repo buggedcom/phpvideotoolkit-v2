@@ -59,7 +59,7 @@ Fixed several bugs:
 
 ##Usage
 
-Whilst the extensive documentation covers just about everything, here are a few examples of what you can do.
+Whilst the extensive documentation covers just about everything (to be honest there are only a few pages in the documentation as I'm too busy to write too much of it - but the examples below are pretty good), here are a few examples of what you can do.
 
 ###Configuring PHPVideoToolkit
 
