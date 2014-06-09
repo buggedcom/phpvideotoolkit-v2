@@ -5,9 +5,7 @@
     try
     {
         $video = new \PHPVideoToolkit\Video($example_video_path, $config);
-        $process = $video->getProcess();
-
-        $output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+        $process = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
                         ->extractFrames(null, null, '1/2')
                         ->save('./output/extract-frame.example3.%timecode.jpg', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
 
@@ -18,7 +16,7 @@
         echo '<hr /><h1>Buffer Output</h1>';
         \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
         echo '<hr /><h1>Resulting Output</h1>';
-        \PHPVideoToolkit\Trace::vars($output->getOutput());
+        \PHPVideoToolkit\Trace::vars($process->getOutput());
     
     }
     catch(\PHPVideoToolkit\FfmpegProcessOutputException $e)

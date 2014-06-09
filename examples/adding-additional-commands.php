@@ -7,14 +7,14 @@
         \PHPVideoToolkit\Trace::vars('Note, this process will not work as the commands are invalid.');
         
         $video = new \PHPVideoToolkit\Video($example_video_path, $config);
+
         $process = $video->getProcess();
-        
         $process->addPreInputCommand('-custom-command');
         $process->addCommand('-custom-command-with-arg', 'arg value');
         $process->addPostOutputCommand('-output-command', 'another value');
         
     //  $process->setProcessTimelimit(1);
-        $output = $video->save('./output/big_buck_bunny.mp4', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
+        $video->save('./output/big_buck_bunny.mp4', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
         
         
         echo '<h1>Raw Executed Command</h1>';
@@ -26,7 +26,7 @@
         echo '<hr /><h1>Buffer Output</h1>';
         \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
         echo '<hr /><h1>Resulting Output</h1>';
-        \PHPVideoToolkit\Trace::vars($output->getOutput()->getMediaPath());
+        \PHPVideoToolkit\Trace::vars($process->getOutput()->getMediaPath());
 
     }
     catch(\PHPVideoToolkit\FfmpegProcessOutputException $e)

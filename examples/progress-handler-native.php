@@ -8,7 +8,6 @@
     {
         $video = new \PHPVideoToolkit\Video($example_video_path, $config);
         $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(70));
-        $process = $video->getProcess();
 
         if(isset($_GET['method']) === true && $_GET['method'] === 'blocking')
         {
@@ -24,7 +23,7 @@
                 array_push($progress_data, round($data['percentage'], 2).': '.round($data['run_time'], 2));
             }, $config);
 
-            $output = $video->purgeMetaData()
+            $process = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
                             ->save('./output/big_buck_bunny.3gp', null, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
             
@@ -41,7 +40,7 @@
             // IMPORTANT: this method only works with ->saveNonBlocking as otherwise the progress handler
             // probe will quit after one cycle.
             $progress_handler = new \PHPVideoToolkit\ProgressHandlerNative(null, $config);
-            $output = $video->purgeMetaData()
+            $process = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
                             ->saveNonBlocking('./output/big_buck_bunny.3gp', null, \PHPVideoToolkit\Video::OVERWRITE_EXISTING, $progress_handler);
 
@@ -58,7 +57,7 @@
         echo '<hr /><h1>Buffer Output</h1>';
         \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
         echo '<hr /><h1>Resulting Output</h1>';
-        \PHPVideoToolkit\Trace::vars($output->getOutput()->getMediaPath());
+        \PHPVideoToolkit\Trace::vars($process->getOutput()->getMediaPath());
         
         exit;
     }
