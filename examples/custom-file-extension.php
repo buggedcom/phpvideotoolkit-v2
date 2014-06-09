@@ -1,0 +1,45 @@
+<?php
+
+    include_once './includes/bootstrap.php';
+    
+    try
+    {
+        $video = new \PHPVideoToolkit\Video($example_video_path, $config);
+        $video->extractSegment(new \PHPVideoToolkit\Timecode(15));
+
+        $process = $video->save('./output/big_buck_bunny.my_silly_custom_file_extension', new \PHPVideoToolkit\ImageFormat_Jpeg('output', $config), \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
+        
+        
+        echo '<h1>Executed Command</h1>';
+        \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
+        echo '<hr /><h1>FFmpeg Process Messages</h1>';
+        \PHPVideoToolkit\Trace::vars($process->getMessages());
+        echo '<hr /><h1>Buffer Output</h1>';
+        \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
+        echo '<hr /><h1>Resulting Output</h1>';
+        \PHPVideoToolkit\Trace::vars($process->getOutput()->getMediaPath());
+
+    }
+    catch(\PHPVideoToolkit\FfmpegProcessOutputException $e)
+    {
+        echo '<h1>Error</h1>';
+        \PHPVideoToolkit\Trace::vars($e);
+
+        $process = $video->getProcess();
+        if($process->isCompleted())
+        {
+            echo '<hr /><h2>Executed Command</h2>';
+            \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
+            echo '<hr /><h2>FFmpeg Process Messages</h2>';
+            \PHPVideoToolkit\Trace::vars($process->getMessages());
+            echo '<hr /><h2>Buffer Output</h2>';
+            \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
+        }
+    }
+    catch(\PHPVideoToolkit\Exception $e)
+    {
+        echo '<h1>Error</h1>';
+        \PHPVideoToolkit\Trace::vars($e->getMessage());
+        echo '<h2>\PHPVideoToolkit\Exception</h2>';
+        \PHPVideoToolkit\Trace::vars($e);
+    }

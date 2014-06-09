@@ -20,4 +20,17 @@
      */
     class ImageFormat extends VideoFormat
     {
+        protected $_max_frames_on_no_timecode = true;
+
+        public function updateFormatOptions(&$save_path, $overwrite)
+        {
+            parent::updateFormatOptions($save_path, $overwrite);
+            
+            if($this->_max_frames_on_no_timecode === true && preg_match('/%timecode|%index|%[0-9]*d/', $save_path) === 0)
+            {
+                $this->setVideoMaxFrames(1);
+            }
+            
+            return $this;
+        }
     }

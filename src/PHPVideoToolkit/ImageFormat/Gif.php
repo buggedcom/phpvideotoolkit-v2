@@ -21,7 +21,9 @@
     class ImageFormat_Gif extends ImageFormat
     {
         const UNLIMITED_LOOPS = -1;
-        
+
+        protected $_max_frames_on_no_timecode = false;
+       
         public function __construct($input_output_type, Config $config=null)
         {
             parent::__construct($input_output_type, $config);
