@@ -8,7 +8,7 @@
         $process = $video->getProcess();
     
         $output = $video->extractFrame(new \PHPVideoToolkit\Timecode(50))
-                        ->save('./output/extract-frame.example1.jpg', null, \PHPVideoToolkit\Media::OVERWRITE_UNIQUE);
+                        ->save('./output/extract-frame.example1.jpg', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
 
         echo '<h1>Executed Command</h1>';
         \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
