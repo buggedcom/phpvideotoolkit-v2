@@ -56,6 +56,8 @@ Fixed several bugs:
 - fixed issues in portability progress handler where the progress file would be prematurely deleted.
 - fixed issues where using %timecode or %index in the output would not correctly get renamed unless calling getOutput from the process object. #22
 - fixed issues with animated gifs not following the overwrite setting of the save function call
+Added:
+- poor mans caching using InTempDirectory cache class to store cachable data within the temp directory. It is highly recommended you write your own cacher based around something [like Stash](https://github.com/tedious/Stash)
 
 [Full changelog](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/CHANGELOG.md)
 
@@ -76,6 +78,7 @@ $config = new Config(array(
 	'ffprobe' => '/opt/local/bin/ffprobe',
 	'yamdi' => '/opt/local/bin/yamdi',
 	'qtfaststart' => '/opt/local/bin/qt-faststart',
+	'cache_driver' => 'InTempDirectory',
 ));
 ```
 
