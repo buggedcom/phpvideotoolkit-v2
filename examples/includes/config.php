@@ -12,6 +12,7 @@
             'convert'                     => '/opt/local/bin/convert',
             'gifsicle'                    => '/opt/local/bin/gifsicle',
             'php_exec_infinite_timelimit' => true,
+            'cache_driver'                => 'InTempDirectory',
         ));
     }
     catch(\PHPVideoToolkit\Exception $e)

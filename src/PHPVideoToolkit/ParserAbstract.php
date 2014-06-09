@@ -31,6 +31,12 @@
         public function __construct(Config $config=null, $program_config_key='ffmpeg')
         {
             $this->_config = $config === null ? Config::getInstance() : $config;
+
+            if($config->cache_driver)
+            {
+                $cacher = Cache::getCacher($config);
+                $this->setCacher($cacher);
+            }
             
             if($this->isAvailable() === false)
             {

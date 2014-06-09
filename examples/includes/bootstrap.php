@@ -1,16 +1,9 @@
 <?php
 
-    if($argv)
-    {
-        error_reporting(E_NONE);
-    }
-    else
-    {
-        ini_set('error_reporting', '1');
-        ini_set('track_errors', '1');
-        ini_set('display_errors', '1');
-        ini_set('display_startup_errors', '1');
-    }
+    ini_set('error_reporting', '1');
+    ini_set('track_errors', '1');
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
 
 //  define the error callback
     function __errorHandler()

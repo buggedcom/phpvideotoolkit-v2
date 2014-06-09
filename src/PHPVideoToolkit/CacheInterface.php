@@ -20,7 +20,9 @@
      */
     interface CacheInterface
     {
-        public function __construct(CacheInterface $cache_object);
+        public function __construct(Config $config=null);
+        
+        public function isAvailable();
         
         public function set($key, $value, $expiration=null);
         

@@ -39,6 +39,7 @@
         protected $_php_exec_infinite_timelimit;
         protected $_force_enable_qtfaststart;
         protected $_force_enable_flv_meta;
+        protected $_cache_driver;
 
         /**
          * Get the Instance of self
@@ -75,8 +76,9 @@
                 'php_exec_infinite_timelimit' => true,
                 'force_enable_qtfaststart'    => false,
                 'force_enable_flv_meta'       => true,
+                'cache_driver'   => 'Null',
             );
-            $this->setConfig(array_merge($default_options, $options));
+            $this->_setConfig(array_merge($default_options, $options));
         }
 
         /**
@@ -84,9 +86,9 @@
          *
          * @param array $options
          * @access private
-         * @return App_Config
+         * @return Config
          */
-        private function setConfig(array $options=array())
+        private function _setConfig(array $options=array())
         {
             foreach ($options as $key => $value)
             {
@@ -140,6 +142,22 @@
                     if(in_array($value, array('gifsicle', 'convert', 'php', null)) === false)
                     {
                         throw new ConfigSetException('Unrecognised gif transcoder engine.');
+                    }
+                
+                    $this->{'_'.$key} = $value;
+                    
+                    return;
+
+                case 'cache_driver' :
+
+                    $class = '\PHPVideoToolkit\Cache_'.$value;
+                    if(class_exists($class) === false)
+                    {
+                        throw new ConfigSetException('Unrecognised cache driver engine. The cache class must be within the PHPVideoToolkit namespace and be prefixed by `Cache_`.');
+                    }
+                    if(is_subclass_of($class, '\PHPVideoToolkit\CacheAbstract') === false)
+                    {
+                        throw new ConfigSetException('Unrecognised cache driver engine. The cache driver provider must inherit from \PHPVideoToolkit\CacheAbstract.');
                     }
                 
                     $this->{'_'.$key} = $value;
@@ -199,7 +217,7 @@
             {
                 return $this->{'_'.$key};
             }
-            
+
 //          TODO trigger error instead of just returning null
             return null;
 //          throw new Exception('Call to undefined property: '.$name);

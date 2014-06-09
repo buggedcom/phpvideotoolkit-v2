@@ -18,25 +18,16 @@
      * @author Oliver Lillie
      * @package default
      */
-    class Cache_Null extends CacheAbstract
+    class Cache
     {
-        public function isAvailable()
+        public static function getCacher(Config $config)
         {
-            return true;
-        }
-
-        protected function _get($key)
-        {
-            return null;
-        }
-        
-        protected function _isMiss($key)
-        {
-            return true;
-        }
-        
-        protected function _set($key, $value, $expiration=null)
-        {
-            return null;
+            static $cachers = array();
+            if(isset($cachers[$config->cache_driver]) === true)
+            {
+                return $cachers[$config->cache_driver];
+            }
+            $class = '\PHPVideoToolkit\Cache_'.$config->cache_driver;
+            return $cachers[$config->cache_driver] = new $class($config);
         }
     }
