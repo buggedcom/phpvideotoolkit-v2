@@ -2,7 +2,7 @@
 
 ...is a set of PHP classes aimed to provide a modular, object oriented and accessible interface for interacting with videos and audio through FFmpeg.
 
-It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need to compile and install the module. As FFmpeg-PHP has not been updated since 2007 using FFmpeg-PHP with a new version of FFmpeg can often break the module. Using PHPVideoToolkits' emulation of FFmpeg-PHP's functionality allows you to upgrade FFmpeg without worrying about breaking existing funcitonality.
+It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need to compile and install the module. As FFmpeg-PHP has not been updated since 2007 using FFmpeg-PHP with a new version of FFmpeg can often break the module. Using PHPVideoToolkits' emulation of FFmpeg-PHP's functionality allows you to upgrade FFmpeg without worrying about breaking existing functionality.
 
 **IMPORTANT** PHPVideoToolkit has only been tested with v1.1.2 of FFmpeg. Whilst the majority of functionality should work regardless of your version of FFmpeg I cannot guarantee it. If you find a bug or have a patch please open a ticket or submit a pull request on https://github.com/buggedcom/phpvideotoolkit-v2
 
@@ -23,14 +23,14 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 - [Extracting an Animated Gif](#extracting-an-animated-gif)
 - [Extracting Audio or Video Channels from a Video](#extracting-audio-or-video-channels-from-a-video)
 - [Extracting a Segment of an Audio or Video file](#extracting-a-segment-of-an-audio-or-video-file)
-- [Spliting a Audio or Video file into multiple parts](#spliting-a-audio-or-video-file-into-multiple-parts)
+- [Splitting a Audio or Video file into multiple parts](#splitting-a-audio-or-video-file-into-multiple-parts)
 - [Purging and then adding Meta Data](#purging-and-then-adding-meta-data)
 - [Changing Codecs of the audio or video stream](#changing-codecs-of-the-audio-or-video-stream)
 - [Non-Blocking Saves](#non-blocking-saves)
 - [Encoding with Progress Handlers](#encoding-with-progress-handlers)
 - [Accessing Executed Commands and the Command Line Buffer](#accessing-executed-commands-and-the-command-line-buffer)
 - [Supplying custom commands](#supplying-custom-commands)
-- [Imposing a processing timelimit](#imposing-a-processing-timelimit)
+- [Imposing a processing time limit](#imposing-a-processing-time-limit)
 
 ##License
 
@@ -128,7 +128,7 @@ echo $timecode->seconds; // Outputs 39
 
 ```
 
-It's very important to note, as in the last example, that there is a massive difference between accessing ```$timecode->seconds``` and ```$timecode->total_seconds```. `seconds` is the number of seconds in the remaining minute of the timecode. `total_seconds` is the total number of seconds of the timecode. The same logic applies to minutes, hours, milliseconds and theire total_ prefixed counterparts.
+It's very important to note, as in the last example, that there is a massive difference between accessing ```$timecode->seconds``` and ```$timecode->total_seconds```. `seconds` is the number of seconds in the remaining minute of the timecode. `total_seconds` is the total number of seconds of the timecode. The same logic applies to minutes, hours, milliseconds and their total_ prefixed counterparts.
 
 ###Extract a Single Frame of a Video
 
@@ -167,7 +167,7 @@ OR
 
 $output_format = new VideoFormat('output', $config);
 $output_format->setFrameRate(1);
-// optionaly also set the video and output format, however if you use the ImageFormat_Jpeg 
+// optionally also set the video and output format, however if you use the ImageFormat_Jpeg 
 // output format object this is automatically done for you. If you do not add below, FFmpeg
 // automatically guesses from your output file extension which format and codecs you wish to use.
 $output_format->setVideoCodec('mjpeg')
@@ -218,7 +218,7 @@ $output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVide
 
 ```
 
-You may assume that looking at this example you will get 10 frames outputted because the segment being extracted is 10 seconds long. However you will actually only get 9 frames exported. This is because the end time frame is treated as a less than value rather than a less than and euqal to value. So in psuedo code this is what is happening when frames are extracted.
+You may assume that looking at this example you will get 10 frames outputted because the segment being extracted is 10 seconds long. However you will actually only get 9 frames exported. This is because the end time frame is treated as a less than value rather than a less than and equal to value. So in pseudo code this is what is happening when frames are extracted.
 
 ```
 current = 10;
@@ -339,9 +339,9 @@ $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractSegment(new Timecode('00:02:22.0', Timecode::INPUT_FORMAT_TIMECODE), new Timecode(180))
 				->save('./output/big_buck_bunny.mp4');
 ```
-###Spliting a Audio or Video file into multiple parts
+###Splitting a Audio or Video file into multiple parts
 
-There are multiple ways you can configure the split parameters. If an array is supplied as the first argument. It must be an array of either, all Timecode instances detailing the timecodes at which you wish to split the media, or all integers. If integers are supplied the integers are treated as frame numbers you wish to split at. You can however also split at even intervals by suppling a single integer as the first paramenter. That integer is treated as the number of seconds that you wish to split at. If you have a video that is 3 minutes 30 seconds long and set the split to 60 seconds, you will get 4 videos. The first three will be 60 seconds in length and the last would be 30 seconds in length.
+There are multiple ways you can configure the split parameters. If an array is supplied as the first argument. It must be an array of either, all Timecode instances detailing the timecodes at which you wish to split the media, or all integers. If integers are supplied the integers are treated as frame numbers you wish to split at. You can however also split at even intervals by suppling a single integer as the first parameter. That integer is treated as the number of seconds that you wish to split at. If you have a video that is 3 minutes 30 seconds long and set the split to 60 seconds, you will get 4 videos. The first three will be 60 seconds in length and the last would be 30 seconds in length.
 
 The code below splits a video into multiple of equal length of 45 seconds each. 
 
@@ -366,7 +366,7 @@ $output = $video->purgeMetaData()
 ```
 ###Changing Codecs of the audio or video stream
 
-By default PHPVideoToolkit uses the file extension of the output file to automatically generate the required ffmpeg settings (if any) of your desired file format. However if you want to specify different codecs or settings, it is nessicary to specify them within an output format container. There are three different format objects you can use, depending on the format of your output. They are AudioFormat, VideoFormat and ImageFormat.
+By default PHPVideoToolkit uses the file extension of the output file to automatically generate the required ffmpeg settings (if any) of your desired file format. However if you want to specify different codecs or settings, it is ncessesary to specify them within an output format container. There are three different format objects you can use, depending on the format of your output. They are AudioFormat, VideoFormat and ImageFormat.
 
 Note; the examples below are for demonstration purposes only and _may not work_.
 
@@ -399,9 +399,9 @@ $output = $video->save($output_path, $output_format);
 ```
 ###Non-Blocking Saves
 
-The default/main save() function blocks PHP untill the encoding process has completed. This means that depending on the size of the media you are encoding it could leave your script running for a long time. To combat this you can call saveNonBlocking() to start the encoding process without blocking PHP.
+The default/main save() function blocks PHP until the encoding process has completed. This means that depending on the size of the media you are encoding it could leave your script running for a long time. To combat this you can call saveNonBlocking() to start the encoding process without blocking PHP.
 
-However there are some caveats you need to be aware of before doing so. Once the non blocking process as started, if your PHP script closes PHPVideoToolkit can not longer "tidy up" temporary files or perform dynamic renaming of %index or %timecode output files. All repsonsibility is handed over to you. Of course, if you leave the PHP script open untill the encode has finished PHPVideoToolkit will do everything for you.
+However there are some caveats you need to be aware of before doing so. Once the non blocking process as started, if your PHP script closes PHPVideoToolkit can not longer "tidy up" temporary files or perform dynamic renaming of %index or %timecode output files. All responsibility is handed over to you. Of course, if you leave the PHP script open until the encode has finished PHPVideoToolkit will do everything for you.
 
 The code below is an example of how to manage a non-blocking save.
 
@@ -446,13 +446,13 @@ PHPVideoToolkit allows you to monitor the encoding process of FFmpeg. This is do
 
 ProgressHandlerNative and ProgressHandlerOutput work and function in the same way, however one uses a native ffmpeg command, and the out outputs ffmpeg output buffer to a temp file. If your copy of FFmpeg is recent you will be able to use ProgressHandlerNative which uses FFmpegs '-progress' command to provide data. Apart from that difference both handlers return the same data and act in the same way and there is no real need to prioritise one over another unless you version of ffmpeg does not support '-progress'. If it doesn't then when you initialise the ProgressHandlerNative an exception will be thrown.
 
-The third type of handler ProgressHandlerPortable (shown in example 3 below) operates somewhat differently and is specifically design to work with separate HTTP requests or threads. ProgressHandlerPortable can be initiated in a different script entirely, supplied with the PHPVideoToolkit portable process id and then probed independantly of the encoding script. This allows developers to decouple encoding and encoding status scripts.
+The third type of handler ProgressHandlerPortable (shown in example 3 below) operates somewhat differently and is specifically design to work with separate HTTP requests or threads. ProgressHandlerPortable can be initiated in a different script entirely, supplied with the PHPVideoToolkit portable process id and then probed independently of the encoding script. This allows developers to decouple encoding and encoding status scripts.
 
-Progress Handlers can be made to block PHP or can be used in a non blocking fashion. They can even be utilized to work from a seperate script once the encoding has been initialised. However for purposes of the first two examples the progress handlers are in the same script essentially blocking the PHP process. Again however, the first two examples shown function very differently.
+Progress Handlers can be made to block PHP or can be used in a non blocking fashion. They can even be utilised to work from a separate script once the encoding has been initialised. However for purposes of the first two examples the progress handlers are in the same script essentially blocking the PHP process. Again however, the first two examples shown function very differently.
 
 **Example 1. Callback in the handler constructor**
 
-This example supplies the progress callback handler as a paramater to the constructor. This function is then called (every second, by default). Creating the callback in this way will block PHP and cannot be assigned as a progress handler when calling saveNonBlocking().
+This example supplies the progress callback handler as a parameter to the constructor. This function is then called (every second, by default). Creating the callback in this way will block PHP and cannot be assigned as a progress handler when calling saveNonBlocking().
 
 ```php
 namespace PHPVideoToolkit;
@@ -524,8 +524,8 @@ $handler = new ProgressHandlerPortable($_SESSION['phpvideotoolkit_portable_proce
 $probe = $handler->probe();
 
 echo json_encode(array(
-	'finished' => $probe['finished'], // true when the process has ended by interuption, error or success
-	'completed' => $probe['completed'], // true when the process has ended with a successfull encoding that encountered no errors.
+	'finished' => $probe['finished'], // true when the process has ended by interruption, error or success
+	'completed' => $probe['completed'], // true when the process has ended with a successful encoding that encountered no errors.
 	'percentage' => $probe['percentage']
 ));
 exit;
@@ -613,7 +613,7 @@ HOWEVER, there is an important caveat you need to be aware of, the above command
 
 ###Imposing a processing timelimit
 
-You may wish to impose a processing timelimit on encoding. There are various reasons for doing this and should be self explanitory. FFmpeg supplies a command to be able to do this and can be invoked like so...
+You may wish to impose a processing timelimit on encoding. There are various reasons for doing this and should be self explanatory. FFmpeg supplies a command to be able to do this and can be invoked like so...
 
 ```php
 namespace PHPVideoToolkit;
