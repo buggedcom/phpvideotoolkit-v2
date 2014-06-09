@@ -7,7 +7,7 @@
         $video = new \PHPVideoToolkit\Video($example_video_path, $config);
     //  $process->setProcessTimelimit(1);
         $process = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
-                        ->save('./output/big_buck_bunny_'.time().'.mp3', new \PHPVideoToolkit\AudioFormat_Mp3('output', $config), \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
+                        ->save('./output/big_buck_bunny.mp3', new \PHPVideoToolkit\AudioFormat_Mp3('output', $config), \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
         
         
         echo '<h1>Executed Command</h1>';
