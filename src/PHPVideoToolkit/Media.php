@@ -948,12 +948,28 @@
 //                  we build the timecode and frame rate data into the output if we use %timecode
 //                  that way we can always reconstruct the timecode even from another script or process.
                     
-//                  get the frame rate of the export.
-                    $frame_rate = $this->_process->getCommand('-r');
-                    if($frame_rate === false)
+//                  get the frame rate of the export. we give priority to "-r" as this is the output of the object if already set somewhere,
+//                  otherwise we revert to the output format setting,
+//                  then fallback to the to the framerate of the current video component
+                    if(($frame_rate = $this->_process->getCommand('-r')) === false)
                     {
-                        $data = $this->readVideoComponent();
-                        $frame_rate = $data['frames']['rate'];
+                        $options = $output_format->getFormatOptions();
+                        if(empty($options['video_frame_rate']) === false)
+                        {
+                            $frame_rate = $options['video_frame_rate'];
+                        }
+                        else
+                        {
+                            $data = $this->readVideoComponent();
+                            if(isset($data['frames']) === true && isset($data['frames']['rate']) === true)
+                            {
+                                $frame_rate = $data['frames']['rate'];
+                            }
+                        }
+                    }
+                    if($frame_rate <= 0)
+                    {
+                        throw new Exception('Unable to access the output frame rate value and as a result we cannot generate a timecode based filename output.');
                     }
                     
 //                  get the starting offset of the export
