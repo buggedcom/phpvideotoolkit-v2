@@ -21,7 +21,7 @@
         $format->setVideoDimensions(\PHPVideoToolkit\VideoFormat::DIMENSION_XGA);
         $multi_output->addOutput($threegp_output, $format);
 
-        $extracted_output = $video->save($multi_output, null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
+        $process = $video->save($multi_output, null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
         
         
         echo '<h1>Executed Command</h1>';
@@ -33,7 +33,7 @@
         echo '<hr /><h1>Buffer Output</h1>';
         \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
         echo '<hr /><h1>Resulting Output</h1>';
-        \PHPVideoToolkit\Trace::vars($extracted_output->getOutput()->getMediaPath());
+        \PHPVideoToolkit\Trace::vars($process->getOutput()->getMediaPath());
 
     }
     catch(\PHPVideoToolkit\FfmpegProcessOutputException $e)
