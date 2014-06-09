@@ -90,7 +90,10 @@
                 throw new Exception('If setting a forced frame rate please make sure it is either an integer or a float.');
             }
             
-            $this->extractSegment($from_timecode, $to_timecode);
+            if($from_timecode !== null || $to_timecode !== null)
+            {
+                $this->extractSegment($from_timecode, $to_timecode);
+            }
             $this->_extracting_frames = $force_frame_rate === null ? true : $force_frame_rate;
             
             return $this;
