@@ -120,7 +120,10 @@
             {
                 foreach ($this->_tmp_files as $path)
                 {
-                    @unlink($path);
+                    if(is_file($path) === true)
+                    {
+                        @unlink($path);
+                    }
                 }
             }
         }
@@ -230,7 +233,8 @@
          */
         protected function _run($callback)
         {
-            while($this->_running !== false) {
+            while($this->_running !== false)
+            {
 //              get the buffer regardless of wether or not there is a callback as it updates and 
 //              checks for the completion of the command.
                 $buffer = $this->getBuffer();
