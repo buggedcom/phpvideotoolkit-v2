@@ -249,6 +249,7 @@
          */
         public function getCommand($command, $index=null)
         {
+            $index = $index === null ? $this->_output_index : $index;
             if($this->hasCommand($command, $index) === false)
             {
                 return false;
