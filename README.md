@@ -246,7 +246,7 @@ You may assume that looking at this example you will get 10 frames outputted bec
 ```
 current = 10;
 end = 20;
-if(current < end)
+while(current < end)
 {
 	extractFrame(current);
 	current += 1;
