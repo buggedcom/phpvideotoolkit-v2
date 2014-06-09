@@ -35,6 +35,8 @@
         {
             echo '<h2>Non Blocking Method</h2>';
 
+            \PHPVideoToolkit\Trace::vars('This non blocking process can only really be demonstrated easily via php cli.');
+
             // use a non block save to probe the progress handler after the save has been made.
             // IMPORTANT: this method only works with ->saveNonBlocking as otherwise the progress handler
             // probe will quit after one cycle.
