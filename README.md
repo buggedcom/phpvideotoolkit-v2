@@ -29,6 +29,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 - [Changing Codecs of the audio or video stream](#changing-codecs-of-the-audio-or-video-stream)
 - [Non-Blocking Saves](#non-blocking-saves)
 - [Encoding with Progress Handlers](#encoding-with-progress-handlers)
+- [Encoding Multiple Output Files](#encoding-multiple-output-files)
 - [Accessing Executed Commands and the Command Line Buffer](#accessing-executed-commands-and-the-command-line-buffer)
 - [Supplying custom commands](#supplying-custom-commands)
 - [Imposing a processing time limit](#imposing-a-processing-time-limit)
@@ -477,7 +478,7 @@ PHPVideoToolkit allows you to monitor the encoding process of FFmpeg. This is do
 - ProgressHandlerOutput
 - ProgressHandlerPortable
 
-ProgressHandlerNative and ProgressHandlerOutput work and function in the same way, however one uses a native ffmpeg command, and the out outputs ffmpeg output buffer to a temp file. If your copy of FFmpeg is recent you will be able to use ProgressHandlerNative which uses FFmpegs '-progress' command to provide data. Apart from that difference both handlers return the same data and act in the same way and there is no real need to prioritise one over another unless you version of ffmpeg does not support '-progress'. If it doesn't then when you initialise the ProgressHandlerNative an exception will be thrown.
+ProgressHandlerNative and ProgressHandlerOutput work and function in the same way, however one uses a native ffmpeg command, and the out outputs ffmpeg output buffer to a temp file. If your copy of FFmpeg is recent you will be able to use ProgressHandlerNative which uses FFmpegs '-progress' command to provide data. The handlers return slightly differing amounts of data, and the more accurate and verbose of the two is ProgressHandlerOutput and it is recommended that you use that progress handler between the two. However they do both return the same essential data and act in the same way and there is no real need to prioritise one over another unless you version of ffmpeg does not support '-progress'. If it doesn't then when you initialise the ProgressHandlerNative an exception will be thrown. Between the two I personally recommend ProgressHandlerOutput because of the more verbose nature of the data available.
 
 The third type of handler ProgressHandlerPortable (shown in example 3 below) operates somewhat differently and is specifically design to work with separate HTTP requests or threads. ProgressHandlerPortable can be initiated in a different script entirely, supplied with the PHPVideoToolkit portable process id and then probed independently of the encoding script. This allows developers to decouple encoding and encoding status scripts.
 
@@ -530,7 +531,7 @@ $output = $process->getOutput();
 
 So you see whilst the two examples look very similar and both block PHP, the second example does not need to block at all.
 
-**Example 3. Non Blocking Save with Remove Progress Handling**
+**Example 3. Non Blocking Save with Remote Progress Handling**
 
 This example (a better example is found in /examples/progress-handler-portability.php) shows that a non blocking save can be made in one request, and then subsequent requests (i.e. ajax) can be made to a different script to probe the encoding progress.
 
@@ -568,7 +569,40 @@ exit;
 
 ```
 
-**IMPORTANT**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolkit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
+**Progress Handler Caveats**
+
+**1**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolkit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
+
+**2**: When outputting files using %timecode or %index and using the ProgressHandlerPortable system it is not possible to currently automatically renaming the resulting temporary file output to their correct output filenames.
+
+###Encoding Multiple Output Files
+
+FFmpeg allows you to [encode multiple output formats from a single command](https://trac.ffmpeg.org/wiki/Creating%20multiple%20outputs). PHPVideoToolkit allows you to perform this functionality as well. This functionality is essentially the same process as performing multiple saves, however has the added benefit of lower overhead because the input file only has to be read into memory once before the encoding takes place. It is recommended that you use this method if you are outputting more than one version of the media. There are of course several caveats when using this method however. 
+
+When splitting files into multiple segments or extracting portions of a video the transformations that take place are performed on all the outputed media. An example of this functionality can be found in ```convert-to-multiple-output.php```. However a quick example is also shown below.
+
+```php
+namespace PHPVideoToolkit;
+
+$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+
+$multi_output = new MultiOutput($config);
+
+$ogg_output = './output/big_buck_bunny.multi1.ogg';
+$format = Format::getFormatFor($ogg_output, $config, 'VideoFormat');
+$format->setVideoDimensions(VideoFormat::DIMENSION_SQCIF);
+$multi_output->addOutput($ogg_output, $format);
+
+$threegp_output = './output/big_buck_bunny.multi2.3gp';
+$format = Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+$format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
+$multi_output->addOutput($threegp_output, $format);
+
+$output = $video->save($multi_output, null, Media::OVERWRITE_EXISTING);
+
+```
+
+All progress handlers also work with multiple output, however the caveats outlined for the ProgressHandlerPortable still apply.
 
 ###Accessing Executed Commands and the Command Line Buffer
 

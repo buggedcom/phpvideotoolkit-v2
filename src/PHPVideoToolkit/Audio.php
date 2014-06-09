@@ -36,18 +36,9 @@
             }
         }
         
-        /**
-         * Returns the default (empty) input format for the type of media object this class is.
-         *
-         * @access public
-         * @author Oliver Lillie
-         * @param string $type Either input for an input format or output for an output format.
-         * @param string $format A specific output format (if any to use)
-         * @return Format
-         */
-        public function getDefaultFormat($type, $format=null)
+        public function getDefaultFormatClassName()
         {
-            return $this->_getDefaultFormat($type, 'AudioFormat', $format);
+            return 'AudioFormat';
         }
         
         protected function _savePreProcess(Format &$output_format=null, &$save_path, $overwrite, ProgressHandlerAbstract &$progress_handler=null)

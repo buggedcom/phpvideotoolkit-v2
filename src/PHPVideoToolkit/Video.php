@@ -46,17 +46,9 @@
             $this->_extracting_audio = false;
         }
         
-        /**
-         * Returns the default (empty) input format for the type of media object this class is.
-         *
-         * @access public
-         * @author Oliver Lillie
-         * @param string $type Either input for an input format or output for an output format.
-         * @return Format
-         */
-        public function getDefaultFormat($type, $format=null)
+        public function getDefaultFormatClassName()
         {
-            return $this->_getDefaultFormat($type, 'VideoFormat', $format);
+            return 'VideoFormat';
         }
         
         public function extractAudio()

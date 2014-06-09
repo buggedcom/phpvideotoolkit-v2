@@ -29,6 +29,7 @@
                 'finished'   => false, // true when the process has ended by interuption or success completion
                 'completed'  => false, // true when the process has ended by success completion
                 'interrupted'=> false, // true when the process has ended by interuption, ie finished early.
+                'status'     => 'pending',
                 'run_time'   => 0,
                 'percentage' => 0,
                 'fps_avg'    => 0,
@@ -39,7 +40,9 @@
                 'fps'        => 0,
                 'dup'        => 0,
                 'drop'       => 0,
+                'output_count'=> 0,
                 'output_file'=> null,
+                'input_count'=> 0,
                 'input_file' => null,
                 'process_file' => null,
             );

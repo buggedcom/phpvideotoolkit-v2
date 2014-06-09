@@ -24,10 +24,11 @@
     {
         protected $_exec;
         protected $_pre_input_commands;
-        protected $_post_input_commands;
-        protected $_post_output_commands;
         protected $_input;
+        protected $_output_index;
+        protected $_post_input_commands;
         protected $_output;
+        protected $_post_output_commands;
         protected $_progress_handler;
         protected $_detect_error;
         protected $_combined;
@@ -46,12 +47,28 @@
             parent::__construct($program, $config);
             
             $this->_pre_input_commands = array();
-            $this->_post_input_commands = array();
-            $this->_post_output_commands = array();
             $this->_input = array();
+            $this->_output_index = 0;
+            $this->_post_input_commands = array();
+            $this->_output = array();
+            $this->_post_output_commands = array();
             $this->_exec = null;
             $this->_progress_handler = null;
             $this->_combined = false;
+        }
+
+        /**
+         * Sets the output index to a specific index.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @param integer $index The index integer to set the output index to.
+         * @return self
+         */
+        public function setOutputIndex($index)
+        {
+            $this->_output_index = (int) $index;
+            return $this;
         }
         
         /**
@@ -106,7 +123,7 @@
          */
         public function setOutputPath($output)
         {
-            $this->_output = $output;
+            $this->_output[$this->_output_index] = $output;
             return $this;
         }
 
@@ -114,11 +131,14 @@
          * Gets the output.
          *
          * @access public
+         * @param integer $index The index of the output to return. If left null defaults to the currently incremented
+         *  index.
          * @return string
          */
-        public function getOutputPath()
+        public function getOutputPath($index=null)
         {
-            return $this->_output;
+            $index = $index === null ? $this->_output_index : $index;
+            return isset($this->_output[$index]) === true ? $this->_output[$index] : null;
         }
 
         /**
@@ -147,7 +167,11 @@
          */
         public function addCommand($command, $argument=false, $allow_command_repetition=false)
         {
-            $this->_add($this->_post_input_commands, $command, $argument, $allow_command_repetition);
+            if(isset($this->_post_input_commands[$this->_output_index]) === false)
+            {
+                $this->_post_input_commands[$this->_output_index] = array();
+            }
+            $this->_add($this->_post_input_commands[$this->_output_index], $command, $argument, $allow_command_repetition);
             return $this;
         }
 
@@ -200,11 +224,18 @@
          *
          * @access public
          * @param string $command
+         * @param integer $index The index of the output to return. If left null defaults to the currently incremented
+         *  index.
          * @return mixed boolean if failure or value if exists.
          */
-        public function hasCommand($command)
+        public function hasCommand($command, $index=null)
         {
-            return isset($this->_post_input_commands[$command]) === true ? ($this->_post_input_commands[$command] === false ? true : $this->_post_input_commands[$command]): false;
+            $index = $index === null ? $this->_output_index : $index;
+            if(isset($this->_post_input_commands[$index]) === false)
+            {
+                return false;
+            }
+            return isset($this->_post_input_commands[$index][$command]) === true ? ($this->_post_input_commands[$index][$command] === false ? true : $this->_post_input_commands[$index][$command]): false;
         }
         
         /**
@@ -212,16 +243,18 @@
          *
          * @access public
          * @param string $command
+         * @param integer $index The index of the output to return. If left null defaults to the currently incremented
+         *  index.
          * @return mixed boolean if failure or value if exists.
          */
-        public function getCommand($command)
+        public function getCommand($command, $index=null)
         {
-            if($this->hasCommand($command) === false)
+            if($this->hasCommand($command, $index) === false)
             {
                 return false;
             }
             
-            return $this->_post_input_commands[$command];
+            return $this->_post_input_commands[$index][$command];
         }
         
         /**
@@ -266,7 +299,7 @@
                 return;
             }
             $this->_combined = true;
-            
+
             $args = $this->_arguments;
             $this->_arguments = array();
             
@@ -285,21 +318,25 @@
                          ->add($input);
                 }
             }
+
+//          build the multiple post input  and output path commands
+            for($i=0; $i<=$this->_output_index; $i++)
+            {
+//              build the post input commands
+                if(isset($this->_post_input_commands[$i]) === true && empty($this->_post_input_commands[$i]) === false)
+                {
+                    $this->addCommands($this->_post_input_commands[$i]);
+                }
+                if(empty($args) === false)
+                {
+                    $this->_arguments = array_merge($this->_arguments, $args);
+                }
             
-//          build the post input commands
-            if(empty($this->_post_input_commands) === false)
-            {
-                $this->addCommands($this->_post_input_commands);
-            }
-            if(empty($args) === false)
-            {
-                $this->_arguments = array_merge($this->_arguments, $args);
-            }
-            
-//          add in the output
-            if(empty($this->_output) === false)
-            {
-                $this->add($this->_output);
+//              add in the output
+                if(isset($this->_output[$i]) === true && empty($this->_output[$i]) === false)
+                {
+                    $this->add($this->_output[$i]);
+                }
             }
             
 //          build the post output commands
@@ -523,10 +560,12 @@
 //          if we have an error and we want to delete any output on the error
             if($delete_output_on_error === true && $has_error === true)
             {
-                $output = $this->getOutputPath();
-                if(empty($output) === false && is_file($output) === true)
+                foreach ($this->_output as $output)
                 {
-                    @unlink($output);
+                    if(empty($output) === false && is_file($output) === true)
+                    {
+                        @unlink($output);
+                    }
                 }
             }
             
