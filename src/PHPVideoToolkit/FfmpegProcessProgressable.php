@@ -22,6 +22,7 @@
      */
     class FfmpegProcessProgressable extends FfmpegProcess 
     {
+        private $_output_renamed;
         private $_progress_callbacks;
         
         public function __construct($binary_path, Config $config=null)
@@ -29,6 +30,7 @@
             parent::__construct($binary_path, $config);
             
             $this->_progress_callbacks = array();
+            $this->_output_renamed = null;
         }
         
         /**
@@ -145,7 +147,13 @@
             
             return $this;
         }
-        
+
+        public function getOutput($post_process_callback=null)
+        {
+//          get the output of the process
+            return $this->completeProcess($post_process_callback);
+        }
+
         /**
          * Once the process has been completed this function can be called to return the output
          * of the process. Depending on what the process is outputting depends on what is returned.
@@ -158,8 +166,16 @@
          * @author Oliver Lillie
          * @return mixed
          */
-        public function getOutput($post_process_callback=null)
+        public function completeProcess($post_process_callback=null)
         {
+            if($post_process_callback !== null)
+            {
+                if(is_callable($post_process_callback) === false)
+                {
+                    throw new Exception('The supplied post process callback is not callable.');
+                }
+            }
+
             if($this->isCompleted() === false)
             {
                 throw new FfmpegProcessOutputException('Encoding has not yet started.');
@@ -208,69 +224,10 @@
                 throw new FfmpegProcessOutputException('Encoding failed and an error was returned from ffmpeg. Error code '.$this->getErrorCode().' was returned the message (if any) was: '.$last_split);
             }
             
-            if($post_process_callback !== null)
-            {
-                if(is_callable($post_process_callback) === false)
-                {
-                    throw new Exception('The supplied post process callback is not callable.');
-                }
-            }
-            
-//          get the output of the process
-            $output_path = $this->getOutputPath();
-            
-//          we have the output path but we now need to treat differently dependant on if we have multiple file output.
-            if(preg_match('/\.(\%([0-9]*)d)\.([0-9\.]+_[0-9\.]+\.)?_(i|t)\./', $output_path, $matches) > 0)
-            {
-//              determine what we have to rename all the files to.
-                $convert_back_to = $matches[4] === 't' ? 'timecode' : (int) $matches[2];
-                
-//              get the glob path and then find all the files from this output
-                $output_glob_path = str_replace($matches[0], '.*.'.$matches[3].'_'.$matches[4].'.', $output_path);
-                $outputted_files = glob($output_glob_path);
-                
-//              sort the output naturally so that if there is no index padding that we get the frames in the correct order.
-                natsort($outputted_files);
+            $output_path = $this->_renameMultiOutput();
 
-//              loop to rename the file and then create each output object.
-                $output = array();
-                $timecode = null;
-                foreach ($outputted_files as $path)
-                {
-                    $actual_path = preg_replace('/\._u\.[0-9]{5}_[a-z0-9]{5}_[0-9]+\.u_\./', '.', $path);
-                    if($convert_back_to === 'timecode')
-                    {
-//                      if the start timecode has not been generated then find the required from the path string.
-                        if($timecode === null)
-                        {
-                            $matches[3] = rtrim($matches[3], '.');
-                            $matches[3] = explode('_', $matches[3]);
-                            $timecode = new Timecode($matches[3][1], Timecode::INPUT_FORMAT_SECONDS, $matches[3][0]);
-                        }
-                        else
-                        {
-                            $timecode->frame += 1;
-                        }
-                        $actual_path = preg_replace('/\.[0-9]{12}\.[0-9\.]+_[0-9\.]+\._t\./', $timecode->getTimecode('%hh_%mm_%ss_%ms', false), $actual_path);
-                    }
-                    else
-                    {
-                        $actual_path = preg_replace('/\.([0-9]+)\._i\./', '$1', $actual_path);
-                    }
-                    rename($path, $actual_path);
-                    
-                    $media_class = $this->_findMediaClass($actual_path);
-                    $output_object = new $media_class($actual_path, $this->_config, null, false);
-                    
-                    array_push($output, $output_object);
-                    
-                    unset($output_object);
-                }
-                unset($outputted_files);
-                
-                // TODO create the multiple image output
-            }
-            else
+            $output = null;
+            if(is_string($output_path) === true)
             {
 //              check for a none multiple file existence
                 if(empty($output_path) === true)
@@ -286,19 +243,136 @@
                     throw new FfmpegProcessOutputException('The output "'.$output_path.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
                 }
                 
-//              get the media class from the output.
-//              create the object from the class name and return the new object.
-                $media_class = $this->_findMediaClass($output_path);
-                $output = new $media_class($output_path, $this->_config, null, false);
+                $output = $this->_convertPathToMediaObject($output_path);
             }
+            else if(is_array($output_path) === true && empty($output_path) === false)
+            {
+                $output = array();
+                foreach ($output_path as $key => $path)
+                {
+                    array_push($output, $this->_convertPathToMediaObject($path));
+                }
+            }
+            unset($output_path);
                 
 //          do any post processing callbacks
             if($post_process_callback !== null)
             {
                 $output = call_user_func($post_process_callback, $output, $this);
             }
+
+            return $output;
+
+        }
+
+        /**
+         * Checks to see if the ffmpeg output is a %d format and if so performs the rename of the output.
+         *
+         * @access protected
+         * @author: Oliver Lillie
+         * @return mixed If %d output is expected then an array of path names is returned, otherwise a string path is returned.
+         */
+        protected function _renameMultiOutput()
+        {
+//          check to see if the output has already been renamed somewhere
+            if($this->_output_renamed !== null)
+            {
+                return $this->_output_renamed;
+            }
+
+//          get the output of the process
+            $output_path = $this->getOutputPath();
+
+//          we have the output path but we now need to treat differently dependant on if we have multiple file output.
+            if(preg_match('/\.(\%([0-9]*)d)\.([0-9\.]+_[0-9\.]+\.)?_(i|t)\./', $output_path) > 0)
+            {
+                $this->_output_renamed = false;
+                $output = $this->_renamePercentDOutput($output_path);
+                $this->_output_renamed = $output;
+            }
+            else
+            {
+                $output = $output_path;
+            }
+
+            return $output;
+        }
+
+        /**
+         * Returns a Media object based class for the given file path.
+         *
+         * @access protected
+         * @author: Oliver Lillie
+         * @param  string $output_path The file path to convert.
+         * @return object Either "Media", "Video", "Audio" or "Image" PHPVideoToolkit objects.
+         */
+        protected function _convertPathToMediaObject($output_path)
+        {
+//          get the media class from the output.
+//          create the object from the class name and return the new object.
+            $media_class = $this->_findMediaClass($output_path);
+            return new $media_class($output_path, $this->_config, null, false);
+        }
+
+        /**
+         * Renames any output from ffmpeg that would have been outputted in a sequence, ie using %d. Typically used with imagery.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param  string $output_path The string notation for the output path.
+         * @return array Returns an array of modified file paths.
+         */
+        protected function _renamePercentDOutput($output_path)
+        {
+            $output = array();
+
+//          we have the output path but we now need to treat differently dependant on if we have multiple file output.
+            if(preg_match('/\.(\%([0-9]*)d)\.([0-9\.]+_[0-9\.]+\.)?_(i|t)\./', $output_path, $matches) > 0)
+            {
+//              determine what we have to rename all the files to.
+                $convert_back_to = $matches[4] === 't' ? 'timecode' : (int) $matches[2];
                 
-//          finally return the output to the user.
+//              get the glob path and then find all the files from this output
+                $output_glob_path = str_replace($matches[0], '.*.'.$matches[3].'_'.$matches[4].'.', $output_path);
+                $outputted_files = glob($output_glob_path);
+                
+//              sort the output naturally so that if there is no index padding that we get the frames in the correct order.
+                natsort($outputted_files);
+
+//              loop to rename the file and then create each output object.
+                $timecode = null;
+                foreach ($outputted_files as $path)
+                {
+                    if($convert_back_to === 'timecode')
+                    {
+//                      if the start timecode has not been generated then find the required from the path string.
+                        if($timecode === null)
+                        {
+                            $matches[3] = rtrim($matches[3], '.');
+                            $matches[3] = explode('_', $matches[3]);
+                            $timecode = new Timecode($matches[3][1], Timecode::INPUT_FORMAT_SECONDS, $matches[3][0]);
+                        }
+                        else
+                        {
+                            $timecode->frame += 1;
+                        }
+                        $actual_path = preg_replace('/\.[0-9]{12}\.[0-9\.]+_[0-9\.]+\._t\./', $timecode->getTimecode('%hh_%mm_%ss_%ms', false), $path);
+                    }
+                    else
+                    {
+                        $actual_path = preg_replace('/\.([0-9]+)\._i\./', '$1', $path);
+                    }
+                    $actual_path = preg_replace('/\._u\.[0-9]{5}_[a-z0-9]{5}_[0-9]+\.u_\./', '.', $actual_path);
+                    
+                    rename($path, $actual_path);
+                    
+                    array_push($output, $actual_path);
+                }
+                unset($outputted_files);
+                
+                // TODO create the multiple image output
+            }
+
             return $output;
         }
         
@@ -317,7 +391,8 @@
             $data = getimagesize($path);
             if(!$data)
             {
-                $type = 'audio';
+                $media_parser = new MediaParser($this->_config);
+                $type = $media_parser->getFileType($path);
             }
             else if(strpos($data['mime'], 'image/') !== false)
             {

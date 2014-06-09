@@ -635,16 +635,19 @@
          * @author Oliver Lillie
          * @return mixed
          */
-        public function _postProcessOutput($output, $process)
+        public function _postProcessOutput(FfmpegProcess $process)
         {
+            $output = $process->completeProcess();
             if(empty($this->_post_process_callbacks) === false)
             {
                 foreach ($this->_post_process_callbacks as $callback)
                 {
-                    $output = call_user_func($callback, $output, $this);
+                    $args = $callback[1];
+                    array_unshift($args, $output, $this);
+                    $output = call_user_func_array($callback[0], $args);
                 }
             }
-            
+
             return $output;
         }
         
@@ -688,10 +691,19 @@
                                      ->getExecBuffer()
                                      ->setBlocking($this->_blocking === null ? true : $this->_blocking);
 
+            $process = $this->_process;
+            $callback = array($this, '_postProcessOutput');
+            $buffer->registerCompletionCallback(
+                function() use ($callback, $process)
+                {
+                    call_user_func($callback, $process);
+                }
+            );
+
             if($progress_handler !== null && $progress_handler->getNonBlockingCompatibilityStatus() === false)
             {
                 $buffer->execute(
-                    function() use ($progress_handler)
+                    function($exec_buffer, $null, $completed) use ($progress_handler, $callback, $process)
                     {
                         if($progress_handler !== null)
                         {
@@ -705,13 +717,7 @@
                 $buffer->execute();
             }
 
-//          now we work out what we are returning as it depends on the blocking status.
-            if($this->_blocking === true)
-            {
-                return $this->_process->getOutput(array($this, '_postProcessOutput'));
-            }
-            
-//          just return the process if the process is non blocking.
+//          just return the process if the process
             return $this->_process;
         }
         
