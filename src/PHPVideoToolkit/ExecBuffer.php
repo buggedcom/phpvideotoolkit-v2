@@ -45,6 +45,9 @@
         protected $_php_exec_infinite_timelimit;
         
         protected $_tmp_files;
+        protected $_gc_temp_files;
+
+        protected $_completion_callbacks;
         
         const DEV_NULL = '/dev/null';
         const TEMP = -1;
@@ -74,6 +77,9 @@
             $this->_php_exec_infinite_timelimit = $php_exec_infinite_timelimit;
             
             $this->_tmp_files = array();
+            $this->setGarbageCollection(true);
+
+            $this->_completion_callbacks = array();
             
             $id = uniqid(rand(99999, 999999).'-').'-'.md5(__FILE__);
             $this->_boundary = $id;
@@ -106,9 +112,18 @@
             
             return $this;
         }
+
+        public function setGarbageCollection($gc)
+        {
+            if(is_bool($gc) === false)
+            {
+                throw new Exception('The $gc garabage collection value must be a boolean value.');
+            }
+            $this->_gc_temp_files = $gc;
+        }
         
         /**
-         * Destruct function autoamtically tidies up tmp files.
+         * Destruct function automatically tidies up tmp files.
          *
          * @access public
          * @author Oliver Lillie
@@ -116,7 +131,7 @@
          */
         public function __destruct()
         {
-            if(empty($this->_tmp_files) === false)
+            if($this->_gc_temp_files === true && empty($this->_tmp_files) === false)
             {
                 foreach ($this->_tmp_files as $path)
                 {
@@ -190,12 +205,40 @@
             }
             
 //          this is the final callback
+//          this is the final callback to any function callback
             if($callback !== null && is_callable($callback) === true)
             {
                 call_user_func($callback, $this, null, true);
             }
-            
+
+//          this is the callbacks to any completion callbacks.
+            if($this->getBlocking() === true)
+            {
+                $this->_callCompletionCallbacks();
+            }
+
             return $this;
+        }
+
+        protected function _callCompletionCallbacks()
+        {
+            if(empty($this->_completion_callbacks) === false)
+            {
+                foreach ($this->_completion_callbacks as $callback)
+                {
+                    call_user_func($callback, $this);
+                }
+            }
+        }
+
+        public function registerCompletionCallback($callback)
+        {
+            if(is_callable($callback) === true)
+            {
+                array_push($this->_completion_callbacks, $callback);
+                return true;
+            }
+            return false;
         }
         
         /**
@@ -248,6 +291,10 @@
 //              if we have finished running the loop then break here.
                 if($this->_running === false)
                 {
+                    if($this->getBlocking() === false)
+                    {
+                        $this->_callCompletionCallbacks();
+                    }
                     break;
                 }
 

@@ -124,6 +124,10 @@
             
 //          has the process completed itself?
             $this->completed = $return_data['completed'];
+            if($this->completed === true)
+            {
+                unlink($this->_output);
+            }
             
             return $return_data;
         }
