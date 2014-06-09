@@ -11,7 +11,7 @@
      * @uses ffmpeg http://ffmpeg.sourceforge.net/
      */
      
-     namespace PHPVideoToolkit;
+    namespace PHPVideoToolkit;
      
     /**
      * This is a container class for determining which ffmpeg parser class

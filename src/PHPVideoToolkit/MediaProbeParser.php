@@ -11,7 +11,7 @@
      * @uses ffmpeg http://ffmpeg.sourceforge.net/
      */
      
-     namespace PHPVideoToolkit;
+    namespace PHPVideoToolkit;
 
     /**
      * This class provides generic data parsing for the output from FFmpeg from specific

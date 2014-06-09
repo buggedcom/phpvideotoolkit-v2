@@ -11,7 +11,7 @@
      * @uses ffmpeg http://ffmpeg.sourceforge.net/
      */
      
-     namespace PHPVideoToolkit;
+    namespace PHPVideoToolkit;
      
     /**
      * @access public
