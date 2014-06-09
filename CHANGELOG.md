@@ -1,3 +1,11 @@
+#[2.1.7-beta] [09.04.2014]
+WARNING: Potential code breaking change from Media->save. save() no longer returns the output path if saved in blocking mode. It returns as non-blocking mode does the FfmpegProcess object. So to return the output path of what has been outputed you must call $process->getOutput().
+Fixed several bugs:
+- fixed issues in portability progress handler where parsing of image only output data would fail.
+- fixed issues in portability progress handler where the progress file would be prematurely deleted.
+- fixed issues where using %timecode or %index in the output would not correctly get renamed unless calling getOutput from the process object. #22
+- fixed issues with animated gifs not following the overwrite setting of the save function call
+
 #[2.1.6-beta] [08.04.2014]
 By default image rotation does not automatically modify the aspect ratio settings of rotated output, however this patch fixes that. If an aspect ratio is not already set and a rotation means that the aspect ratio is not the same as the current ratio then a new ratio will be applied.
 This patch also provides automated functionality where if the aspect ratio does not match the width and height, the ratio corrected width and height and height are returned instead of the actual width and height. This will mean that any output processed from a mis matching file will be as expected.

@@ -10,6 +10,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 
 - [License](#license)
 - [Documentation](#documentation)
+- [Latest Changes](#Latest Changes)
 - [Usage](#usage)
 - [Configuring PHPVideoToolkit](#configuring-phpvideotoolkit)
 - [Accessing Data About FFmpeg](#accessing-data-about-ffmpeg)
@@ -43,6 +44,17 @@ See LICENSE.md for more details.
 ##Documentation
 
 Extensive documentation and examples are bundled with the download and is available in the documentation directory.
+
+##Latest Changes
+
+#[2.1.7-beta] [09.04.2014]
+***WARNING*** Potential code breaking change from Media->save. save() no longer returns the output path if saved in blocking mode. It returns as non-blocking mode does the FfmpegProcess object. So to return the output path of what has been outputed you must call $process->getOutput().
+Fixed several bugs:
+- fixed issues in portability progress handler where parsing of image only output data would fail.
+- fixed issues in portability progress handler where the progress file would be prematurely deleted.
+- fixed issues where using %timecode or %index in the output would not correctly get renamed unless calling getOutput from the process object. #22
+- fixed issues with animated gifs not following the overwrite setting of the save function call
+[Full changelog](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/CHANGELOG.md)
 
 ##Usage
 
