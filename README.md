@@ -32,7 +32,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 - [Accessing Executed Commands and the Command Line Buffer](#accessing-executed-commands-and-the-command-line-buffer)
 - [Supplying custom commands](#supplying-custom-commands)
 - [Imposing a processing time limit](#imposing-a-processing-time-limit)
-- [Forcing a specific output format whilst using a silly file extention](#forcing-a-specific-output-format-whilst-using-a-silly-file-extension)
+- [Forcing a specific output format whilst using a silly file extension](#forcing-a-specific-output-format-whilst-using-a-silly-file-extension)
 
 ##License
 
@@ -666,7 +666,7 @@ catch(FfmpegProcessOutputException $e)
 				
 ```
 
-###Forcing a specific output format whilst using a silly file extention
+###Forcing a specific output format whilst using a silly file extension
 
 Because of the advanced nature of the input and output formatters, if supplied you can encode a specific output, but use a silly (or custom) file extension. Not really sure why you would want to but it is possible.
 
