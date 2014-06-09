@@ -41,8 +41,8 @@
             $output_format->setVideoFrameRate(12);
         
             $video = new \PHPVideoToolkit\Video($example_video_path, $config);
-            $output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(70))
-                            ->save($output_path, $output_format);
+            $output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(30))
+                            ->save($output_path, $output_format, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
             
             $length = microtime_float()-$start;
             
