@@ -151,8 +151,9 @@ The code below extracts a frame from the video at the 40 second mark.
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractFrame(new Timecode(40))
+$process = $video->extractFrame(new Timecode(40))
 				->save('./output/big_buck_bunny_frame.jpg');
+$output = $process->getOutput();
 ```
 ###Extract Multiple Frames from a Segment of a Video
 
@@ -162,8 +163,9 @@ The code below extracts frames at the parent videos' frame rate from between 40 
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractFrames(new Timecode(40), new Timecode(50))
+$process = $video->extractFrames(new Timecode(40), new Timecode(50))
 				->save('./output/big_buck_bunny_frame_%timecode.jpg');
+$output = $process->getOutput();
 ```
 
 ###Extract Multiple Frames of a Video at 1 frame per second
@@ -189,8 +191,9 @@ $output_format->setVideoCodec('mjpeg')
 */
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractFrames(null, new Timecode(50)) // if null then the extracted segment starts from the begining of the video
+$process = $video->extractFrames(null, new Timecode(50)) // if null then the extracted segment starts from the begining of the video
 				->save('./output/big_buck_bunny_frame_%timecode.jpg', $output_format);
+$output = $process->getOutput();
 ```
 
 The second is to use the $force_frame_rate option of the extractFrames function.
@@ -199,8 +202,9 @@ The second is to use the $force_frame_rate option of the extractFrames function.
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractFrames(new Timecode(50), null, 1) // if null then the extracted segment goes from the start timecode to the end of the video
+$process = $video->extractFrames(new Timecode(50), null, 1) // if null then the extracted segment goes from the start timecode to the end of the video
 				->save('./output/big_buck_bunny_frame_%timecode.jpg');
+$output = $process->getOutput();
 ```
 
 ###Extract Multiple Frames of a Video at 1 frame every 'x' seconds
@@ -211,8 +215,9 @@ The code below uses the ```$force_frame_rate``` argument for ```$video->extractF
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractFrames(new Timecode(40), new Timecode(50), '1/60')
+$process = $video->extractFrames(new Timecode(40), new Timecode(50), '1/60')
 				->save('./output/big_buck_bunny_frame_%timecode.jpg');
+$output = $process->getOutput();
 ```
 
 ###Caveats of Extracting Multiple Frames
@@ -223,12 +228,12 @@ $output = $video->extractFrames(new Timecode(40), new Timecode(50), '1/60')
 namespace PHPVideoToolkit;
 
 $video = new \PHPVideoToolkit\Video($example_video_path, $config);
-$process = $video->getProcess();
 
-$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+$process = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
 				->extractFrames(null, null, 1)
 				->save('./output/%timecode.jpg', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
 
+$output = $process->getOutput();
 ```
 
 You may assume that looking at this example you will get 10 frames outputted because the segment being extracted is 10 seconds long. However you will actually only get 9 frames exported. This is because the end time frame is treated as a less than value rather than a less than and equal to value. So in pseudo code this is what is happening when frames are extracted.
@@ -269,9 +274,10 @@ $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new Timecode(10), new Timecode(20))
+$process = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 				
+$output = $process->getOutput();
 ```
 
 **Quick Encoding, but lower quality (still better than FFmpeg mind)**
@@ -290,9 +296,10 @@ $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new Timecode(10), new Timecode(20))
+$process = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 				
+$output = $process->getOutput();
 ```
 
 *Native PHP GD with symbio/gif-creator library*
@@ -307,9 +314,10 @@ $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new Timecode(10), new Timecode(20))
+$process = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 				
+$output = $process->getOutput();
 ```
 
 *Gifsicle with native PHP GD*
@@ -325,9 +333,10 @@ $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
 $output_format->setVideoFrameRate(5);
 		
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new Timecode(10), new Timecode(20))
+$process = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 				
+$output = $process->getOutput();
 ```
 
 ###Extracting Audio or Video Channels from a Video
@@ -336,9 +345,10 @@ $output = $video->extractSegment(new Timecode(10), new Timecode(20))
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractAudio()->save('./output/big_buck_bunny.mp3');
-// $output = $video->extractVideo()->save('./output/big_buck_bunny.mp4');
+$process = $video->extractAudio()->save('./output/big_buck_bunny.mp3');
+// $process = $video->extractVideo()->save('./output/big_buck_bunny.mp4');
 				
+$output = $process->getOutput();
 ```
 
 ###Extracting a Segment of an Audio or Video file
@@ -349,8 +359,9 @@ The code below extracts a portion of the video at the from 2 minutes 22 seconds 
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->extractSegment(new Timecode('00:02:22.0', Timecode::INPUT_FORMAT_TIMECODE), new Timecode(180))
+$process = $video->extractSegment(new Timecode('00:02:22.0', Timecode::INPUT_FORMAT_TIMECODE), new Timecode(180))
 				->save('./output/big_buck_bunny.mp4');
+$output = $process->getOutput();
 ```
 ###Splitting a Audio or Video file into multiple parts
 
@@ -362,8 +373,9 @@ The code below splits a video into multiple of equal length of 45 seconds each.
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->split(45)
+$process = $video->split(45)
 				->save('./output/big_buck_bunny_%timecode.mp4');
+$output = $process->getOutput();
 ```
 ###Purging and then adding Meta Data
 
@@ -373,9 +385,10 @@ Unfortunately there is no way using FFmpeg to add meta data without re-encoding 
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->purgeMetaData()
+$process = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
 				->save('./output/big_buck_bunny.mp4');
+$output = $process->getOutput();
 ```
 ###Changing Codecs of the audio or video stream
 
@@ -394,7 +407,8 @@ $output_format->setAudioCodec('acc')
 			  ->setVideoCodec('ogg');
 
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->save($output_path, $output_format);
+$process = $video->save($output_path, $output_format);
+$output = $process->getOutput();
 ```
 
 *Changing the audio codec of an audio export*
@@ -407,8 +421,9 @@ $output_format = new AudioFormat('output', $config);
 $output_format->setAudioCodec('acc');
 
 $video = new Video('media/BigBuckBunny_320x180.mp4', $config);
-$output = $video->save($output_path, $output_format);
+$process = $video->save($output_path, $output_format);
 
+$output = $process->getOutput();
 ```
 ###Non-Blocking Saves
 
@@ -477,9 +492,10 @@ $progress_handler = new ProgressHandlerNative(function($data)
 	echo '<pre>'.print_r($data, true).'</pre>';
 }, $config);
 
-$output = $video->purgeMetaData()
+$process = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
 				->save('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING, $progress_handler);
+$output = $process->getOutput();
 ```
 
 **Example 2. Probing the handler**
@@ -493,7 +509,7 @@ $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 
 $progress_handler = new ProgressHandlerNative(null, $config);
 
-$output = $video->purgeMetaData()
+$process = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
 				->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING, $progress_handler);
 				
@@ -503,6 +519,8 @@ while($progress_handler->completed !== true)
 	echo '<pre>'.print_r($progress_handler->probe(true), true).'</pre>';
 }
 				
+$output = $process->getOutput();
+
 ```
 
 So you see whilst the two examples look very similar and both block PHP, the second example does not need to block at all.
@@ -555,8 +573,7 @@ There may be instances where things go wrong and PHPVideoToolkit hasn't correctl
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$output = $video->save('./output/big_buck_bunny.mov');
-$process = $video->getProcess();
+$process = $video->save('./output/big_buck_bunny.mov');
 
 echo 'Expected Executed Command<br />';
 echo '<pre>'.$process->getExecutedCommand().'</pre>';
