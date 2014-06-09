@@ -971,6 +971,11 @@
                     {
                         throw new Exception('Unable to access the output frame rate value and as a result we cannot generate a timecode based filename output.');
                     }
+                    else if(preg_match('/[0-9]+\/[0-9]+/', $frame_rate) > 0)
+                    {
+                        $frame_rate = explode('/', $frame_rate);
+                        $frame_rate = $frame_rate[0]/$frame_rate[1];
+                    }
                     
 //                  get the starting offset of the export
                     $offset = '0';

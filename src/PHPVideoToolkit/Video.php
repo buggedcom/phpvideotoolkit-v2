@@ -85,9 +85,9 @@
             {
                 throw new Exception('You cannot a single frame and then extract multiple frames in the same execution chain.');
             }
-            if($force_frame_rate !== null && is_int($force_frame_rate) === false && is_float($force_frame_rate) === false)
+            if($force_frame_rate !== null && is_int($force_frame_rate) === false && is_float($force_frame_rate) === false && (is_string($force_frame_rate) === true && preg_match('/[0-9]+\/[0-9]+/', $force_frame_rate) === 0))
             {
-                throw new Exception('If setting a forced frame rate please make sure it is either an integer or a float.');
+                throw new Exception('If setting a forced frame rate please make sure it is either an integer, a float or a string in the "1/xxx" format (i.e. 1/60 = 1 frame every 60 seconds).');
             }
             
             if($from_timecode !== null || $to_timecode !== null)

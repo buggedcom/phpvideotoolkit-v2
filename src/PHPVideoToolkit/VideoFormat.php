@@ -510,9 +510,9 @@
             {
                 throw new Exception('Unrecognised frame rate "'.$frame_rate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate');
             }
-            else if(is_int($frame_rate) === false && is_float($frame_rate) === false)
+            else if(is_int($frame_rate) === false && is_float($frame_rate) === false && (is_string($frame_rate) === true && preg_match('/[0-9]+\/[0-9]+/', $frame_rate) === 0))
             {
-                throw new Exception('If setting frame rate please make sure it is either an integer or a float.');
+                throw new Exception('If setting a frame rate please make sure it is either an integer, a float or a string in the "1/n" format (i.e. 1/60 = 1 frame every 60 seconds).');
             }
             
 //          now check the class settings to see if restricted codecs have been set and have to be obeys
