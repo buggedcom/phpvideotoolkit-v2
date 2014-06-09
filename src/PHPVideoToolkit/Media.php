@@ -840,22 +840,24 @@
             
 //          check for a recognised output format, and if one is not supplied
 //          then check the a the format has been set in the output format, if not through an error and exit
+            $format = false;
             $ext = pathinfo($save_path, PATHINFO_EXTENSION);
-            if(empty($ext) === true)
-            {
-//              get the output commands and augment with the final output options.
-                $options = $output_format->getFormatOptions();
-                if(empty($options['format']) === true)
-                {
-                    throw new Exception('The save path supplied does not have an extension and you have not supplied an output format. Please either add a file extension to the save path or call setFormat() on the output format.');
-                }
-            }
-            else
+            if(empty($ext) === false)
             {
 //              check we have a format we know about.
                 $format = Extensions::toBestGuessFormat($ext);
-                if(empty($format) === true)
+            }
+
+//          if we still don't have a format, check from the output format.
+            if(!$format)
+            {
+                $options = $output_format->getFormatOptions();
+                if(isset($options['format']) === false || empty($options['format']) === true)
                 {
+                    if(empty($ext) === true)
+                    {
+                        throw new Exception('The output path of the file extension has not be given. Please either set a file extension of the output path - or - call setFormat() on the output format to set the format of the output media.');
+                    }
                     throw new Exception('Un-recognised file extension. Please call setFormat() on the output format to set the format of the output media.');
                 }
             }
