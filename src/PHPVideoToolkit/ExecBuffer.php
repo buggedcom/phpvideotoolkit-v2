@@ -120,7 +120,7 @@
             {
                 foreach ($this->_tmp_files as $path)
                 {
-                    //@unlink($path);
+                    @unlink($path);
                 }
             }
         }
