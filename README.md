@@ -19,6 +19,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 - [Extract Multiple Frames from a Segment of a Video](#extract-multiple-frames-from-a-segment-of-a-video)
 - [Extract Multiple Frames of a Video at 1 frame per second](#extract-multiple-frames-of-a-video-at-1-frame-per-second)
 - [Extract Multiple Frames of a Video at 1 frame every 'x' seconds](#extract-multiple-frames-of-a-video-at-1-frame-every-x-seconds)
+- [Caveats of Extracting Multiple Frames](#caveats-of-extracting-multiple-frames)
 - [Extracting an Animated Gif](#extracting-an-animated-gif)
 - [Extracting Audio or Video Channels from a Video](#extracting-audio-or-video-channels-from-a-video)
 - [Extracting a Segment of an Audio or Video file](#extracting-a-segment-of-an-audio-or-video-file)
@@ -200,6 +201,36 @@ $video  = new Video('BigBuckBunny_320x180.mp4', $config);
 $output = $video->extractFrames(new Timecode(40), new Timecode(50), '1/60')
 				->save('./output/big_buck_bunny_frame_%timecode.jpg');
 ```
+
+###Caveats of Extracting Multiple Frames
+
+***IMPORTANT:*** It is important to note that if you exporting multiple frames a video you will not always get the expected amount of frames you would expect. This is down to the way FFmpeg treats timecodes. Take the example below into consideration.
+
+```php
+namespace PHPVideoToolkit;
+
+$video = new \PHPVideoToolkit\Video($example_video_path, $config);
+$process = $video->getProcess();
+
+$output = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
+				->extractFrames(null, null, 1)
+				->save('./output/%timecode.jpg', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
+
+```
+
+You may assume that looking at this example you will get 10 frames outputted because the segment being extracted is 10 seconds long. However you will actually only get 9 frames exported. This is because the end time frame is treated as a less than value rather than a less than and euqal to value. So in psuedo code this is what is happening when frames are extracted.
+
+```
+current = 10;
+end = 20;
+if(current < end)
+{
+	extractFrame(current);
+	current += 1;
+}
+```
+
+So if we require 10 frames you must actually set your end timecode to a little over 20 seconds like so ```$video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20.1))```
 
 ###Extracting an Animated Gif
 Now, FFmpeg's animated gif support is a pile of doggy do do. I can't understand why. However what PHPVideoToolkit does is bypass the native gif exporting of FFmpeg and provide it's own much better alternative.
