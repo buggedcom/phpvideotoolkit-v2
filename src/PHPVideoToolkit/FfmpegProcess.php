@@ -561,11 +561,11 @@
         
         /**
          * Returns a boolean value determining if the process has completed.
+         * WARNING. If this function is called it automatically disables the garbage collection of the ExceBuffer.
          *
          * @access public
          * @author Oliver Lillie
-         * @see ExecBuffer::isCompleted
-         * @return boolean
+         * @return string
          */
         public function getPortableId()
         {
@@ -573,6 +573,8 @@
             {
                 throw new Exception('It is not possible to get a portable id as the exec process has been made blocking. To get a portable id make the process unblocking or call getPortableId() before the save occurs.');
             }
+
+            $this->_exec->setGarbageCollection(false);
             
             $output = $this->getBufferOutput();
             return substr($output, strrpos($output, 'phpvideotoolkit_')+16).'.'.$this->_callExecBufferFunction('getBoundary').'.'.time();
