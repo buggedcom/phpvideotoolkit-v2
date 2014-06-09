@@ -5,9 +5,9 @@
     ob_start();
     
     echo '<p>This is an example to chain processing on from one output to another to another and so on.</p><hr />';
-    echo '<p>.mov status: <strong id="status-1">---</strong></p><br />';
-    echo '<p>resize mov status: <strong id="status-2">---</strong></p><br />';
-    echo '<p>jpeg from resized mov status: <strong id="status-3">---</strong></p><br />';
+    echo '<p>.mov status: <strong id="status-1">---</strong></p>';
+    echo '<p>resize mov status: <strong id="status-2">---</strong></p>';
+    echo '<p>jpeg from resized mov status: <strong id="status-3">---</strong></p>';
     
     ob_flush();
     
@@ -19,7 +19,7 @@
 
         $process = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
                         ->saveNonBlocking('./output/big_buck_bunny.mov', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING, $progress_handler);
-        
+
         $dot_count = -1;
         while($progress_handler->completed !== true)
         {
@@ -60,12 +60,11 @@
             // encoding has completed and no error was detected so 
             // we can get the output from the process.
         }
-        
-        $progress_handler = new \PHPVideoToolkit\ProgressHandlerNative(null, $config);
+
         $format = $mov->getDefaultFormat('output');
-        \PHPVideoToolkit\Trace::vars($format);
-        
         $format->setVideoDimensions(100, 100);
+
+        $progress_handler = new \PHPVideoToolkit\ProgressHandlerNative(null, $config);
         $process = $mov->saveNonBlocking('./output/big_buck_bunny_resized.mov', $format, \PHPVideoToolkit\Media::OVERWRITE_EXISTING, $progress_handler);
         
         $dot_count = -1;
@@ -103,7 +102,28 @@
         {
             $resized_mov = $process->getOutput();
             
-            echo '<script>document.getElementById("status-2").innerHTML = '.json_encode('Encoded OK, output: "'.$output->getMediaPath().'".').'</script>';
+            echo '<script>document.getElementById("status-2").innerHTML = '.json_encode('Encoded OK, output: "'.$resized_mov->getMediaPath().'".').'</script>';
+            ob_flush();
+            // encoding has completed and no error was detected so 
+            // we can get the output from the process.
+        }
+        
+        $format = new \PHPVideoToolkit\ImageFormat_Jpeg('output', $config);
+        $format->setVideoMaxFrames(1); // prevents ffmpeg throwing a fit if %d is not used.
+
+        $process = $resized_mov->saveNonBlocking('./output/big_buck_bunny_resized.jpg', $format, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
+
+        if($process->hasError() === true)
+        {
+            echo '<script>document.getElementById("status-3").innerHTML = '.json_encode('Encoding encountered an error: '.$process->getErrorCode().'.').'</script>';
+            ob_flush();
+            // an error was encountered, do something with it.
+        }
+        else
+        {
+            $jpeg = $process->getOutput();
+            
+            echo '<script>document.getElementById("status-3").innerHTML = '.json_encode('Encoded OK, output: "'.$jpeg->getMediaPath().'".').'</script>';
             ob_flush();
             // encoding has completed and no error was detected so 
             // we can get the output from the process.
