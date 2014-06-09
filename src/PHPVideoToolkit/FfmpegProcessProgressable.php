@@ -226,34 +226,43 @@
             
             $output_path = $this->_renameMultiOutput();
 
-            $output = null;
-            if(is_string($output_path) === true)
+            $output = array();
+            foreach ($output_path as $key=>$path)
             {
-//              check for a none multiple file existence
-                if(empty($output_path) === true)
+                if(is_string($path) === true)
                 {
-                    throw new FfmpegProcessOutputException('Unable to find output for the process as it was not set.');
+//                  check for a none multiple file existence
+                    if(empty($path) === true)
+                    {
+                        throw new FfmpegProcessOutputException('Unable to find output for the process as it was not set.');
+                    }
+                    else if(is_file($path) === false)
+                    {
+                        throw new FfmpegProcessOutputException('The output "'.$path.'", of the Ffmpeg process does not exist.');
+                    }
+                    else if(filesize($path) <= 0)
+                    {
+                        throw new FfmpegProcessOutputException('The output "'.$path.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
+                    }
+                    
+                    $output[$key] = $this->_convertPathToMediaObject($path);
                 }
-                else if(is_file($output_path) === false)
+                else if(is_array($path) === true && empty($path) === false)
                 {
-                    throw new FfmpegProcessOutputException('The output "'.$output_path.'", of the Ffmpeg process does not exist.');
+                    $path_output = array();
+                    foreach ($path as $key => $file_path)
+                    {
+                        array_push($path_output, $this->_convertPathToMediaObject($file_path));
+                    }
+                    $output[$key] = $path_output;
+                    unset($path_output);
                 }
-                else if(filesize($output_path) <= 0)
-                {
-                    throw new FfmpegProcessOutputException('The output "'.$output_path.'", of the Ffmpeg process is a 0 byte file. Something must have gone wrong however it wasn\'t reported as an error by FFmpeg.');
-                }
-                
-                $output = $this->_convertPathToMediaObject($output_path);
             }
-            else if(is_array($output_path) === true && empty($output_path) === false)
+
+            if(count($output) === 1 && count($output[0]) === 1)
             {
-                $output = array();
-                foreach ($output_path as $key => $path)
-                {
-                    array_push($output, $this->_convertPathToMediaObject($path));
-                }
+                $output = $output[0];
             }
-            unset($output_path);
                 
 //          do any post processing callbacks
             if($post_process_callback !== null)
@@ -281,21 +290,21 @@
             }
 
 //          get the output of the process
-            $output_path = $this->getOutputPath();
-
-//          we have the output path but we now need to treat differently dependant on if we have multiple file output.
-            if(preg_match('/\.(\%([0-9]*)d)\.([0-9\.]+_[0-9\.]+\.)?_(i|t)\./', $output_path) > 0)
+            $paths = array();
+            $output_count = $this->getOutputCount();
+            for($i=0; $i<$output_count; $i++)
             {
-                $this->_output_renamed = false;
-                $output = $this->_renamePercentDOutput($output_path);
-                $this->_output_renamed = $output;
-            }
-            else
-            {
-                $output = $output_path;
+                $path = $this->getOutputPath($i);
+
+//              we have the output path but we now need to treat differently dependant on if we have multiple file output.
+                if(preg_match('/\.(\%([0-9]*)d)\.([0-9\.]+_[0-9\.]+\.)?_(i|t)\./', $path) > 0)
+                {
+                    $path = $this->_renamePercentDOutput($path);
+                }
+                array_push($paths, $path);
             }
 
-            return $output;
+            return $paths;
         }
 
         /**

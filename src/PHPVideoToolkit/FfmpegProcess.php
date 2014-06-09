@@ -127,6 +127,11 @@
             return $this;
         }
 
+        public function getOutputCount()
+        {
+            return count($this->_output);
+        }
+
         /**
          * Gets the output.
          *
