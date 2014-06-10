@@ -6,19 +6,27 @@
     
     session_start();
     
+    echo '<a href="?reset=1">Reset Process</a>';
+
     try
     {
         // important to not that this doesn't affect the actual process and that still carries on in the background regardless.
         if(isset($_GET['reset']) === true)
         {
-            unset($_SESSION['process_id']);
+            unset($_SESSION['process_id_multiple']);
         }
         
-        if(isset($_SESSION['process_id']) === true)
+        if(isset($_SESSION['process_id_multiple']) === true)
         {
-            Trace::vars('Process ID found in session...');
+            list($temp_id, $boundary, $time_started, $expected_duration) = explode('.', $_SESSION['process_id_multiple']);
+            Trace::vars('Process ID found in session...', $_SESSION['process_id_multiple'], array(
+                '$temp_id' => $temp_id,
+                '$boundary' => $boundary,
+                '$time_started' => $time_started,
+                '$expected_duration' => $expected_duration,
+            ));
             
-            $handler = new ProgressHandlerPortable($_SESSION['process_id']);
+            $handler = new ProgressHandlerPortable($_SESSION['process_id_multiple']);
 
             Trace::vars('Probing progress handler...');
             
@@ -27,7 +35,7 @@
             if($probe['finished'] === true)
             {
                 Trace::vars('Process has completed.');
-                unset($_SESSION['process_id']);
+                unset($_SESSION['process_id_multiple']);
                 echo '<a href="?reset=1">Restart Process</a>';
                 exit;
             }
@@ -39,6 +47,13 @@
         }
         
         Trace::vars('Starting new encode...');
+
+        /**
+         * MASSIVE MASSIVE README WARNING
+         * Whilst it is technically possible to output 5 or even more media files from one encode request
+         * it often takes much much longer to run. This of course is dependant on your server and you should run tests
+         * to see what your server can handle before doing too many of these requests as you could kill your server.
+         */
 
         $multi_output = new MultiOutput();
 
@@ -75,8 +90,8 @@
         $video = new Video($example_video_path);
         $process = $video->saveNonBlocking($multi_output, null, Video::OVERWRITE_EXISTING);
 
-        $id = $process->getPortableId();
-        $_SESSION['process_id'] = $id;
+        $id = $video->getPortableId();
+        $_SESSION['process_id_multiple'] = $id;
         
         echo '<h1>Process ID</h1>';
         Trace::vars($id);

@@ -5,20 +5,28 @@
     include_once './includes/bootstrap.php';
     
     session_start();
-    
+
+    echo '<a href="?reset=1">Reset Process</a>';
+
     try
     {
         // important to not that this doesn't affect the actual process and that still carries on in the background regardless.
         if(isset($_GET['reset']) === true)
         {
-            unset($_SESSION['process_id']);
+            unset($_SESSION['process_id_single']);
         }
         
-        if(isset($_SESSION['process_id']) === true)
+        if(isset($_SESSION['process_id_single']) === true)
         {
-            Trace::vars('Process ID found in session...', $_SESSION['process_id']);
+           list($temp_id, $boundary, $time_started, $expected_duration) = explode('.', $_SESSION['process_id_single']);
+            Trace::vars('Process ID found in session...', $_SESSION['process_id_single'], array(
+                '$temp_id' => $temp_id,
+                '$boundary' => $boundary,
+                '$time_started' => $time_started,
+                '$expected_duration' => $expected_duration,
+            ));
             
-            $handler = new ProgressHandlerPortable($_SESSION['process_id']);
+            $handler = new ProgressHandlerPortable($_SESSION['process_id_single']);
 
             Trace::vars('Probing progress handler...');
             
@@ -27,7 +35,7 @@
             if($probe['finished'] === true)
             {
                 Trace::vars('Process has completed.');
-                unset($_SESSION['process_id']);
+                unset($_SESSION['process_id_single']);
                 echo '<a href="?reset=1">Restart Process</a>';
                 exit;
             }
@@ -44,7 +52,7 @@
         $process = $video->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING);
 
         $id = $video->getPortableId();
-        $_SESSION['process_id'] = $id;
+        $_SESSION['process_id_single'] = $id;
         
         echo '<h1>Process ID</h1>';
         Trace::vars($id);
