@@ -250,7 +250,7 @@
                 else if(is_array($path) === true && empty($path) === false)
                 {
                     $path_output = array();
-                    foreach ($path as $key => $file_path)
+                    foreach ($path as $file_path)
                     {
                         array_push($path_output, $this->_convertPathToMediaObject($file_path));
                     }
@@ -259,7 +259,7 @@
                 }
             }
 
-            if(count($output) === 1 && count($output[0]) === 1)
+            if(count($output) === 1)
             {
                 $output = $output[0];
             }
