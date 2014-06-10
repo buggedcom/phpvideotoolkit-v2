@@ -5,14 +5,14 @@
     include_once './includes/bootstrap.php';
     
     foreach (array(
-        $example_video_path => 'Video',
-        $example_audio_path => 'Audio',
+        $example_video_path => 'PHPVideoToolkit\Video',
+        $example_audio_path => 'PHPVideoToolkit\Audio',
     ) as $path => $class)
     {
         try
         {
-            $phpvideotoolkit_media = new $class($path);
-            $output = $phpvideotoolkit_media->read();
+            $media = new $class($path);
+            $output = $media->read();
         
             echo '<hr /><h1>Resulting Output for '.pathinfo($path, PATHINFO_BASENAME).'</h1>';
             Trace::vars($output);
@@ -23,7 +23,7 @@
             echo '<h1>Error</h1>';
             Trace::vars($e);
 
-            $process = $phpvideotoolkit_media->getProcess();
+            $process = $media->getProcess();
             if($process->isCompleted())
             {
                 echo '<hr /><h2>Executed Command</h2>';

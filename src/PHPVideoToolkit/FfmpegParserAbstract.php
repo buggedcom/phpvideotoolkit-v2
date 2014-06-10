@@ -147,6 +147,7 @@
 //          then match out the relevant data, clean and process.
             $data = array(
                 'from-cache' => true,
+                'read-at' => time(),
                 'binary' => array(
                     'configuration' => array(),
                     'vhook-support' => false,
@@ -285,6 +286,7 @@
                 'build' => $build,
                 'version' => $version, 
                 'from-cache' => true,
+                'read-at' => time(),
             );
 
             $this->_cacheSet($cache_key, $data);

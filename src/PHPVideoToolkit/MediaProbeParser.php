@@ -50,6 +50,7 @@
 //          get the file data
             $data = array(
                 'from-cache'=> true,
+                'read-at'   => time(),
                 'path'      => $file_path,
                 'type'      => $this->getFileType($file_path, $read_from_cache),
                 'duration'  => $this->getFileDuration($file_path, $read_from_cache),
