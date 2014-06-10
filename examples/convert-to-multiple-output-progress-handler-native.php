@@ -43,7 +43,7 @@
                 array_push($progress_data, round($data['percentage'], 2).': '.round($data['run_time'], 2));
             });
 
-            $output = $video->purgeMetaData()
+            $process = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
                             ->save($multi_output, null, Video::OVERWRITE_EXISTING, $progress_handler);
             
@@ -58,7 +58,7 @@
             // IMPORTANT: this method only works with ->saveNonBlocking as otherwise the progress handler
             // probe will quit after one cycle.
             $progress_handler = new ProgressHandlerNative();
-            $output = $video->purgeMetaData()
+            $process = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
                             ->saveNonBlocking($multi_output, null, Video::OVERWRITE_EXISTING, $progress_handler);
 
@@ -77,8 +77,16 @@
         echo '<hr /><h1>Buffer Output</h1>';
         Trace::vars($process->getBuffer(true));
         echo '<hr /><h1>Resulting Output</h1>';
-        Trace::vars($output->getOutput()->getMediaPath());
-        
+        $output = $process->getOutput();
+        $paths = array();
+        if(empty($output) === false)
+        {
+            foreach ($output as $obj)
+            {
+                array_push($paths, $obj->getMediaPath());
+            }
+        }
+        Trace::vars($paths);
         exit;
     }
     catch(FfmpegProcessOutputException $e)

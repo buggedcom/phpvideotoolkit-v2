@@ -17,16 +17,19 @@
         $flv_output = './output/big_buck_bunny.multi1.ogg';
         $format = Format::getFormatFor($flv_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_SQCIF);
+        $format->setVideoFrameRate(5);
         $multi_output->addOutput($flv_output, $format);
 
         $threegp_output = './output/big_buck_bunny.multi2.3gp';
         $format = Format::getFormatFor($threegp_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
+        $format->setVideoFrameRate(25);
         $multi_output->addOutput($threegp_output, $format);
 
         $threegp_output = './output/big_buck_bunny.multi3.3gp';
         $format = Format::getFormatFor($threegp_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
+        $format->setVideoFrameRate(12);
         $multi_output->addOutput($threegp_output, $format);
 
         if(isset($_GET['method']) === true && $_GET['method'] === 'blocking')
@@ -43,7 +46,7 @@
                 array_push($progress_data, round($data['percentage'], 2).': '.round($data['run_time'], 2));
             });
 
-            $output = $video->purgeMetaData()
+            $process = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
                             ->save($multi_output, null, Video::OVERWRITE_EXISTING, $progress_handler);
             
@@ -58,13 +61,14 @@
             // IMPORTANT: this method only works with ->saveNonBlocking as otherwise the progress handler
             // probe will quit after one cycle.
             $progress_handler = new ProgressHandlerOutput();
-            $output = $video->purgeMetaData()
+            $process = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
                             ->saveNonBlocking($multi_output, null, Video::OVERWRITE_EXISTING, $progress_handler);
 
             while($progress_handler->completed !== true)
             {
-                Trace::vars($progress_handler->probe(true, 1));
+                $data = $progress_handler->probe(true, 1);
+                Trace::vars($data);
             }
         }
          
@@ -77,7 +81,16 @@
         echo '<hr /><h1>Buffer Output</h1>';
         Trace::vars($process->getBuffer(true));
         echo '<hr /><h1>Resulting Output</h1>';
-        Trace::vars($output->getOutput()->getMediaPath());
+        $output = $process->getOutput();
+        $paths = array();
+        if(empty($output) === false)
+        {
+            foreach ($output as $obj)
+            {
+                array_push($paths, $obj->getMediaPath());
+            }
+        }
+        Trace::vars($paths);
         
         exit;
     }
