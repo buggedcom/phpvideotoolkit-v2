@@ -228,8 +228,8 @@
          * This get's triggerd if there is a call made to an undefined property in
          * the App_Config instance or subInstance, so we throw an Exception
          *
-         * @param string $name
-         * @throws Exception
+         * @param string $key
+         * @return mixed
          */
         public function __get($key)
         {
@@ -237,9 +237,19 @@
             {
                 return $this->{'_'.$key};
             }
-
-//          TODO trigger error instead of just returning null
             return null;
-//          throw new Exception('Call to undefined property: '.$name);
+        }
+
+        /**
+         * Magic method set
+         *
+         * Determines if a property is set on the object.
+         *
+         * @param string $key
+         * @return boolean
+         */
+        public function __isset($key)
+        {
+            return property_exists($this, '_'.$key) === true;
         }
     }
