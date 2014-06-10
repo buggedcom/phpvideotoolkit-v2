@@ -1,5 +1,11 @@
 <?php
 
+    use PHPVideoToolkit\Video;
+    use PHPVideoToolkit\Config;
+    use PHPVideoToolkit\Timecode;
+    use PHPVideoToolkit\Tempfile;
+    use PHPVideoToolkit\Media;
+
     /**
      * This is a pure php emulation of the PHP module FFmpeg-PHP.
      * NOTE: Please note whenever possible you should use ffmpeg-php as it is much more efficient than this pure PHP emulation.
@@ -49,7 +55,7 @@
          */
         function __construct($video_path, $persistent=null)
         {
-            $this->_toolkit = new \PHPVideoToolkit\Video($video_path, \PHPVideoToolkit\Config::getInstance());
+            $this->_toolkit = new Video($video_path, Config::getInstance());
         }
         
         /**
@@ -493,16 +499,16 @@
             }
 
 //          get the timecode of the frame to extract;
-            $timecode = \PHPVideoToolkit\Timecode::parseTimecode($frame_number, '%fn', $this->getFrameRate());
+            $timecode = Timecode::parseTimecode($frame_number, '%fn', $this->getFrameRate());
             
 //          get the temp directory for the output.
-            $config = \PHPVideoToolkit\Config::getInstance();
-            $temp = new \PHPVideoToolkit\TempFile($config->temp_directory);
+            $config = Config::getInstance();
+            $temp = new TempFile($config->temp_directory);
             $output_path = $temp->file(false, 'png');
             
 //          perform the extraction
             $output = $this->_toolkit->extractFrame($timecode)
-                            ->save($output_path, null, \PHPVideoToolkit\Media::OVERWRITE_UNIQUE);
+                            ->save($output_path, null, Media::OVERWRITE_UNIQUE);
             
 //          then convert the image to GD resource and tidy the temp file.
             $gd_img = $output->toGdImage();
@@ -525,7 +531,7 @@
         public function getNextKeyFrame()
         {
 //          get the timecode of the frame to extract;
-            $timecode = \PHPVideoToolkit\Timecode::parseTimecode($this->_frame_index, '%fn', $this->getFrameRate());
+            $timecode = Timecode::parseTimecode($this->_frame_index, '%fn', $this->getFrameRate());
             $timecode->seconds += 1;
             
 //          get the frame
