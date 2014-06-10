@@ -400,7 +400,10 @@
         {
             if(empty($this->_output) === false && is_file($this->_output) === true)
             {
-                @unlink($this->_output);
+                if($this->_gc_temp_files === true)
+                {
+                    @unlink($this->_output);
+                }
                 $this->_output = null;
             }
         }

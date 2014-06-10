@@ -603,6 +603,19 @@
             
             return $duration;
         }
+
+        /**
+         * Returns a string value of a portable identifier used in conjunction with ProgressHandlerPortable.
+         * WARNING. If this function is called it automatically disables the garbage collection of the ExceBuffer.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @return string
+         */
+        public function getPortableId()
+        {
+            return $this->_process->getPortableId().'.'.$this->getEstimatedFinalDuration()->total_seconds;
+        }
         
         /**
          * Registers an output post process function, that is called after output has been generated.

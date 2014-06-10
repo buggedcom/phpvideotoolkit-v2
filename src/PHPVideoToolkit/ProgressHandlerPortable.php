@@ -29,6 +29,7 @@
         protected $_temp_id;
         protected $_boundary;
         protected $_time_started;
+        protected $_expected_duration;
         
         private $_wait_on_next_probe;
         
@@ -49,10 +50,11 @@
             }
             $this->_process_id = $process_id;
             
-            list($temp_id, $boundary, $time_started) = explode('.', $this->_process_id);
+            list($temp_id, $boundary, $time_started, $expected_duration) = explode('.', $this->_process_id);
             $this->_temp_id = $temp_id;
             $this->_boundary = $boundary;
             $this->_time_started = $time_started;
+            $this->_expected_duration = new Timecode($expected_duration);
             
             $this->_output = $this->_config->temp_directory.'/phpvideotoolkit_'.$temp_id;
             if(is_file($this->_output) === false)
@@ -93,6 +95,9 @@
 //          setup the data to return.
             $return_data = $this->_getDefaultData();
             
+            $return_data['process_file'] = $this->_output;
+            $return_data['expected_duration'] = $this->_expected_duration;
+
 //          load up the data             
             $completed = false;
             $raw_data = $this->_getRawData();
@@ -123,7 +128,7 @@
             $this->_checkOutputForErrorsFailureOrSuccess($raw_data, $return_data);
             
 //          has the process completed itself?
-            $this->completed = $return_data['completed'];
+            $this->completed = $return_data['finished'];
             if($this->completed === true)
             {
                 @unlink($this->_output);
@@ -169,17 +174,21 @@
                 $return_data['completed'] = true;
                 if($return_data['status'] !== self::ENCODING_STATUS_INTERRUPTED)
                 {
-                    $return_data['status'] = self::ENCODING_STATUS_COMPLETED;
+                    $return_data['status'] = self::ENCODING_STATUS_FINISHED;
                 }
                 $return_data['finished'] = true;
             }
             else if($return_data['percentage'] === 100)
             {
+                $return_data['completed'] = true;
+                $return_data['status'] = self::ENCODING_STATUS_COMPLETED;
+            }
+            else if($return_data['percentage'] >= 99.5)
+            {
+                $return_data['percentage'] = 100;
                 $return_data['status'] = self::ENCODING_STATUS_FINALISING;
             }
 
-
-            
             if(strpos($raw_data, $error_code_boundary) !== false)
             {
                 if(preg_match('/'.$error_code_boundary.'([0-9]+)/', $raw_data, $matches) > 0)
@@ -191,14 +200,6 @@
 
         protected function _parseOutputData(&$return_data, $raw_data)
         {
-//          get the total duration from the output
-            $total_duration = '00:00:00.00';
-            if(preg_match('/Duration:\s+([^,]*)/', $raw_data, $matches) > 0)
-            {
-                $total_duration = $matches[1];
-            }            
-            $total_duration = new Timecode($total_duration, Timecode::INPUT_FORMAT_TIMECODE);
-
             $return_data['status'] = self::ENCODING_STATUS_PENDING;
             $return_data['started'] = true;
 
@@ -285,7 +286,7 @@
                 $return_data['fps'] = isset($matches['fps']) === true ? $matches['fps'][$last_key] : null;
                 $return_data['size'] = $matches['size'][$last_key];
                 $return_data['duration'] = new Timecode($matches['time'][$last_key], Timecode::INPUT_FORMAT_TIMECODE);
-                $return_data['percentage'] = ($return_data['duration']->total_seconds/$total_duration->total_seconds)*100;
+                $return_data['percentage'] = ($return_data['duration']->total_seconds/$this->_expected_duration->total_seconds)*100;
                 $return_data['dup'] = $matches['dup'][$last_key];
                 $return_data['drop'] = $matches['drop'][$last_key];
                 

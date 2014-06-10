@@ -627,8 +627,9 @@
         }
         
         /**
-         * Returns a boolean value determining if the process has completed.
+         * Returns a string value of a portable identifier used in conjunction with ProgressHandlerPortable.
          * WARNING. If this function is called it automatically disables the garbage collection of the ExceBuffer.
+         * WARNING. This function should not be called directly. Please use Media::getPortableId instead.
          *
          * @access public
          * @author Oliver Lillie

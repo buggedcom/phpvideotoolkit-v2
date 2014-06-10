@@ -16,7 +16,7 @@
         
         if(isset($_SESSION['process_id']) === true)
         {
-            Trace::vars('Process ID found in session...');
+            Trace::vars('Process ID found in session...', $_SESSION['process_id']);
             
             $handler = new ProgressHandlerPortable($_SESSION['process_id']);
 
@@ -43,7 +43,7 @@
         $video = new Video($example_video_path);
         $process = $video->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING);
 
-        $id = $process->getPortableId();
+        $id = $video->getPortableId();
         $_SESSION['process_id'] = $id;
         
         echo '<h1>Process ID</h1>';

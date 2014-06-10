@@ -29,6 +29,8 @@
         const ENCODING_STATUS_INTERRUPTED = 'interrupted';
         const ENCODING_STATUS_ERROR = 'error';
 
+        protected $_total_duration;
+
         protected function _getDefaultData()
         {
             return array(
