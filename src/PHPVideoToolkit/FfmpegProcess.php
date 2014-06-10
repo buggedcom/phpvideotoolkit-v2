@@ -641,6 +641,11 @@
             {
                 throw new Exception('It is not possible to get a portable id as the exec process has been made blocking. To get a portable id make the process unblocking or call getPortableId() before the save occurs.');
             }
+            $trace = debug_backtrace();
+            if(isset($trace[1]) === false || $trace[1]['function'] !== 'getPortableId' || $trace[1]['class'] !== 'PHPVideoToolkit\Media')
+            {
+                throw new Exception('Please call getPortableId from the media object rather than the process object, i.e. $video->getPortableId();');
+            }
 
             $this->_exec->setGarbageCollection(false);
             
