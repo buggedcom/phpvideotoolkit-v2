@@ -22,13 +22,12 @@
     {
         protected $_config;
         
-        protected $_is_non_blocking_comaptible = true;
+        protected $_is_non_blocking_compatible = true;
          
         protected $_ffmpeg_process;
         protected $_temp_directory;
         
         protected $_callback;
-        protected $_total_duration;
         
         private $_wait_on_next_probe;
         
@@ -47,7 +46,7 @@
             
             $this->completed = null;
             $this->_callback = $callback;
-            $this->_total_duration = 0;
+            $this->_total_duration = null;
             $this->_ffmpeg_process = null;
             $this->_wait_on_next_probe = false;
             $this->_last_probe_data = null;
@@ -56,13 +55,13 @@
 //          with a non blocking save.
             if($this->_callback !== null)
             {
-                $this->_is_non_blocking_comaptible = false;
+                $this->_is_non_blocking_compatible = false;
             }
         }
         
         public function getNonBlockingCompatibilityStatus()
         {
-            return $this->_is_non_blocking_comaptible;
+            return $this->_is_non_blocking_compatible;
         }
         
         public function setTotalDuration(Timecode $duration)
