@@ -1,5 +1,7 @@
 <?php
 
+    namespace PHPVideoToolkit;
+
     include_once './includes/bootstrap.php';
     
     ob_start();
@@ -13,12 +15,12 @@
     
     try
     {
-        $video = new \PHPVideoToolkit\Video($example_video_path, $config);
+        $video = new Video($example_video_path, $config);
         
-        $progress_handler = new \PHPVideoToolkit\ProgressHandlerNative(null, $config);
+        $progress_handler = new ProgressHandlerNative(null, $config);
 
-        $process = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
-                        ->saveNonBlocking('./output/big_buck_bunny.mov', null, \PHPVideoToolkit\Media::OVERWRITE_EXISTING, $progress_handler);
+        $process = $video->extractSegment(new Timecode(10), new Timecode(20))
+                        ->saveNonBlocking('./output/big_buck_bunny.mov', null, Media::OVERWRITE_EXISTING, $progress_handler);
 
         $dot_count = -1;
         while($progress_handler->completed !== true)
@@ -64,8 +66,8 @@
         $format = $mov->getDefaultFormat('output');
         $format->setVideoDimensions(100, 100);
 
-        $progress_handler = new \PHPVideoToolkit\ProgressHandlerNative(null, $config);
-        $process = $mov->saveNonBlocking('./output/big_buck_bunny_resized.mov', $format, \PHPVideoToolkit\Media::OVERWRITE_EXISTING, $progress_handler);
+        $progress_handler = new ProgressHandlerNative(null, $config);
+        $process = $mov->saveNonBlocking('./output/big_buck_bunny_resized.mov', $format, Media::OVERWRITE_EXISTING, $progress_handler);
         
         $dot_count = -1;
         while($progress_handler->completed !== true)
@@ -130,25 +132,25 @@
         }
         
     }
-    catch(\PHPVideoToolkit\FfmpegProcessOutputException $e)
+    catch(FfmpegProcessOutputException $e)
     {
         echo '<h1>Error</h1>';
-        \PHPVideoToolkit\Trace::vars($e);
+        Trace::vars($e);
 
         if($process->isCompleted())
         {
             echo '<hr /><h2>Executed Command</h2>';
-            \PHPVideoToolkit\Trace::vars($process->getExecutedCommand());
+            Trace::vars($process->getExecutedCommand());
             echo '<hr /><h2>FFmpeg Process Messages</h2>';
-            \PHPVideoToolkit\Trace::vars($process->getMessages());
+            Trace::vars($process->getMessages());
             echo '<hr /><h2>Buffer Output</h2>';
-            \PHPVideoToolkit\Trace::vars($process->getBuffer(true));
+            Trace::vars($process->getBuffer(true));
         }
     }
-    catch(\PHPVideoToolkit\Exception $e)
+    catch(Exception $e)
     {
         echo '<h1>Error</h1>';
-        \PHPVideoToolkit\Trace::vars($e->getMessage());
-        echo '<h2>\PHPVideoToolkit\Exception</h2>';
-        \PHPVideoToolkit\Trace::vars($e);
+        Trace::vars($e->getMessage());
+        echo '<h2>Exception</h2>';
+        Trace::vars($e);
     }

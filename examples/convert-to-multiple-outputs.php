@@ -2,6 +2,8 @@
 
     namespace PHPVideoToolkit;
 
+    namespace PHPVideoToolkit;
+
     include_once './includes/bootstrap.php';
 
     try

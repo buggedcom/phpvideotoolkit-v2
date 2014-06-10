@@ -1,5 +1,7 @@
 <?php
 
+    namespace PHPVideoToolkit;
+
     include_once './includes/bootstrap.php';
     
     try
@@ -7,22 +9,22 @@
         echo '<h1>Timecodes</h1>';
         echo '<hr />';
         echo '<h2>Setting Timecode value via constructor</h2>';
-        $timecode = new \PHPVideoToolkit\Timecode(102.34);
-        echo 'new \PHPVideoToolkit\Timecode(102.34); = '.$timecode.'<br />';
-        $timecode = new \PHPVideoToolkit\Timecode(102.34, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS);
-        echo 'new \PHPVideoToolkit\Timecode(102.34, \PHPVideoToolkit\Timecode::INPUT_FORMAT_SECONDS); = '.$timecode.'<br />';
-        $timecode = new \PHPVideoToolkit\Timecode(1.705666667, \PHPVideoToolkit\Timecode::INPUT_FORMAT_MINUTES);
-        echo 'new \PHPVideoToolkit\Timecode(1.705666667, \PHPVideoToolkit\Timecode::INPUT_FORMAT_MINUTES); = '.$timecode.'<br />';
-        $timecode = new \PHPVideoToolkit\Timecode(.028427778, \PHPVideoToolkit\Timecode::INPUT_FORMAT_HOURS);
-        echo 'new \PHPVideoToolkit\Timecode(.028427778, \PHPVideoToolkit\Timecode::INPUT_FORMAT_HOURS); = '.$timecode.'<br />';
-        $timecode = new \PHPVideoToolkit\Timecode('00:01:42.34', \PHPVideoToolkit\Timecode::INPUT_FORMAT_TIMECODE);
-        echo 'new \PHPVideoToolkit\Timecode(\'00:01:42.34\', \PHPVideoToolkit\Timecode::INPUT_FORMAT_TIMECODE); = '.$timecode.'<br />';
+        $timecode = new Timecode(102.34);
+        echo 'new Timecode(102.34); = '.$timecode.'<br />';
+        $timecode = new Timecode(102.34, Timecode::INPUT_FORMAT_SECONDS);
+        echo 'new Timecode(102.34, Timecode::INPUT_FORMAT_SECONDS); = '.$timecode.'<br />';
+        $timecode = new Timecode(1.705666667, Timecode::INPUT_FORMAT_MINUTES);
+        echo 'new Timecode(1.705666667, Timecode::INPUT_FORMAT_MINUTES); = '.$timecode.'<br />';
+        $timecode = new Timecode(.028427778, Timecode::INPUT_FORMAT_HOURS);
+        echo 'new Timecode(.028427778, Timecode::INPUT_FORMAT_HOURS); = '.$timecode.'<br />';
+        $timecode = new Timecode('00:01:42.34', Timecode::INPUT_FORMAT_TIMECODE);
+        echo 'new Timecode(\'00:01:42.34\', Timecode::INPUT_FORMAT_TIMECODE); = '.$timecode.'<br />';
         
         echo '<hr />';
         echo '<h2>Adjusting timecode values</h2>';
         
-        $timecode = new \PHPVideoToolkit\Timecode('00:01:42.34', \PHPVideoToolkit\Timecode::INPUT_FORMAT_TIMECODE);
-        echo 'new \PHPVideoToolkit\Timecode(\'00:01:42.34\', \PHPVideoToolkit\Timecode::INPUT_FORMAT_TIMECODE); = '.$timecode.'<br />';
+        $timecode = new Timecode('00:01:42.34', Timecode::INPUT_FORMAT_TIMECODE);
+        echo 'new Timecode(\'00:01:42.34\', Timecode::INPUT_FORMAT_TIMECODE); = '.$timecode.'<br />';
         $timecode->hours += 15;
         echo '$timecode->hours += 15; = '.$timecode.'<br />';
         $timecode->seconds -= 54125.5;
@@ -42,10 +44,10 @@
         echo '$timecode->seconds = '.$timecode->seconds.'<br />';
         
     }
-    catch(\PHPVideoToolkit\Exception $e)
+    catch(Exception $e)
     {
         echo '<h1>Error</h1>';
-        \PHPVideoToolkit\Trace::vars($e->getMessage());
-        echo '<h2>\PHPVideoToolkit\Exception</h2>';
-        \PHPVideoToolkit\Trace::vars($e);
+        Trace::vars($e->getMessage());
+        echo '<h2>Exception</h2>';
+        Trace::vars($e);
     }
