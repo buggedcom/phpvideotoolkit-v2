@@ -6,7 +6,7 @@
 
     try
     {
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
         $process = $video->extractFrame(new Timecode('00:00:50.00'))
                         ->save('./output/extract-frame.example2.jpg', null, Media::OVERWRITE_EXISTING);
 

@@ -11,7 +11,7 @@
     {
         try
         {
-            $phpvideotoolkit_media = new $class($path, $config);
+            $phpvideotoolkit_media = new $class($path);
             $output = $phpvideotoolkit_media->read();
         
             echo '<hr /><h1>Resulting Output for '.pathinfo($path, PATHINFO_BASENAME).'</h1>';

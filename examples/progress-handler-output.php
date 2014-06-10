@@ -8,7 +8,7 @@
     
     try
     {
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
         $video->extractSegment(new Timecode(10), new Timecode(70));
 
         if(isset($_GET['method']) === true && $_GET['method'] === 'blocking')
@@ -23,7 +23,7 @@
             {
                 // do something here like log to file or db.
                 array_push($progress_data, round($data['percentage'], 2).': '.round($data['run_time'], 2));
-            }, $config);
+            });
 
             $process = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
@@ -39,7 +39,7 @@
             // use a non block save to probe the progress handler after the save has been made.
             // IMPORTANT: this method only works with ->saveNonBlocking as otherwise the progress handler
             // probe will quit after one cycle.
-            $progress_handler = new ProgressHandlerOutput(null, $config);
+            $progress_handler = new ProgressHandlerOutput();
             $process = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
                             ->saveNonBlocking('./output/big_buck_bunny.3gp', null, Video::OVERWRITE_EXISTING, $progress_handler);

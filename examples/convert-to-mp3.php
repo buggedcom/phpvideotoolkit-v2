@@ -6,10 +6,10 @@
     
     try
     {
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
     //  $process->setProcessTimelimit(1);
         $process = $video->extractSegment(new Timecode(10), new Timecode(20))
-                        ->save('./output/big_buck_bunny.mp3', new AudioFormat_Mp3('output', $config), Media::OVERWRITE_EXISTING);
+                        ->save('./output/big_buck_bunny.mp3', new AudioFormat_Mp3('output'), Media::OVERWRITE_EXISTING);
         
         
         echo '<h1>Executed Command</h1>';

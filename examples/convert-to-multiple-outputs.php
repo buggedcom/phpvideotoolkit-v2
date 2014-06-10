@@ -8,20 +8,20 @@
 
     try
     {
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
         $process = $video->getProcess();
         
         $video->extractSegment(new Timecode(10), new Timecode(20));
 
-        $multi_output = new MultiOutput($config);
+        $multi_output = new MultiOutput();
 
         $ogg_output = './output/big_buck_bunny.multi1.ogg';
-        $format = Format::getFormatFor($ogg_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($ogg_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_SQCIF);
         $multi_output->addOutput($ogg_output, $format);
 
         $threegp_output = './output/big_buck_bunny.multi2.3gp';
-        $format = Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($threegp_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
         $multi_output->addOutput($threegp_output, $format);
 

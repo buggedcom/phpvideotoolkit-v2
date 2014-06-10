@@ -6,10 +6,10 @@
     
     try
     {
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
         $video->extractSegment(new Timecode(15));
 
-        $process = $video->save('./output/big_buck_bunny.my_silly_custom_file_extension', new ImageFormat_Jpeg('output', $config), Media::OVERWRITE_EXISTING);
+        $process = $video->save('./output/big_buck_bunny.my_silly_custom_file_extension', new ImageFormat_Jpeg('output'), Media::OVERWRITE_EXISTING);
         
         
         echo '<h1>Executed Command</h1>';

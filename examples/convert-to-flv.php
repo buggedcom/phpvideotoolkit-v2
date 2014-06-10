@@ -6,7 +6,7 @@
 
     try
     {
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
     //  $process->setProcessTimelimit(1);
         $process = $video->extractSegment(new Timecode(10), new Timecode(20))
                         ->save('./output/big_buck_bunny.flv', null, Media::OVERWRITE_EXISTING);

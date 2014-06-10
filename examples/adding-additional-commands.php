@@ -8,7 +8,7 @@
     {
         Trace::vars('Note, this process will purposely NOT work as the additional commands are invalid.');
         
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
 
         $process = $video->getProcess();
         $process->addPreInputCommand('-custom-command');

@@ -8,24 +8,24 @@
     
     try
     {
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
         $video->extractSegment(new Timecode(10), new Timecode(30));
         $process = $video->getProcess();
 
-        $multi_output = new MultiOutput($config);
+        $multi_output = new MultiOutput();
 
         $flv_output = './output/big_buck_bunny.multi1.ogg';
-        $format = Format::getFormatFor($flv_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($flv_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_SQCIF);
         $multi_output->addOutput($flv_output, $format);
 
         $threegp_output = './output/big_buck_bunny.multi2.3gp';
-        $format = Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($threegp_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
         $multi_output->addOutput($threegp_output, $format);
 
         $threegp_output = './output/big_buck_bunny.multi3.3gp';
-        $format = Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($threegp_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
         $multi_output->addOutput($threegp_output, $format);
 
@@ -41,7 +41,7 @@
             {
                 // do something here like log to file or db.
                 array_push($progress_data, round($data['percentage'], 2).': '.round($data['run_time'], 2));
-            }, $config);
+            });
 
             $output = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
@@ -57,7 +57,7 @@
             // use a non block save to probe the progress handler after the save has been made.
             // IMPORTANT: this method only works with ->saveNonBlocking as otherwise the progress handler
             // probe will quit after one cycle.
-            $progress_handler = new ProgressHandlerNative(null, $config);
+            $progress_handler = new ProgressHandlerNative();
             $output = $video->purgeMetaData()
                             ->setMetaData('title', 'Hello World')
                             ->saveNonBlocking($multi_output, null, Video::OVERWRITE_EXISTING, $progress_handler);

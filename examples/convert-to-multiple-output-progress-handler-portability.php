@@ -18,7 +18,7 @@
         {
             Trace::vars('Process ID found in session...');
             
-            $handler = new ProgressHandlerPortable($_SESSION['process_id'], $config);
+            $handler = new ProgressHandlerPortable($_SESSION['process_id']);
 
             Trace::vars('Probing progress handler...');
             
@@ -40,39 +40,39 @@
         
         Trace::vars('Starting new encode...');
 
-        $multi_output = new MultiOutput($config);
+        $multi_output = new MultiOutput();
 
         $mp3_output = './output/big_buck_bunny.multi1.mp3';
-        $format = Format::getFormatFor($mp3_output, $config, 'AudioFormat');
+        $format = Format::getFormatFor($mp3_output, null, 'AudioFormat');
         $multi_output->addOutput($mp3_output, $format);
 
         $ogg_output = './output/big_buck_bunny.multi2.ogg';
-        $format = Format::getFormatFor($ogg_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($ogg_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_SQCIF);
         $multi_output->addOutput($ogg_output, $format);
 
         $ogg_output = './output/big_buck_bunny.multi3.ogg';
-        $format = Format::getFormatFor($ogg_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($ogg_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
         $multi_output->addOutput($ogg_output, $format);
 
         $threegp_output = './output/big_buck_bunny.multi4.3gp';
-        $format = Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($threegp_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_XGA);
         $multi_output->addOutput($threegp_output, $format);
 
         $threegp_output = './output/big_buck_bunny.multi5.3gp';
-        $format = Format::getFormatFor($threegp_output, $config, 'VideoFormat');
+        $format = Format::getFormatFor($threegp_output, null, 'VideoFormat');
         $format->setVideoDimensions(VideoFormat::DIMENSION_SVGA);
         $format->setVideoFrameRate(10);
         $format->videoFlipVertical();
         $multi_output->addOutput($threegp_output, $format);
 
         $aac_output = './output/big_buck_bunny.multi6.aac';
-        $format = Format::getFormatFor($aac_output, $config, 'AudioFormat');
+        $format = Format::getFormatFor($aac_output, null, 'AudioFormat');
         $multi_output->addOutput($aac_output, $format);
         
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
         $process = $video->saveNonBlocking($multi_output, null, Video::OVERWRITE_EXISTING);
 
         $id = $process->getPortableId();

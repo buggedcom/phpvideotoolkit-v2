@@ -18,7 +18,7 @@
         {
             Trace::vars('Process ID found in session...');
             
-            $handler = new ProgressHandlerPortable($_SESSION['process_id'], $config);
+            $handler = new ProgressHandlerPortable($_SESSION['process_id']);
 
             Trace::vars('Probing progress handler...');
             
@@ -40,7 +40,7 @@
         
         Trace::vars('Starting new encode...');
         
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
         $process = $video->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING);
 
         $id = $process->getPortableId();

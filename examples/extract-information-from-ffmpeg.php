@@ -4,7 +4,7 @@
 
     include_once './includes/bootstrap.php';
     
-    $ffmpeg = new FfmpegParser($config);
+    $ffmpeg = new FfmpegParser();
 
     $is_available = $ffmpeg->isAvailable();
     Trace::vars('$ffmpeg->isAvailable()', $is_available);

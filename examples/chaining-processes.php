@@ -15,9 +15,9 @@
     
     try
     {
-        $video = new Video($example_video_path, $config);
+        $video = new Video($example_video_path);
         
-        $progress_handler = new ProgressHandlerNative(null, $config);
+        $progress_handler = new ProgressHandlerNative();
 
         $process = $video->extractSegment(new Timecode(10), new Timecode(20))
                         ->saveNonBlocking('./output/big_buck_bunny.mov', null, Media::OVERWRITE_EXISTING, $progress_handler);
@@ -66,7 +66,7 @@
         $format = $mov->getDefaultFormat('output');
         $format->setVideoDimensions(100, 100);
 
-        $progress_handler = new ProgressHandlerNative(null, $config);
+        $progress_handler = new ProgressHandlerNative();
         $process = $mov->saveNonBlocking('./output/big_buck_bunny_resized.mov', $format, Media::OVERWRITE_EXISTING, $progress_handler);
         
         $dot_count = -1;
@@ -110,7 +110,7 @@
             // we can get the output from the process.
         }
         
-        $format = new ImageFormat_Jpeg('output', $config);
+        $format = new ImageFormat_Jpeg('output');
         $process = $resized_mov->save('./output/big_buck_bunny_resized.jpg', $format, Media::OVERWRITE_EXISTING);
 
         if($process->hasError() === true)
