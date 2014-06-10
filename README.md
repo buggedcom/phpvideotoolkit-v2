@@ -50,6 +50,7 @@ Extensive documentation and examples are bundled with the download and is availa
 ##Latest Changes
 
 **[2.2.0-beta]** [10.04.2014]
+
 WARNING: Potential code breaking changes across the board. Please do not upgrade existing stable scripts to this codebase. Please use 2.1.5 or below for stability.
 - merged in multi-output branch so that the master branch now supports multi output from ffmpeg.
 - fixed far too many other bugs to mention.
