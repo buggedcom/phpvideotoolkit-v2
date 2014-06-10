@@ -64,7 +64,7 @@
                     {
                         if(is_file($file) === true)
                         {
-                         //   @unlink($file);
+                           @unlink($file);
                         }
                     }
                 }
