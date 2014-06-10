@@ -18,7 +18,14 @@
         echo '<hr /><h1>Buffer Output</h1>';
         Trace::vars($process->getBuffer(true));
         echo '<hr /><h1>Resulting Output</h1>';
-        Trace::vars($process->getOutput());
+        $output = $process->getOutput();
+        $output = array_values($output);
+        $paths = array();
+        foreach ($output as $obj)
+        {
+            array_push($paths, $obj->getMediaPath());
+        }
+        Trace::vars($paths);
     
     }
     catch(FfmpegProcessOutputException $e)

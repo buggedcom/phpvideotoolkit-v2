@@ -14,8 +14,6 @@
     namespace PHPVideoToolkit;
     
     /**
-     * undocumented class
-     *
      * @access public
      * @author Oliver Lillie
      * @package default
@@ -23,6 +21,7 @@
     class FfmpegProcessProgressable extends FfmpegProcess 
     {
         private $_output_renamed;
+        private $_final_output;
         private $_progress_callbacks;
         
         public function __construct($binary_path, Config $config=null)
@@ -31,6 +30,7 @@
             
             $this->_progress_callbacks = array();
             $this->_output_renamed = null;
+            $this->_final_output = null;
         }
         
         /**
@@ -168,6 +168,11 @@
          */
         public function completeProcess($post_process_callback=null)
         {
+            if($this->_final_output !== null)
+            {
+                return $this->_final_output;
+            }
+            
             if($post_process_callback !== null)
             {
                 if(is_callable($post_process_callback) === false)
@@ -270,8 +275,7 @@
                 $output = call_user_func($post_process_callback, $output, $this);
             }
 
-            return $output;
-
+            return $this->_final_output = $output;
         }
 
         /**
