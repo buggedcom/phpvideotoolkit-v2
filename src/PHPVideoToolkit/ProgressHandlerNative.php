@@ -64,7 +64,16 @@
 
             if(empty($raw_data) === true)
             {
-                $return_data['status'] = self::ENCODING_STATUS_PENDING;
+                if($this->_last_probe_data === null)
+                {
+                    $return_data['status'] = self::ENCODING_STATUS_PENDING;
+                }
+                else
+                {
+                    $return_data = $last_data;
+                    $return_data['finished'] = true;
+                    $return_data['status'] = self::ENCODING_STATUS_FINISHED;
+                }
                 return;
             }
 
@@ -115,19 +124,6 @@
                     }
                 }
 
-                if($this->_ffmpeg_process->isCompleted() === true)
-                {
-                    $return_data['completed'] = true;
-                    if($return_data['status'] !== self::ENCODING_STATUS_INTERRUPTED)
-                    {
-                        $return_data['status'] = self::ENCODING_STATUS_COMPLETED;
-                    }
-                }
-                else if($return_data['percentage'] === 100)
-                {
-                    $return_data['status'] = self::ENCODING_STATUS_FINALISING;
-                }
-                    
 //              work out the fps average for performance reasons
                 if(count($parts) === 1)
                 {
@@ -143,7 +139,28 @@
                     $return_data['fps_avg'] = $total_fps/($last_key+1);
                 }
             }
-            
+
+            if($this->_ffmpeg_process->isCompleted() === true)
+            {
+                $return_data['finished'] = true;
+                if($return_data['status'] !== self::ENCODING_STATUS_INTERRUPTED)
+                {
+                    $return_data['completed'] = true;
+                    $return_data['status'] = self::ENCODING_STATUS_FINISHED;
+                }
+            }
+            else if($return_data['percentage'] === 100)
+            {
+                $return_data['completed'] = true;
+                $return_data['status'] = self::ENCODING_STATUS_COMPLETED;
+            }
+            else if($return_data['percentage'] >= 99.5)
+            {
+                $return_data['percentage'] = 100;
+                $return_data['status'] = self::ENCODING_STATUS_FINALISING;
+            }
+
+            $this->_last_probe_data = $return_data;
         }
          
         public function attachFfmpegProcess(FfmpegProcess $process, Config $config=null)

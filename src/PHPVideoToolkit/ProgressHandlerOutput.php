@@ -22,11 +22,20 @@
     {
         protected function _parseOutputData(&$return_data, $raw_data)
         {
-            $return_data['status'] = self::ENCODING_STATUS_PENDING;
             $return_data['started'] = true;
 
             if(empty($raw_data) === true)
             {
+                if($this->_last_probe_data === null)
+                {
+                    $return_data['status'] = self::ENCODING_STATUS_PENDING;
+                }
+                else
+                {
+                    $return_data = $this->_last_probe_data;
+                    $return_data['finished'] = true;
+                    $return_data['status'] = self::ENCODING_STATUS_FINISHED;
+                }
                 return;
             }
 
@@ -131,7 +140,6 @@
 //              if we have the last frame then signal that the process has finished.
                 if($is_last === true)
                 {
-                    $return_data['finished'] = true;
                     if($return_data['percentage'] < 99.5)
                     {
                         $return_data['interrupted'] = true;
@@ -141,19 +149,6 @@
                     {
                         $return_data['percentage'] = 100;
                     }
-                }
-
-                if($this->_ffmpeg_process->isCompleted() === true)
-                {
-                    $return_data['completed'] = true;
-                    if($return_data['status'] !== self::ENCODING_STATUS_INTERRUPTED)
-                    {
-                        $return_data['status'] = self::ENCODING_STATUS_COMPLETED;
-                    }
-                }
-                else if($return_data['percentage'] === 100)
-                {
-                    $return_data['status'] = self::ENCODING_STATUS_FINALISING;
                 }
 
 //              work out the fps average for performance reasons
@@ -179,6 +174,28 @@
             {
                 $return_data['status'] = self::ENCODING_STATUS_ERROR;
             }
+
+            if($this->_ffmpeg_process->isCompleted() === true)
+            {
+                $return_data['finished'] = true;
+                if($return_data['status'] !== self::ENCODING_STATUS_INTERRUPTED)
+                {
+                    $return_data['completed'] = true;
+                    $return_data['status'] = self::ENCODING_STATUS_FINISHED;
+                }
+            }
+            else if($return_data['percentage'] === 100)
+            {
+                $return_data['completed'] = true;
+                $return_data['status'] = self::ENCODING_STATUS_COMPLETED;
+            }
+            else if($return_data['percentage'] >= 99.5)
+            {
+                $return_data['percentage'] = 100;
+                $return_data['status'] = self::ENCODING_STATUS_FINALISING;
+            }
+
+            $this->_last_probe_data = $return_data;
         }
          
         protected function _getRawData()

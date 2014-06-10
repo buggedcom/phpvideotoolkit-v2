@@ -23,9 +23,10 @@
         const ENCODING_STATUS_PENDING = 'pending';
         const ENCODING_STATUS_DECODING = 'decoding';
         const ENCODING_STATUS_ENCODING = 'encoding';
-        const ENCODING_STATUS_INTERRUPTED = 'interrupted';
-        const ENCODING_STATUS_COMPLETED = 'completed';
         const ENCODING_STATUS_FINALISING = 'finalising';
+        const ENCODING_STATUS_COMPLETED = 'completed';
+        const ENCODING_STATUS_FINISHED = 'finished';
+        const ENCODING_STATUS_INTERRUPTED = 'interrupted';
         const ENCODING_STATUS_ERROR = 'error';
 
         protected function _getDefaultData()

@@ -32,6 +32,8 @@
         
         private $_wait_on_next_probe;
         
+        protected $_last_probe_data;
+
         public $completed;
                  
         public function __construct($callback=null, Config $config=null)
@@ -48,6 +50,7 @@
             $this->_total_duration = 0;
             $this->_ffmpeg_process = null;
             $this->_wait_on_next_probe = false;
+            $this->_last_probe_data = null;
             
 //          check to see if we have been supplied a callback, if so then it is no longer compatible 
 //          with a non blocking save.
@@ -127,21 +130,14 @@
                 if($return_data['percentage'] >= 100)
                 {
                     $return_data['percentage'] = 100;
-                    $return_data['output_file'] = $this->_ffmpeg_process->getOutputPath();
-                }
-//              or if it has been interuptted 
-                else if($return_data['interrupted'] === true)
-                {
                 }
             }
             
 //          check for any errors encountered by the parser
-            if($this->_checkOutputForErrors($return_data) === true)
-            {
-            }
+            $this->_checkOutputForErrors($return_data);
             
 //          has the process completed itself?
-            $this->completed = $return_data['completed'];
+            $this->completed = $return_data['finished'];
             
             return $return_data;
         }
