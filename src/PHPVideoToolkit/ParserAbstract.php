@@ -32,9 +32,9 @@
         {
             $this->_config = $config === null ? Config::getInstance() : $config;
 
-            if($config->cache_driver)
+            if($this->_config->cache_driver)
             {
-                $cacher = Cache::getCacher($config);
+                $cacher = Cache::getCacher($this->_config);
                 $this->setCacher($cacher);
             }
             
