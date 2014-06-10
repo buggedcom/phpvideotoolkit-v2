@@ -336,9 +336,13 @@
          */
         public function getRawBuffer()
         {
-            if(empty($this->_output) === false)
+             if(empty($this->_output) === false && is_file($this->_output) === true)
             {
-                $this->_buffer = file_get_contents($this->_output);
+                $buffer = file_get_contents($this->_output);
+                if(empty($buffer) === false)
+                {
+                    $this->_buffer = $buffer;
+                }
                 $this->_detectCompletionAndEnd();
             }
             
