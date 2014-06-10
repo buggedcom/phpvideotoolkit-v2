@@ -598,6 +598,8 @@ $output = $video->save($multi_output, null, Media::OVERWRITE_EXISTING);
 
 All progress handlers also work with multiple output, however the caveats outlined for the ProgressHandlerPortable still apply.
 
+**IMPORTANT** Whilst this is technically possibly, depending on your server and the number of outputs you are generating, it can be quicker to simply chain the requests together instead. See the [chaining processes example](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/examples/chaining-processes.php) for more information on method chaining.
+
 ###Accessing Executed Commands and the Command Line Buffer
 
 There may be instances where things go wrong and PHPVideoToolkit hasn't correctly prevented or reported any encoding/decoding errors, or, you may just want to log what is going on. You can access any executed commands and the command lines output fairly simply as the example below shows.
