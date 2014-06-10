@@ -115,6 +115,28 @@
         }
         
         /**
+         * Gets ALL the input given to the process.
+         *
+         * @access public
+         * @return array
+         */
+        public function getAllInput()
+        {
+            return $this->_input;
+        }
+        
+        /**
+         * Gets ALL the output given to the process.
+         *
+         * @access public
+         * @return array
+         */
+        public function getAllOutput()
+        {
+            return $this->_output;
+        }
+        
+        /**
          * Sets the output.
          *
          * @access public

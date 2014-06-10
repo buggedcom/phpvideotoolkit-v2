@@ -21,8 +21,8 @@
     class ProgressHandlerNative extends ProgressHandlerAbstract
     {
         protected $_progress_file;
-        protected $_input_file;
-        protected $_output_file;
+        protected $_input;
+        protected $_output;
         
         public function __construct($callback=null, Config $config=null)
         {
@@ -37,8 +37,8 @@
             parent::__construct($callback, $config);
             
             $this->_progress_file = null;
-            $this->_input_file = null;
-            $this->_output_file = null;
+            $this->_input = null;
+            $this->_output = null;
         }
         
         protected function _getRawData()
@@ -55,6 +55,12 @@
         protected function _parseOutputData(&$return_data, $raw_data)
         {
             $return_data['started'] = true;
+
+            $return_data['input_count'] = count($this->_input);
+            $return_data['input_file'] = $return_data['input_count'] === 1 ? $this->_input[0] : $this->_input;
+
+            $return_data['output_count'] = count($this->_output);
+            $return_data['output_file'] = $return_data['output_count'] === 1 ? $this->_output[0] : $this->_output;
 
             if(empty($raw_data) === true)
             {
@@ -145,6 +151,8 @@
             parent::attachFfmpegProcess($process, $config);
 
             $this->_progress_file = tempnam($this->_config->temp_directory, 'phpvideotoolkit_progress_');
+            $this->_input = $this->_ffmpeg_process->getAllInput();
+            $this->_output = $this->_ffmpeg_process->getAllOutput();
             $this->_ffmpeg_process->addCommand('-progress', $this->_progress_file);
         }
      }
