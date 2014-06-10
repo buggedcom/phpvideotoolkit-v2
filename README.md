@@ -80,12 +80,12 @@ $config = new Config(array(
 	'yamdi' => '/opt/local/bin/yamdi',
 	'qtfaststart' => '/opt/local/bin/qt-faststart',
 	'cache_driver' => 'InTempDirectory',
-));
+), true);
 ```
 
-If a config object is not defined and supplied to the PHPVideoToolkit classes, then a default Config object is created and assigned to the class.
+Take special note of the second parameter ```true```. If set as true then the related Config object is set as the default config instance. This means that once set as the default instance you do not need to supply the Config object to the other PHPVideoToolkit class constructors. If a config object is not defined and supplied to the PHPVideoToolkit classes, then a default Config object is created and assigned to the class.
 
-Every example below uses ```$config``` as the configuration object.
+Every example below assumes that the Config object has been set as the default config object prior in the execution so there is no need to supply config to each example.
 ###Accessing Data About FFmpeg
 
 Simple demonstration about how to access information about FfmpegParser object.
@@ -93,7 +93,7 @@ Simple demonstration about how to access information about FfmpegParser object.
 ```php
 namespace PHPVideoToolkit;
 
-$ffmpeg = new FfmpegParser($config);
+$ffmpeg = new FfmpegParser();
 $is_available = $ffmpeg->isAvailable(); // returns boolean
 $ffmpeg_version = $ffmpeg->getVersion(); // outputs something like - array('version'=>1.0, 'build'=>null)
 	
@@ -105,7 +105,7 @@ Simple demonstration about how to access information about media files using the
 ```php
 namespace PHPVideoToolkit;
 
-$parser = new MediaParser($config);
+$parser = new MediaParser();
 $data = $parser->getFileInformation('BigBuckBunny_320x180.mp4');
 echo '<pre>'.print_r($data, true).'</pre>';
 	
@@ -156,7 +156,7 @@ The code below extracts a frame from the video at the 40 second mark.
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->extractFrame(new Timecode(40))
 				->save('./output/big_buck_bunny_frame.jpg');
 $output = $process->getOutput();
@@ -168,7 +168,7 @@ The code below extracts frames at the parent videos' frame rate from between 40 
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->extractFrames(new Timecode(40), new Timecode(50))
 				->save('./output/big_buck_bunny_frame_%timecode.jpg');
 $output = $process->getOutput();
@@ -186,7 +186,7 @@ $output_format = new ImageFormat_Jpeg('output');
 /*
 OR 
 
-$output_format = new VideoFormat('output', $config);
+$output_format = new VideoFormat('output');
 $output_format->setFrameRate(1);
 // optionally also set the video and output format, however if you use the ImageFormat_Jpeg 
 // output format object this is automatically done for you. If you do not add below, FFmpeg
@@ -196,7 +196,7 @@ $output_format->setVideoCodec('mjpeg')
 
 */
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->extractFrames(null, new Timecode(50)) // if null then the extracted segment starts from the begining of the video
 				->save('./output/big_buck_bunny_frame_%timecode.jpg', $output_format);
 $output = $process->getOutput();
@@ -207,7 +207,7 @@ The second is to use the $force_frame_rate option of the extractFrames function.
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->extractFrames(new Timecode(50), null, 1) // if null then the extracted segment goes from the start timecode to the end of the video
 				->save('./output/big_buck_bunny_frame_%timecode.jpg');
 $output = $process->getOutput();
@@ -220,7 +220,7 @@ The code below uses the ```$force_frame_rate``` argument for ```$video->extractF
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->extractFrames(new Timecode(40), new Timecode(50), '1/60')
 				->save('./output/big_buck_bunny_frame_%timecode.jpg');
 $output = $process->getOutput();
@@ -233,7 +233,7 @@ $output = $process->getOutput();
 ```php
 namespace PHPVideoToolkit;
 
-$video = new \PHPVideoToolkit\Video($example_video_path, $config);
+$video = new \PHPVideoToolkit\Video($example_video_path);
 
 $process = $video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20))
 				->extractFrames(null, null, 1)
@@ -350,7 +350,7 @@ $output = $process->getOutput();
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->extractAudio()->save('./output/big_buck_bunny.mp3');
 // $process = $video->extractVideo()->save('./output/big_buck_bunny.mp4');
 				
@@ -364,7 +364,7 @@ The code below extracts a portion of the video at the from 2 minutes 22 seconds 
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->extractSegment(new Timecode('00:02:22.0', Timecode::INPUT_FORMAT_TIMECODE), new Timecode(180))
 				->save('./output/big_buck_bunny.mp4');
 $output = $process->getOutput();
@@ -378,7 +378,7 @@ The code below splits a video into multiple of equal length of 45 seconds each.
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->split(45)
 				->save('./output/big_buck_bunny_%timecode.mp4');
 $output = $process->getOutput();
@@ -390,7 +390,7 @@ Unfortunately there is no way using FFmpeg to add meta data without re-encoding 
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
 				->save('./output/big_buck_bunny.mp4');
@@ -408,11 +408,11 @@ namespace PHPVideoToolkit;
 
 $output_path = './output/big_buck_bunny.mpeg';
 
-$output_format = new VideoFormat('output', $config);
+$output_format = new VideoFormat('output');
 $output_format->setAudioCodec('acc')
 			  ->setVideoCodec('ogg');
 
-$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$video = new Video('media/BigBuckBunny_320x180.mp4');
 $process = $video->save($output_path, $output_format);
 $output = $process->getOutput();
 ```
@@ -423,10 +423,10 @@ namespace PHPVideoToolkit;
 
 $output_path = './output/big_buck_bunny.mp3';
 
-$output_format = new AudioFormat('output', $config);
+$output_format = new AudioFormat('output');
 $output_format->setAudioCodec('acc');
 
-$video = new Video('media/BigBuckBunny_320x180.mp4', $config);
+$video = new Video('media/BigBuckBunny_320x180.mp4');
 $process = $video->save($output_path, $output_format);
 
 $output = $process->getOutput();
@@ -442,7 +442,7 @@ The code below is an example of how to manage a non-blocking save.
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->saveNonBlocking('./output/big_buck_bunny.mov');
 
 // do something else important, db queries etc
@@ -491,12 +491,12 @@ This example supplies the progress callback handler as a parameter to the constr
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 
 $progress_handler = new ProgressHandlerNative(function($data)
 {
 	echo '<pre>'.print_r($data, true).'</pre>';
-}, $config);
+});
 
 $process = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
@@ -511,9 +511,9 @@ This example initialises a handler but does not supply a callback function. Inst
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 
-$progress_handler = new ProgressHandlerNative(null, $config);
+$progress_handler = new ProgressHandlerNative(null);
 
 $process = $video->purgeMetaData()
 				->setMetaData('title', 'Hello World')
@@ -542,7 +542,7 @@ namespace PHPVideoToolkit;
 
 session_start();
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->saveNonBlocking('./output/big_buck_bunny.mp4', null, Video::OVERWRITE_EXISTING);
 				
 $_SESSION['phpvideotoolkit_portable_process_id'] = $process->getPortableId();
@@ -556,7 +556,7 @@ namespace PHPVideoToolkit;
 
 session_start();
 
-$handler = new ProgressHandlerPortable($_SESSION['phpvideotoolkit_portable_process_id'], $config);
+$handler = new ProgressHandlerPortable($_SESSION['phpvideotoolkit_portable_process_id']);
 
 $probe = $handler->probe();
 
@@ -584,9 +584,9 @@ When splitting files into multiple segments or extracting portions of a video th
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 
-$multi_output = new MultiOutput($config);
+$multi_output = new MultiOutput();
 
 $ogg_output = './output/big_buck_bunny.multi1.ogg';
 $format = Format::getFormatFor($ogg_output, $config, 'VideoFormat');
@@ -611,7 +611,7 @@ There may be instances where things go wrong and PHPVideoToolkit hasn't correctl
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->save('./output/big_buck_bunny.mov');
 
 echo 'Expected Executed Command<br />';
@@ -642,7 +642,7 @@ The process object is passed by reference so any changes to the object are also 
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->getProcess();
 
 ```
@@ -687,7 +687,7 @@ You may wish to impose a processing timelimit on encoding. There are various rea
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
+$video  = new Video('BigBuckBunny_320x180.mp4');
 
 $process = $video->getProcess();
 $process->setProcessTimelimit(10); // in seconds
@@ -710,8 +710,8 @@ Because of the advanced nature of the input and output formatters, if supplied y
 ```php
 namespace PHPVideoToolkit;
 
-$video  = new Video('BigBuckBunny_320x180.mp4', $config);
-$video->save('output.my_silly_custom_file_extension', new ImageFormat_Jpeg('output', $config));
+$video  = new Video('BigBuckBunny_320x180.mp4');
+$video->save('output.my_silly_custom_file_extension', new ImageFormat_Jpeg('output'));
 				
 ```
 
