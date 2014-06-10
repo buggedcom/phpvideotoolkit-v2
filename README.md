@@ -49,16 +49,10 @@ Extensive documentation and examples are bundled with the download and is availa
 
 ##Latest Changes
 
-**[2.1.7-beta]** [09.04.2014]
-
-***WARNING*** Potential code breaking change from Media->save. save() no longer returns the output path if saved in blocking mode. It returns as non-blocking mode does the FfmpegProcess object. So to return the output path of what has been outputed you must call $process->getOutput().
-Fixed several bugs:
-- fixed issues in portability progress handler where parsing of image only output data would fail.
-- fixed issues in portability progress handler where the progress file would be prematurely deleted.
-- fixed issues where using %timecode or %index in the output would not correctly get renamed unless calling getOutput from the process object. #22
-- fixed issues with animated gifs not following the overwrite setting of the save function call
-Added:
-- poor mans caching using InTempDirectory cache class to store cachable data within the temp directory. It is highly recommended you write your own cacher based around something [like Stash](https://github.com/tedious/Stash)
+**[2.2.0-beta]** [10.04.2014]
+WARNING: Potential code breaking changes across the board. Please do not upgrade existing stable scripts to this codebase. Please use 2.1.5 or below for stability.
+- merged in multi-output branch so that the master branch now supports multi output from ffmpeg.
+- fixed far too many other bugs to mention.
 
 [Full changelog](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/CHANGELOG.md)
 

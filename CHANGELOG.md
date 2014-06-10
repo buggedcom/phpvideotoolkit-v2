@@ -1,5 +1,10 @@
+#[2.2.0-beta] [10.04.2014]
+WARNING: Potential code breaking changes across the board. Please do not upgrade existing stable scripts to this codebase. Please use 2.1.5 or below for stability.
+- merged in multi-output branch so that the master branch now supports multi output from ffmpeg.
+- fixed far too many other bugs to mention.
+
 #[2.1.7-beta] [09.04.2014]
-WARNING: Potential code breaking change from Media->save. save() no longer returns the output path if saved in blocking mode. It returns as non-blocking mode does the FfmpegProcess object. So to return the output path of what has been outputed you must call $process->getOutput().
+WARNING: Potential code breaking change from Media->save. save() no longer returns the output path if saved in blocking mode. It returns as non-blocking mode does the FfmpegProcess object. So to return the output path of what has been outputed you must call $process->getOutput(). Please use 2.1.5 or below for stability.
 Fixed several bugs:
 - fixed issues in portability progress handler where parsing of image only output data would fail.
 - fixed issues in portability progress handler where the progress file would be prematurely deleted.
