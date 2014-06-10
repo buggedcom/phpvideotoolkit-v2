@@ -110,10 +110,8 @@
             // we can get the output from the process.
         }
         
-        $format = new \PHPVideoToolkit\ImageFormat_Jpeg('output', $config);
-        $format->setVideoMaxFrames(1); // prevents ffmpeg throwing a fit if %d is not used.
-
-        $process = $resized_mov->saveNonBlocking('./output/big_buck_bunny_resized.jpg', $format, \PHPVideoToolkit\Media::OVERWRITE_EXISTING);
+        $format = new ImageFormat_Jpeg('output', $config);
+        $process = $resized_mov->save('./output/big_buck_bunny_resized.jpg', $format, Media::OVERWRITE_EXISTING);
 
         if($process->hasError() === true)
         {
