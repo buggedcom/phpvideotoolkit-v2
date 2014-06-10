@@ -57,12 +57,15 @@
         }
 
         /**
-         * Class Constructor
+         * Constructs and merges the given config data with the defaul settings.
          *
-         * @param array $config
-         * @access private
+         * @access public
+         * @author: Oliver Lillie
+         * @param  array $options An array of key=>value pairs to set into the config object.
+         * @param  boolean $set_as_default If true (default false) then this instance of the Config object is set
+         *  as the default configuration instance as returned by Config::getInstance.
          */
-        public function __construct(array $options=array())
+        public function __construct(array $options=array(), $set_as_default=false)
         {
             $default_options = array(
                 'ffmpeg'         => 'ffmpeg',
@@ -79,6 +82,23 @@
                 'cache_driver'   => 'Null',
             );
             $this->_setConfig(array_merge($default_options, $options));
+
+            if($set_as_default === true)
+            {
+                $this->setAsDefaultInstance();
+            }
+        }
+
+        /**
+         * Sets the config object as the default config instance so the config object does not need to be
+         * supplied in the constructor to all the PHPVideoToolkit objects.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         */
+        public function setAsDefaultInstance()
+        {
+            self::$instance = $this;
         }
 
         /**
