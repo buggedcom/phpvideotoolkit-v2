@@ -98,6 +98,7 @@
                 $parts[$key] = $data;
             }
 
+            $ended = false;
             if(empty($parts) === false)
             {
                 $last_key = count($parts)-1;
@@ -112,6 +113,7 @@
                     
                 if($parts[$last_key]['progress'] === 'end')
                 {
+                    $ended = true;
                     $return_data['finished'] = true;
                     if($return_data['percentage'] < 99.5)
                     {
@@ -140,8 +142,10 @@
                 }
             }
 
-            if($this->_ffmpeg_process->isCompleted() === true)
+            if($ended === true)
             {
+                $this->_deleteProgressFile();
+
                 $return_data['finished'] = true;
                 if($return_data['status'] !== self::ENCODING_STATUS_INTERRUPTED)
                 {
@@ -162,12 +166,17 @@
 
             $this->_last_probe_data = $return_data;
         }
+
+        protected function _deleteProgressFile()
+        {
+            @unlink($this->_progress_file);
+        }
          
         public function attachFfmpegProcess(FfmpegProcess $process, Config $config=null)
         {
             parent::attachFfmpegProcess($process, $config);
 
-            $this->_progress_file = tempnam($this->_config->temp_directory, 'phpvideotoolkit_progress_');
+            $this->_progress_file = tempnam($this->_config->temp_directory, 'phpvideotoolkit_progress_'.time().'_');
             $this->_input = $this->_ffmpeg_process->getAllInput();
             $this->_output = $this->_ffmpeg_process->getAllOutput();
             $this->_ffmpeg_process->addCommand('-progress', $this->_progress_file);
