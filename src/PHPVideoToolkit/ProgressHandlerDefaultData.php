@@ -20,6 +20,14 @@
      */
     class ProgressHandlerDefaultData
     {
+        const ENCODING_STATUS_PENDING = 'pending';
+        const ENCODING_STATUS_DECODING = 'decoding';
+        const ENCODING_STATUS_ENCODING = 'encoding';
+        const ENCODING_STATUS_INTERRUPTED = 'interrupted';
+        const ENCODING_STATUS_COMPLETED = 'completed';
+        const ENCODING_STATUS_FINALISING = 'finalising';
+        const ENCODING_STATUS_ERROR = 'error';
+
         protected function _getDefaultData()
         {
             return array(
@@ -29,7 +37,7 @@
                 'finished'   => false, // true when the process has ended by interuption or success completion
                 'completed'  => false, // true when the process has ended by success completion
                 'interrupted'=> false, // true when the process has ended by interuption, ie finished early.
-                'status'     => 'pending',
+                'status'     => self::ENCODING_STATUS_PENDING,
                 'run_time'   => 0,
                 'percentage' => 0,
                 'fps_avg'    => 0,

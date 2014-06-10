@@ -22,7 +22,7 @@
     {
         protected function _parseOutputData(&$return_data, $raw_data)
         {
-            $return_data['status'] = 'pending';
+            $return_data['status'] = self::ENCODING_STATUS_PENDING;
             $return_data['started'] = true;
 
             if(empty($raw_data) === true)
@@ -100,7 +100,7 @@
 
             if(preg_match_all($regex, $raw_data, $matches) > 0)
             {
-                $return_data['status'] = 'encoding';
+                $return_data['status'] = self::ENCODING_STATUS_ENCODING;
 
                 $last_key = count($matches[0])-1;
                 $return_data['frame'] = isset($matches['frame']) === true ? $matches['frame'][$last_key] : null;
@@ -135,16 +135,27 @@
                     if($return_data['percentage'] < 99.5)
                     {
                         $return_data['interrupted'] = true;
-                        $return_data['status'] = 'interrupted';
+                        $return_data['status'] = self::ENCODING_STATUS_INTERRUPTED;
                     }
                     else
                     {
                         $return_data['percentage'] = 100;
-                        $return_data['completed'] = true;
-                        $return_data['status'] = 'completed';
                     }
                 }
-                    
+
+                if($this->_ffmpeg_process->isCompleted() === true)
+                {
+                    $return_data['completed'] = true;
+                    if($return_data['status'] !== self::ENCODING_STATUS_INTERRUPTED)
+                    {
+                        $return_data['status'] = self::ENCODING_STATUS_COMPLETED;
+                    }
+                }
+                else if($return_data['percentage'] === 100)
+                {
+                    $return_data['status'] = self::ENCODING_STATUS_FINALISING;
+                }
+
 //              work out the fps average for performance reasons
                 if(count($matches[2]) === 1)
                 {
@@ -162,11 +173,11 @@
             }
             else if(strpos($raw_data, 'Stream mapping:') !== false && strpos($raw_data, 'Press [q] to stop, [?] for help') !== false)
             {
-                $return_data['status'] = 'decoding';
+                $return_data['status'] = self::ENCODING_STATUS_DECODING;
             }
             else
             {
-                $return_data['status'] = 'error';
+                $return_data['status'] = self::ENCODING_STATUS_ERROR;
             }
         }
          

@@ -58,11 +58,11 @@
 
             if(empty($raw_data) === true)
             {
-                $return_data['status'] = 'decoding';
+                $return_data['status'] = self::ENCODING_STATUS_PENDING;
                 return;
             }
 
-            $return_data['status'] = 'encoding';
+            $return_data['status'] = self::ENCODING_STATUS_ENCODING;
             
             $return_data['process_file'] = $this->_progress_file;
 
@@ -101,14 +101,25 @@
                     if($return_data['percentage'] < 99.5)
                     {
                         $return_data['interrupted'] = true;
-                        $return_data['status'] = 'interrupted';
+                        $return_data['status'] = self::ENCODING_STATUS_INTERRUPTED;
                     }
                     else
                     {
                         $return_data['percentage'] = 100;
-                        $return_data['completed'] = true;
-                        $return_data['status'] = 'completed';
                     }
+                }
+
+                if($this->_ffmpeg_process->isCompleted() === true)
+                {
+                    $return_data['completed'] = true;
+                    if($return_data['status'] !== self::ENCODING_STATUS_INTERRUPTED)
+                    {
+                        $return_data['status'] = self::ENCODING_STATUS_COMPLETED;
+                    }
+                }
+                else if($return_data['percentage'] === 100)
+                {
+                    $return_data['status'] = self::ENCODING_STATUS_FINALISING;
                 }
                     
 //              work out the fps average for performance reasons
