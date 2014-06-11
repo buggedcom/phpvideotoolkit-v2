@@ -51,7 +51,7 @@
 
             if($this->_config->gif_transcoder_convert_use_dither === true)
             {
-                $process->add('-ordered-dither')->add('o8x8,8');
+                $process->add('-ordered-dither')->add($this->_config->gif_transcoder_convert_dither_order);
             }
             if($this->_config->gif_transcoder_convert_use_coalesce === true)
             {
