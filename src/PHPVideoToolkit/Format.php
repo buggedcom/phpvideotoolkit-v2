@@ -29,8 +29,11 @@
         
         protected $_additional_commands;
         protected $_removed_commands;
+
+        const INPUT = 'input';
+        const OUTPUT = 'output';
         
-        public function __construct($input_output_type, Config $config=null)
+        public function __construct($input_output_type=Format::OUTPUT, Config $config=null)
         {
             parent::__construct($config);
             

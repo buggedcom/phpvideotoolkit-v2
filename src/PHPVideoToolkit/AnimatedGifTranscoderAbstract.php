@@ -51,9 +51,9 @@
         /**
          * A variable holder that contains the overwrite mode for saving the animated gif.
          * @var constant One of the following:
-         *  PHPVideoToolkit::Media::OVERWRITE_FAIL
-         *  PHPVideoToolkit::Media::OVERWRITE_EXISTING
-         *  PHPVideoToolkit::Media::OVERWRITE_UNIQUE
+         *  PHPVideoToolkit\Media::OVERWRITE_FAIL
+         *  PHPVideoToolkit\Media::OVERWRITE_EXISTING
+         *  PHPVideoToolkit\Media::OVERWRITE_UNIQUE
          * @access protected
          */
         protected $_overwrite_mode;
