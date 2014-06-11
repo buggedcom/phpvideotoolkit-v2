@@ -156,31 +156,35 @@ FFmpeg allows you to set certain import format parameters to the input media. As
 Generally speaking if you are just transcoding from one format to another, you do not even need to worry about supplying an output format either. PHPVideoToolkit will best guess the output format you require and then apply it magically when you call 'save' to encode the media. To this end there are specific Audio, Image and Video formats you can use. These are listed below. If you have specific settings for a specific file output please feel free to create your own media specific output formats and submit a pull request and I will include them in the bundle. These media specific formats are listed below.
 
 _Audio_
-flac - `AudioFormat_Flac`
-mp3 - `AudioFormat_Mp3`
+
+- `AudioFormat_Flac`
+- `AudioFormat_Mp3`
 
 _Image_
-bmp - `ImageFormat_Bmp`
-gif - `ImageFormat_Gif`
-jpeg/jpg - `ImageFormat_Jpeg`
-png - `ImageFormat_Png`
-ppm - `ImageFormat_Ppm`
+
+- `ImageFormat_Bmp`
+- `ImageFormat_Gif`
+- `ImageFormat_Jpeg`
+- `ImageFormat_Png`
+- `ImageFormat_Ppm`
 
 _Video_
-3gp - `VideoFormat_3gp`
-flv - `VideoFormat_Flv`
-h264 - `VideoFormat_H264`
-mkv - `VideoFormat_Mkv`
-mp4 - `VideoFormat_Mp4`
-ogg - `VideoFormat_Ogg`
-webm - `VideoFormat_Webm`
-wmv - `VideoFormat_Wmv`
+
+- `VideoFormat_3gp`
+- `VideoFormat_Flv`
+- `VideoFormat_H264`
+- `VideoFormat_Mkv`
+- `VideoFormat_Mp4`
+- `VideoFormat_Ogg`
+- `VideoFormat_Webm`
+- `VideoFormat_Wmv`
 
 For the most part all these format specific Format classes do is set the neccessary codecs and settings required to generate the desired output, however, formats like `VideoFormat_Mp4`, `VideoFormat_H264` or `VideoFormat_Flv` contain further functionality and make use of encoding completion callbacks to further process the media after FFmpeg has finished encoding them. For example the flv format runs the resulting output from FFmpeg through the yamdi server library to inject meta data, or the mp4 format uses qtfaststart to create a fast start streaming mp4.
 
 So getting to the bit you will most likely use... The formatting of outputted media. 
 
 _AudioFormat_
+
 [AudioFormat](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/src/PHPVideoToolkit/AudioFormat.php) and child classes thereof have the following functions available.
 
 - disableAudio/enableAudio
@@ -192,6 +196,7 @@ _AudioFormat_
 - setAudioQuality
 
 _VideoFormat_
+
 [VideoFormat](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/src/PHPVideoToolkit/VideoFormat.php) and child classes thereof have the following functions available.
 
 - disableVideo/enableVideo
@@ -210,9 +215,11 @@ _VideoFormat_
 - videoFlipHorizontal
 
 _ImageFormat_
+
 ImageFormat and the related child classes do not have any further functions.
 
 **Basic usage**
+
 Below is an example of a very simple manipulation of a video.
 
 ```php
