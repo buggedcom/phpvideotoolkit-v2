@@ -632,23 +632,23 @@ Array
 
 There are 4 different "status" booleans and one specific status code in the output that you should be aware of. They are ***started***, ***interrupted***, ***completed***, ***finished*** and ***status***.
 
-**started** 
+**started** ***(boolean)***
 
 This is set to true once the process file has been found by PHPVideoToolkit and the decode/encode process has been sent to FFmpeg.
 
-**interrupted** 
+**interrupted** ***(boolean)***
 
 This is set to true if for some reason the server as stopped the encoding process prematurely. If this is ever encountered, it means your encoding process has failed and cannot be restarted other than attempting the encode again.
 
-**completed** 
+**completed** ***(boolean)*** 
 
 This is set to true once FFmpeg has signaled that the encoding process has finished.
 
-**finished** 
+**finished** ***(boolean)*** 
 
 This is set to true once PHPVideoToolkit has received the completion signal from the command line. This is typically speaking set after 'completed' is set to true. This is because after the encode has completed, FFmpeg outputs more information after the process has completed and then PHPVideoToolkit does a little tidying of temporary files or post process particular file formats.
 
-**status**
+**status** ***(constant/string)***
 
 This is a value that is defined according to the values above using the following constants; ```ProgressHandlerDefaultData::ENCODING_STATUS_PENDING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_DECODING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_ENCODING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_FINALISING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_COMPLETED```, ```ProgressHandlerDefaultData::ENCODING_STATUS_FINISHED```, ```ProgressHandlerDefaultData::ENCODING_STATUS_INTERRUPTED```,  and ```ProgressHandlerDefaultData::ENCODING_STATUS_ERROR```. You'll notice there are more status than boolean flags. This is because the 'status' key is slightly more verbose. As a result the constant values are explained below.
 
@@ -680,63 +680,63 @@ If anything as gone wrong in the encoding process you will get either  ```Progre
 
 The other values returned via the probe data are explained below.
 
-***run_time***
+**run_time** ***(float)***
 
 This is the total time in seconds that the process has taken.
 
-***percentage***
+**percentage** ***(float)***
 
 This is the encoding completion percentage in the range of 0-100. 100 being the encode is complete.
 
-***fps***
+**fps** ***(float)***
 
 This is the current number of frames per second that are being processed.
 
-***fps_avg***
+**fps_avg** ***(float)***
 
 This is the average number of frames per second that are being processed.
 
-***frame***
+**frame** ***(integer)***
 
 This is the current frame that is being processed.
 
-***size***
+**size** ***(string)***
 
 This is the current size of the output media.
 
-***duration***
+**duration** ***(PHPVideoToolkit\Timecode object)***
 
 This is the current duration of the output media (if appropriate - as if you are outputting images only this will be `null`)
 
-***expected_duration***
+**expected_duration** ***(PHPVideoToolkit\Timecode object)***
 
 This is the expected approimate value that the output media's duration will be. The final value held by 'duration' (above) will usually be a few microseconds different that this value.
 
-***dup***
+**dup** ***(float)***
 
 This value is the number of duplicate frames processed.
 
-***drop***
+**drop** ***(float)***
 
 This is the number of dropped frames.
 
-***output_count***
+**output_count** ***(integer)***
 
 This value is the number of ouput files expected.
 
-***output_file***
+**output_file** ***(string/array)***
 
 This value is either a) a path value as a string if the above 'output_count' is 1, or b) and array of path strings if the above 'output_count' is greated than 1.
 
-***input_count***
+**input_count** ***(integer)***
 
 This value is the number of input files being used.
 
-***input_file***
+**input_file** ***(string/array)***
 
 This value is either a) a path value as a string if the above 'input_count' is 1, or b) and array of path strings if the above 'input_count' is greated than 1.
 
-***process_file***
+**process_file** ***(string)***
 
 This is a path string pointing to the current process file that the progress handler is using to read the data from.
 
