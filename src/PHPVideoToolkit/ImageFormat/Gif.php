@@ -20,8 +20,6 @@
      */
     class ImageFormat_Gif extends ImageFormat
     {
-        const UNLIMITED_LOOPS = -1;
-
         protected $_max_frames_on_no_timecode = false;
        
         public function __construct($input_output_type, Config $config=null)
@@ -29,7 +27,7 @@
             parent::__construct($input_output_type, $config);
             
             $this->_format = array_merge($this->_format, array(
-                'gif_loop_count' => self::UNLIMITED_LOOPS,
+                'gif_loop_count' => AnimatedGif::UNLIMITED_LOOPS,
                 'gif_frame_delay' => 0.1,
             ));
             
@@ -140,7 +138,8 @@
             $save_path = $path.DIRECTORY_SEPARATOR.$name;
             
 //          save the gif
-            $image = $gif->save($save_path, $gif_frame_delay, $overwrite);
+            $gif->setFrameDelay($gif_frame_delay);
+            $image = $gif->save($save_path, $overwrite);
             
 //          remove tmp frame files
             foreach ($output as $output_image)

@@ -14,19 +14,47 @@
     namespace PHPVideoToolkit;
      
     /**
-     * This class provides generic data parsing for the output from FFmpeg.
+     * This class provides an abstract basis for all the gif transcoder engines.
      *
-     * @access public
      * @author Oliver Lillie
-     * @author Jorrit Schippers
-     * @package default
      */
-    abstract class AnimatedGifTranscoderAbstract//implements AnimatedGifTranscoderInterface
+    abstract class AnimatedGifTranscoderAbstract
     {
+        /**
+         * A variable holder for the config object.
+         * @var PHPVideoTookit\Config
+         * @access protected
+         */
         protected $_config;
+
+        /**
+         * A variable holder to contain the PHPVideoToolkit\Image frames.
+         * @var array
+         * @access protected
+         */
         protected $_frames;
+
+        /**
+         * A variable holder that contains the loop count of the animated gif.
+         * @var integer
+         * @access protected
+         */
         protected $_loop_count;
         
+        /**
+         * A variable holder that contains the frame delay between the frames of the animated gif.
+         * @var mixed integer or float
+         * @access protected
+         */
+        protected $_frame_delay;
+        
+        /**
+         * Constructor
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param  PHPVideoToolkit\Config $config The PHPVideoToolkit\Config object
+         */
         public function __construct(Config $config=null)
         {
             $this->_config = $config === null ? Config::getInstance() : $config;
@@ -39,9 +67,8 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $file_path 
-         * @param string $frame_delay 
-         * @return boolean
+         * @param PHPVideoToolkit\Image $image A PHPVideoToolkit\Image object to add to the animated gif frames array.
+         * @return PHPVideoTookit\AnimatedGifTranscoderAbstract Returns the current object.
          */
         public function addFrame(Image $image)
         {
@@ -51,55 +78,85 @@
         }
         
         /**
-         * Adds a frame to the current timeline.
+         * Sets the animated gif loop count.
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $file_path 
-         * @param string $frame_delay 
-         * @return boolean
+         * @param mixed $loop_count A positive integer or AnimatedGif::UNLIMITED_LOOPS to loop unlimitedly.
+         * @return PHPVideoTookit\AnimatedGifTranscoderAbstract Returns the current object.
+         * @throws \InvalidArgumentException If the $loop_count value is less than -1
+         * @throws \InvalidArgumentException If the $loop_count value is not an integer.
          */
         public function setLoopCount($loop_count)
         {
-            if($loop_count !== null && $loop_count < -1)
+            if(is_integer($loop_count) === false)
             {
-                throw new Exception('The loop count cannot be less than -1. (-1 specifies unlimited looping)');
+                throw new \InvalidArgumentException('The loop count must be an integer value.');
             }
-            $this->_loop_count = (int) $loop_count;
+            if($loop_count < 0 && $loop_count !== AnimatedGif::UNLIMITED_LOOPS)
+            {
+                throw new \InvalidArgumentException('The loop count cannot be less than 0. (AnimatedGif::UNLIMITED_LOOPS specifies unlimited looping)');
+            }
+            $this->_loop_count = $loop_count;
             
             return $this;
         }
         
         /**
-         * Saves the animated gif.
+         * Sets the frame delay between frames.
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $save_path
-         * @param float $frame_delay The delay of each frame.
-         * @return Image
+         * @param mixed $loop_count A positive integer or AnimatedGif::UNLIMITED_LOOPS
+         * @return PHPVideoTookit\AnimatedGifTranscoderAbstract Returns the current object.
+         * @throws \InvalidArgumentException If the $loop_count value is less than -1
+         * @throws \InvalidArgumentException If the $loop_count value is not an integer.
          */
-        public function save($save_path, $frame_delay=0.1, $overwrite=Media::OVERWRITE_FAIL)
+        public function setFrameDelay($frame_delay)
+        {
+            if(is_integer($frame_delay) === false && is_float($frame_delay) === false)
+            {
+                throw new \InvalidArgumentException('The frame delay must be an integer value.');
+            }
+            if($frame_delay < 0.001)
+            {
+                throw new \InvalidArgumentException('The frame delay cannot be less than 0.001.');
+            }
+            $this->_frame_delay = $frame_delay;
+            
+            return $this;
+        }
+        
+       /**
+         * Saves the animated gif.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param  string $save_path The path to save the animated gif to.
+         * @param  constant $overwrite Determines the file overwrite status. Can be one of the following values.
+         *  PHPVideoToolkit::Media::OVERWRITE_FAIL
+         *  PHPVideoToolkit::Media::OVERWRITE_EXISTING
+         *  PHPVideoToolkit::Media::OVERWRITE_UNIQUE
+         * @return string Returns the save path of the animated gif.
+         * @throws \RuntimeException If $overwrite is set to PHPVideoToolkit::Media::OVERWRITE_FAIL and the $save_path already exists.
+         * @throws \RuntimeException If $overwrite is set to PHPVideoToolkit::Media::OVERWRITE_EXISTING and the $save_path is not writable.
+         */
+        public function save($save_path, $overwrite=Media::OVERWRITE_FAIL)
         {
             if(empty($this->_frames) === true)
             {
-                throw new Exception('At least one frame must be added in order to save an animated gif.');
-            }
-            
-            if($frame_delay < 0.001)
-            {
-                throw new Exception('The frame delay must at least be 0.001.');
+                throw new \InvalidArgumentException('At least one frame must be added in order to save an animated gif.');
             }
             
             if(is_file($save_path) === true)
             {
                 if(empty($overwrite) === true || $overwrite === Media::OVERWRITE_FAIL)
                 {
-                    throw new Exception('The output file already exists and overwriting is disabled.');
+                    throw new \RuntimeException('The output file already exists and overwriting is disabled.');
                 }
                 else if($overwrite === Media::OVERWRITE_EXISTING && is_writeable(dirname($save_path)) === false)
                 {
-                    throw new Exception('The output file already exists, overwriting is enabled however the file is not writable.');
+                    throw new \RuntimeException('The output file already exists, overwriting is enabled however the file is not writable.');
                 }
 
                 switch($overwrite)
