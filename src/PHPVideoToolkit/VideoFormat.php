@@ -728,6 +728,8 @@
             {
                 $this->_format['video_flip_vertical'] = true;
             }
+
+            return $this;
         }
         
         /**
@@ -749,6 +751,8 @@
             {
                 $this->_format['video_flip_horizontal'] = true;
             }
+
+            return $this;
         }
         
     }
