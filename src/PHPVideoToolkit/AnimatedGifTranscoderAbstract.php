@@ -152,7 +152,7 @@
          */
         public function setOverwriteMode($mode)
         {
-            if(in_array($mode, array(Media::OVERWRITE_FAIL, Media::OVERWRITE_EXISTING, Media::OVERWRITE_UNIQUE)))
+            if(in_array($mode, array(Media::OVERWRITE_FAIL, Media::OVERWRITE_EXISTING, Media::OVERWRITE_UNIQUE)) === false)
             {
                 throw new \InvalidArgumentException('The $mode argument must be one of the following values: PHPVideoToolkit\Media::OVERWRITE_FAIL, PHPVideoToolkit\Media::OVERWRITE_EXISTING, PHPVideoToolkit\Media::OVERWRITE_UNIQUE');
             }
