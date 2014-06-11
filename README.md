@@ -22,6 +22,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 - [Extract Multiple Frames of a Video at 1 frame every 'x' seconds](#extract-multiple-frames-of-a-video-at-1-frame-every-x-seconds)
 - [Caveats of Extracting Multiple Frames](#caveats-of-extracting-multiple-frames)
 - [Extracting an Animated Gif](#extracting-an-animated-gif)
+- [Resizing Video and Images](#resizing-video-and-images)
 - [Extracting Audio or Video Channels from a Video](#extracting-audio-or-video-channels-from-a-video)
 - [Extracting a Segment of an Audio or Video file](#extracting-a-segment-of-an-audio-or-video-file)
 - [Splitting a Audio or Video file into multiple parts](#splitting-a-audio-or-video-file-into-multiple-parts)
@@ -339,6 +340,23 @@ $process = $video->extractSegment(new Timecode(10), new Timecode(20))
 				->save($output_path, $output_format);
 				
 $output = $process->getOutput();
+```
+
+###Resizing Video and Images
+
+In order to resize output video and imagery output you need to supply an [output format](#phpvideotoolkit-output-formats) to the save function you call. The below snippet is an example of resizing a video, however you would use same function call to `setVideoDimensions` just instead of a `VideoFormat` object you would use and `ImageFormat` object.
+
+```php
+
+namespace PHPVideoToolkit;
+
+$video  = new Video('BigBuckBunny_320x180.mp4');
+
+$output_format = new VideoFormat('output');
+$output_format->setVideoDimensions(160, 120);
+
+$video->save('BigBuckBunny_160x120.3gp', $output_format);
+
 ```
 
 ###Extracting Audio or Video Channels from a Video
