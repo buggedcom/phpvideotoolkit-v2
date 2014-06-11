@@ -29,6 +29,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 - [Changing Codecs of the audio or video stream](#changing-codecs-of-the-audio-or-video-stream)
 - [Non-Blocking Saves](#non-blocking-saves)
 - [Encoding with Progress Handlers](#encoding-with-progress-handlers)
+- [Information Available to the Progress Handlers](#information-available-to-the-progress-handlers)
 - [Encoding Multiple Output Files](#encoding-multiple-output-files)
 - [Accessing Executed Commands and the Command Line Buffer](#accessing-executed-commands-and-the-command-line-buffer)
 - [Supplying custom commands](#supplying-custom-commands)
@@ -569,6 +570,175 @@ exit;
 **1**: When encoding MP4s and having enabled qt-faststart usage either through setting ```\PHPVideoToolkit\Config->force_enable_qtfaststart = true;``` or ```\PHPVideoToolkit\VideoFormat_Mp4::enableQtFastStart()``` saves are put into blocking mode as processing with qt-faststart requires further exec calls. Similarly any encoding post processes such as when encoding FLVs will also convert a non blocking save into a blocking one.
 
 **2**: When outputting files using %timecode or %index and using the ProgressHandlerPortable system it is not possible to currently automatically renaming the resulting temporary file output to their correct output filenames.
+
+###Information Available to the Progress Handlers
+All of the progress handlers outlined above returned the same information, albeit there are some minor differences as when some of the data is available, however the difference is negligle and for the purposes of this document they really do not matter. Below is a sample output of the data available from ```$progress_handler->probe();```
+
+```
+Array
+(
+	[error] => 
+	[error_message] => 
+	[started] => 1
+	[finished] => 
+	[completed] => 
+	[interrupted] => 
+	[status] => encoding
+	[run_time] => 0.730171918869
+	[percentage] => 11.0666666667
+	[fps_avg] => 209.539693388
+	[size] => 242kB
+	[frame] => 153
+	[duration] => PHPVideoToolkit\Timecode Object
+		(
+			[_total_frames:protected] => 
+			[_total_milliseconds:protected] => 6640
+			[_total_seconds:protected] => 6.64
+			[_total_minutes:protected] => 0.110666666667
+			[_total_hours:protected] => 0.00184444444444
+			[_frames:protected] => 
+			[_milliseconds:protected] => 0.64
+			[_seconds:protected] => 6
+			[_minutes:protected] => 0
+			[_hours:protected] => 0
+			[_frame_rate:protected] => 
+		)
+
+	[expected_duration] => PHPVideoToolkit\Timecode Object
+		(
+			[_total_frames:protected] => 
+			[_total_milliseconds:protected] => 60000
+			[_total_seconds:protected] => 60
+			[_total_minutes:protected] => 1
+			[_total_hours:protected] => 0.0166666666667
+			[_frames:protected] => 
+			[_milliseconds:protected] => 0
+			[_seconds:protected] => 60
+			[_minutes:protected] => 0
+			[_hours:protected] => 0
+			[_frame_rate:protected] => 
+		)
+
+	[fps] => 0.0
+	[dup] => 
+	[drop] => 
+	[output_count] => 1
+	[output_file] => /@Projects/PHPVideoToolkit/v2/git/examples/output/big_buck_bunny.3gp
+	[input_count] => 1
+	[input_file] => /@Projects/PHPVideoToolkit/v2/git/examples/media/BigBuckBunny_320x180.mp4
+	[process_file] => /@Projects/PHPVideoToolkit/v2/git/examples/tmp/phpvideotoolkit_GsZ7FC
+)
+```
+
+There are 4 different "status" booleans and one specific status code in the output that you should be aware of. They are ***started***, ***interrupted***, ***completed***, ***finished*** and ***status***.
+
+**started** 
+
+This is set to true once the process file has been found by PHPVideoToolkit and the decode/encode process has been sent to FFmpeg.
+
+**interrupted** 
+
+This is set to true if for some reason the server as stopped the encoding process prematurely. If this is ever encountered, it means your encoding process has failed and cannot be restarted other than attempting the encode again.
+
+**completed** 
+
+This is set to true once FFmpeg has signaled that the encoding process has finished.
+
+**finished** 
+
+This is set to true once PHPVideoToolkit has received the completion signal from the command line. This is typically speaking set after 'completed' is set to true. This is because after the encode has completed, FFmpeg outputs more information after the process has completed and then PHPVideoToolkit does a little tidying of temporary files or post process particular file formats.
+
+**status**
+
+This is a value that is defined according to the values above using the following constants; ```ProgressHandlerDefaultData::ENCODING_STATUS_PENDING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_DECODING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_ENCODING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_FINALISING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_COMPLETED```, ```ProgressHandlerDefaultData::ENCODING_STATUS_FINISHED```, ```ProgressHandlerDefaultData::ENCODING_STATUS_INTERRUPTED```,  and ```ProgressHandlerDefaultData::ENCODING_STATUS_ERROR```. You'll notice there are more status than boolean flags. This is because the 'status' key is slightly more verbose. As a result the constant values are explained below.
+
+```ProgressHandlerDefaultData::ENCODING_STATUS_PENDING```
+
+This means that the process has not yet started decoding the input media. It is followed by...
+
+```ProgressHandlerDefaultData::ENCODING_STATUS_DECODING```
+
+This means that FFmpeg is currently decoding the input media. Which is then followed by...
+
+```ProgressHandlerDefaultData::ENCODING_STATUS_ENCODING```
+
+This means that FFmpeg is currently encoding the output files. This is followed by...
+
+```ProgressHandlerDefaultData::ENCODING_STATUS_FINALISING```
+
+This means that FFmpeg has reached the end of the encoding process and is currently tidying up and we are in the final stages of the encode. This is followed by...
+
+```ProgressHandlerDefaultData::ENCODING_STATUS_COMPLETED```
+
+Which means that the encoding process has completed but PHPVideoToolkit still requires a little moment to tidy up. 
+
+```ProgressHandlerDefaultData::ENCODING_STATUS_FINISHED```
+
+Then this is given it means the encoding process is totally complete and you can safely move/rename/use your end output media.
+
+If anything as gone wrong in the encoding process you will get either  ```ProgressHandlerDefaultData::ENCODING_STATUS_INTERRUPTED``` or ```ProgressHandlerDefaultData::ENCODING_STATUS_ERROR``` at any point of the encoding process. Generally speaking if either of these constants are given both the ***error*** and ***error_message*** keys within the probed data will also be populated.
+
+The other values returned via the probe data are explained below.
+
+***run_time***
+
+This is the total time in seconds that the process has taken.
+
+***percentage***
+
+This is the encoding completion percentage in the range of 0-100. 100 being the encode is complete.
+
+***fps***
+
+This is the current number of frames per second that are being processed.
+
+***fps_avg***
+
+This is the average number of frames per second that are being processed.
+
+***frame***
+
+This is the current frame that is being processed.
+
+***size***
+
+This is the current size of the output media.
+
+***duration***
+
+This is the current duration of the output media (if appropriate - as if you are outputting images only this will be `null`)
+
+***expected_duration***
+
+This is the expected approimate value that the output media's duration will be. The final value held by 'duration' (above) will usually be a few microseconds different that this value.
+
+***dup***
+
+This value is the number of duplicate frames processed.
+
+***drop***
+
+This is the number of dropped frames.
+
+***output_count***
+
+This value is the number of ouput files expected.
+
+***output_file***
+
+This value is either a) a path value as a string if the above 'output_count' is 1, or b) and array of path strings if the above 'output_count' is greated than 1.
+
+***input_count***
+
+This value is the number of input files being used.
+
+***input_file***
+
+This value is either a) a path value as a string if the above 'input_count' is 1, or b) and array of path strings if the above 'input_count' is greated than 1.
+
+***process_file***
+
+This is a path string pointing to the current process file that the progress handler is using to read the data from.
 
 ###Encoding Multiple Output Files
 
