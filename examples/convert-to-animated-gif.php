@@ -38,7 +38,12 @@
                 $config->convert = $convert;
                 $config->gif_transcoder = 'gifsicle';
             }
-        
+            else if($gif_transcoder === 'convert')
+            {
+                $config->convert = $convert;
+                $config->gif_transcoder = 'convert';
+            }
+
             $output_format = Format::getFormatFor($output_path, $config, 'ImageFormat');
             $output_format->setVideoFrameRate(12);
         
