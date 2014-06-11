@@ -245,7 +245,7 @@
         }
         
         /**
-         * Determines if the convert transcoder engine is available on the current system.
+         * Determines if the gifsicle/convert or gifsicle/php transcoder engine is available on the current system.
          *
          * @access public
          * @static

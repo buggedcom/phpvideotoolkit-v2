@@ -16,12 +16,10 @@
     use GifCreator; 
      
     /**
-     * This class provides generic data parsing for the output from FFmpeg.
+     * This class provides an animated gif transcoder engine that uses pure PHP to create an animated gif. This is the
+     * weakest format of the three engines and should be avoided if possible.
      *
-     * @access public
      * @author Oliver Lillie
-     * @author Jorrit Schippers
-     * @package default
      */
     class AnimatedGifTranscoderPhp extends AnimatedGifTranscoderAbstract
     {
@@ -30,9 +28,10 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $save_path
-         * @param float $frame_delay The delay of each frame.
-         * @return Image
+         * @param  string $save_path The path to save the animated gif to.
+         * @return PHPVideoToolkit\Image Returns a new instance of PHPVideoToolkit\Image with the new animated gif as the src.
+         * @throws PHPVideoToolkit\AnimatedGifException If an empty gif is generated.
+         * @throws PHPVideoToolkit\AnimatedGifException If the gif couldn't be saved to the filesystem.
          */
         public function save($save_path)
         {
@@ -55,16 +54,25 @@
 //          check for errors or put the data into the file.
             if(empty($gif_data) === true)
             {
-                throw new FfmpegProcessPostProcessException('AnimatedGif using `php` generated an empty gif.');
+                throw new AnimatedGifException('AnimatedGif using `php` generated an empty gif.');
             }
             if(file_put_contents($save_path, $gif_data) === false)
             {
-                throw new FfmpegProcessPostProcessException('AnimatedGif save to filesystem failed using "'.$save_path.'".');
+                throw new AnimatedGifException('AnimatedGif save to filesystem failed using "'.$save_path.'".');
             }
 
             return new Image($save_path, $this->_config);
         }
         
+        /**
+         * Determines if the php transcoder engine is available on the current system.
+         *
+         * @access public
+         * @static
+         * @author: Oliver Lillie
+         * @param  PHPVideoToolkit\Config $config The configuration object.
+         * @return boolean Returns true if this engine can be used, otherwise false.
+         */
         public static function available(Config $config)
         {
             return function_exists('imagegif') && is_file(dirname(dirname(dirname(__FILE__))).'/vendor/sybio/gif-creator/src/GifCreator/GifCreator.php');
