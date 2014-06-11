@@ -227,7 +227,7 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4');
 
-$output_format = new VideoFormat_Mp4('output');
+$output_format = new VideoFormat_Mp4();
 // attempt to auto rotate the video to the correct orientation (ie mobile phone users - hurgygur)
 $output_format->setVideoRotation(true)
 			  ->setVideoFrameRate(10)
@@ -247,7 +247,7 @@ Because of the advanced nature of the input and output formatters, if supplied y
 namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4');
-$video->save('output.my_silly_custom_file_extension', new ImageFormat_Jpeg('output'));
+$video->save('output.my_silly_custom_file_extension', new ImageFormat_Jpeg());
 				
 ```
 
@@ -283,12 +283,12 @@ There are two ways you can export at a differing frame rate from that of the par
 ```php
 namespace PHPVideoToolkit;
 
-$output_format = new ImageFormat_Jpeg('output');
+$output_format = new ImageFormat_Jpeg();
 
 /*
 OR 
 
-$output_format = new VideoFormat('output');
+$output_format = new VideoFormat();
 $output_format->setFrameRate(1);
 // optionally also set the video and output format, however if you use the ImageFormat_Jpeg 
 // output format object this is automatically done for you. If you do not add below, FFmpeg
@@ -457,7 +457,7 @@ namespace PHPVideoToolkit;
 
 $video  = new Video('BigBuckBunny_320x180.mp4');
 
-$output_format = new VideoFormat('output');
+$output_format = new VideoFormat();
 $output_format->setVideoDimensions(160, 120);
 
 $video->save('BigBuckBunny_160x120.3gp', $output_format);
@@ -527,7 +527,7 @@ namespace PHPVideoToolkit;
 
 $output_path = './output/big_buck_bunny.mpeg';
 
-$output_format = new VideoFormat('output');
+$output_format = new VideoFormat();
 $output_format->setAudioCodec('acc')
 			  ->setVideoCodec('ogg');
 
@@ -542,7 +542,7 @@ namespace PHPVideoToolkit;
 
 $output_path = './output/big_buck_bunny.mp3';
 
-$output_format = new AudioFormat('output');
+$output_format = new AudioFormat();
 $output_format->setAudioCodec('acc');
 
 $video = new Video('media/BigBuckBunny_320x180.mp4');

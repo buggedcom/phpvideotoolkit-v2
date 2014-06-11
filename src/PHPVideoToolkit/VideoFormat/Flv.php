@@ -23,7 +23,7 @@
         protected $_post_process_meta_data_injection;
         protected $_enforce_meta_data_success;
         
-        public function __construct($input_output_type, Config $config=null)
+        public function __construct($input_output_type=Format::OUTPUT, Config $config=null)
         {
             parent::__construct($input_output_type, $config);
             

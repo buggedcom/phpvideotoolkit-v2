@@ -63,7 +63,7 @@
             // we can get the output from the process.
         }
 
-        $format = $mov->getDefaultFormat('output');
+        $format = $mov->getDefaultFormat(Format::OUTPUT);
         $format->setVideoDimensions(100, 100);
 
         $progress_handler = new ProgressHandlerNative();

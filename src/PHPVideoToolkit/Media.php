@@ -143,7 +143,7 @@
                     $format = Extensions::toBestGuessFormat($ext);
                 }
                 
-                $this->_media_input_format = $this->getDefaultFormat('input', $format);
+                $this->_media_input_format = $this->getDefaultFormat(Format::INPUT, $format);
             }
             else
             {
@@ -196,7 +196,7 @@
         protected function _getDefaultFormat($type, $default_class_name, $format)
         {
             // TODO replace with reference to Format::getFormatFor
-            if(in_array($type, array('input', 'output')) === false)
+            if(in_array($type, array(Format::OUTPUT, Format::Input)) === false)
             {
                 throw new Exception('Unrecognised format type "'.$type.'".');
             }
@@ -1094,7 +1094,7 @@
                 {
                     $format = Extensions::toBestGuessFormat($ext);
                 }
-                $output_format = $this->getDefaultFormat('output', $format);
+                $output_format = $this->getDefaultFormat(Format::OUTPUT, $format);
             }
             
 //          set the media into the format object so that we can update the format options that

@@ -22,7 +22,7 @@
     {
         protected $_restricted_video_presets;
         
-        public function __construct($input_output_type, Config $config=null)
+        public function __construct($input_output_type=Format::OUTPUT, Config $config=null)
         {
             parent::__construct($input_output_type, $config);
             
