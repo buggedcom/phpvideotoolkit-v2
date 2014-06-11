@@ -16,6 +16,7 @@ It also currently provides FFmpeg-PHP emulation in pure PHP so you wouldn't need
 - [Accessing Data About FFmpeg](#accessing-data-about-ffmpeg)
 - [Accessing Data About media files](#accessing-data-about-media-files)
 - [PHPVideoToolkit Timecodes](#phpvideotoolkit-timecodes)
+- [PHPVideoToolkit Output Formats](#phpvideotoolkit-output-formats)
 - [Extract a Single Frame of a Video](#extract-a-single-frame-of-a-video)
 - [Extract Multiple Frames from a Segment of a Video](#extract-multiple-frames-from-a-segment-of-a-video)
 - [Extract Multiple Frames of a Video at 1 frame per second](#extract-multiple-frames-of-a-video-at-1-frame-per-second)
@@ -145,6 +146,103 @@ echo $timecode->seconds; // Outputs 39
 ```
 
 It's very important to note, as in the last example, that there is a massive difference between accessing ```$timecode->seconds``` and ```$timecode->total_seconds```. `seconds` is the number of seconds in the remaining minute of the timecode. `total_seconds` is the total number of seconds of the timecode. The same logic applies to minutes, hours, milliseconds and their total_ prefixed counterparts.
+
+###PHPVideoToolkit Output Formats
+
+PHPVideoToolkit contains a base class `Format`. This class is extended by three other important base classes called `AudioFormat`, `VideoFormat` and `ImageFormat`. They extend as follows: Format > AudioFormat > VideoFormat > ImageFormat. This allows each of the later formats to inherit functionality from the previous format.
+
+FFmpeg allows you to set certain import format parameters to the input media. As such these Format classes work for both input and output formatting of media. For the most part, unless you need to do something very specific you do not need to worry about setting an input format for the media you wish to put into FFmpeg. So this documentation will not explain input formatting.
+
+Generally speaking if you are just transcoding from one format to another, you do not even need to worry about supplying an output format either. PHPVideoToolkit will best guess the output format you require and then apply it magically when you call 'save' to encode the media. To this end there are specific Audio, Image and Video formats you can use. These are listed below. If you have specific settings for a specific file output please feel free to create your own media specific output formats and submit a pull request and I will include them in the bundle. These media specific formats are listed below.
+
+_Audio_
+flac - `AudioFormat_Flac`
+mp3 - `AudioFormat_Mp3`
+
+_Image_
+bmp - `ImageFormat_Bmp`
+gif - `ImageFormat_Gif`
+jpeg/jpg - `ImageFormat_Jpeg`
+png - `ImageFormat_Png`
+ppm - `ImageFormat_Ppm`
+
+_Video_
+3gp - `VideoFormat_3gp`
+flv - `VideoFormat_Flv`
+h264 - `VideoFormat_H264`
+mkv - `VideoFormat_Mkv`
+mp4 - `VideoFormat_Mp4`
+ogg - `VideoFormat_Ogg`
+webm - `VideoFormat_Webm`
+wmv - `VideoFormat_Wmv`
+
+For the most part all these format specific Format classes do is set the neccessary codecs and settings required to generate the desired output, however, formats like `VideoFormat_Mp4`, `VideoFormat_H264` or `VideoFormat_Flv` contain further functionality and make use of encoding completion callbacks to further process the media after FFmpeg has finished encoding them. For example the flv format runs the resulting output from FFmpeg through the yamdi server library to inject meta data, or the mp4 format uses qtfaststart to create a fast start streaming mp4.
+
+So getting to the bit you will most likely use... The formatting of outputted media. 
+
+_AudioFormat_
+[AudioFormat](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/src/PHPVideoToolkit/AudioFormat.php) and child classes thereof have the following functions available.
+
+- disableAudio/enableAudio
+- setAudioCodec
+- setAudioBitrate
+- setAudioSampleFrequency
+- setAudioChannels
+- setVolume
+- setAudioQuality
+
+_VideoFormat_
+[VideoFormat](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/src/PHPVideoToolkit/VideoFormat.php) and child classes thereof have the following functions available.
+
+- disableVideo/enableVideo
+- setVideoCodec
+- setVideoDimensions
+- setVideoScale
+- setVideoPadding
+- setVideoAspectRatio
+- setVideoFrameRate
+- setVideoMaxFrames
+- setVideoBitrate
+- setVideoPixelFormat
+- setVideoQuality
+- setVideoRotation
+- videoFlipVertical
+- videoFlipHorizontal
+
+_ImageFormat_
+ImageFormat and the related child classes do not have any further functions.
+
+**Basic usage**
+Below is an example of a very simple manipulation of a video.
+
+```php
+namespace PHPVideoToolkit;
+
+$video  = new Video('BigBuckBunny_320x180.mp4');
+
+$output_format = new VideoFormat_Mp4('output');
+// attempt to auto rotate the video to the correct orientation (ie mobile phone users - hurgygur)
+$output_format->setVideoRotation(true)
+			  ->setVideoFrameRate(10)
+			  ->setVideoPixelFormat('rgb24')
+			  ->setAudioSampleFrequency(44100);
+
+$video->save('output.mp4', $output_format);
+				
+```
+
+
+###Forcing a specific output format whilst using a silly file extension
+
+Because of the advanced nature of the input and output formatters, if supplied you can encode a specific output, but use a silly (or custom) file extension. Not really sure why you would want to but it is possible.
+
+```php
+namespace PHPVideoToolkit;
+
+$video  = new Video('BigBuckBunny_320x180.mp4');
+$video->save('output.my_silly_custom_file_extension', new ImageFormat_Jpeg('output'));
+				
+```
 
 ###Extract a Single Frame of a Video
 
@@ -885,18 +983,6 @@ catch(FfmpegProcessOutputException $e)
 {
 	echo $e->getMessage(); // Imposed time limit (10 seconds) exceeded.
 }
-				
-```
-
-###Forcing a specific output format whilst using a silly file extension
-
-Because of the advanced nature of the input and output formatters, if supplied you can encode a specific output, but use a silly (or custom) file extension. Not really sure why you would want to but it is possible.
-
-```php
-namespace PHPVideoToolkit;
-
-$video  = new Video('BigBuckBunny_320x180.mp4');
-$video->save('output.my_silly_custom_file_extension', new ImageFormat_Jpeg('output'));
 				
 ```
 
