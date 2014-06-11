@@ -344,7 +344,7 @@ $output = $process->getOutput();
 
 ###Resizing Video and Images
 
-In order to resize output video and imagery output you need to supply an [output format](#phpvideotoolkit-output-formats) to the save function you call. The below snippet is an example of resizing a video, however you would use same function call to `setVideoDimensions` just instead of a `VideoFormat` object you would use and `ImageFormat` object.
+In order to resize output video and imagery output you need to supply an [output format](#phpvideotoolkit-output-formats) to the save function you call. The below snippet is an example of resizing a video, however you would use same function call to `setVideoDimensions` just instead of a `VideoFormat` object you would use an `ImageFormat` object.
 
 ```php
 
