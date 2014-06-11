@@ -650,33 +650,33 @@ This is set to true once PHPVideoToolkit has received the completion signal from
 
 **status** ***(constant/string)***
 
-This is a value that is defined according to the values above using the following constants; ```ProgressHandlerDefaultData::ENCODING_STATUS_PENDING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_DECODING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_ENCODING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_FINALISING```, ```ProgressHandlerDefaultData::ENCODING_STATUS_COMPLETED```, ```ProgressHandlerDefaultData::ENCODING_STATUS_FINISHED```, ```ProgressHandlerDefaultData::ENCODING_STATUS_INTERRUPTED```,  and ```ProgressHandlerDefaultData::ENCODING_STATUS_ERROR```. You'll notice there are more status than boolean flags. This is because the 'status' key is slightly more verbose. As a result the constant values are explained below.
+This is a value that is defined according to the values above using the following constants; `ProgressHandlerDefaultData::ENCODING_STATUS_PENDING`, `ProgressHandlerDefaultData::ENCODING_STATUS_DECODING`, `ProgressHandlerDefaultData::ENCODING_STATUS_ENCODING`, `ProgressHandlerDefaultData::ENCODING_STATUS_FINALISING`, `ProgressHandlerDefaultData::ENCODING_STATUS_COMPLETED`, `ProgressHandlerDefaultData::ENCODING_STATUS_FINISHED`, `ProgressHandlerDefaultData::ENCODING_STATUS_INTERRUPTED`,  and `ProgressHandlerDefaultData::ENCODING_STATUS_ERROR`. You'll notice there are more status than boolean flags. This is because the 'status' key is slightly more verbose. As a result the constant values are explained below.
 
-***ProgressHandlerDefaultData::ENCODING_STATUS_PENDING***
+`ProgressHandlerDefaultData::ENCODING_STATUS_PENDING`
 
 This means that the process has not yet started decoding the input media. It is followed by...
 
-***ProgressHandlerDefaultData::ENCODING_STATUS_DECODING***
+`ProgressHandlerDefaultData::ENCODING_STATUS_DECODING`
 
 This means that FFmpeg is currently decoding the input media. Which is then followed by...
 
-***ProgressHandlerDefaultData::ENCODING_STATUS_ENCODING***
+`ProgressHandlerDefaultData::ENCODING_STATUS_ENCODING`
 
 This means that FFmpeg is currently encoding the output files. This is followed by...
 
-***ProgressHandlerDefaultData::ENCODING_STATUS_FINALISING***
+`ProgressHandlerDefaultData::ENCODING_STATUS_FINALISING`
 
 This means that FFmpeg has reached the end of the encoding process and is currently tidying up and we are in the final stages of the encode. This is followed by...
 
-***ProgressHandlerDefaultData::ENCODING_STATUS_COMPLETED***
+`ProgressHandlerDefaultData::ENCODING_STATUS_COMPLETED`
 
 Which means that the encoding process has completed but PHPVideoToolkit still requires a little moment to tidy up. 
 
-***ProgressHandlerDefaultData::ENCODING_STATUS_FINISHED***
+`ProgressHandlerDefaultData::ENCODING_STATUS_FINISHED`
 
 Then this is given it means the encoding process is totally complete and you can safely move/rename/use your end output media.
 
-If anything as gone wrong in the encoding process you will get either  ***ProgressHandlerDefaultData::ENCODING_STATUS_INTERRUPTED*** or ***ProgressHandlerDefaultData::ENCODING_STATUS_ERROR*** at any point of the encoding process. Generally speaking if either of these constants are given both the ***error*** and ***error_message*** keys within the probed data will also be populated.
+If anything as gone wrong in the encoding process you will get either  `ProgressHandlerDefaultData::ENCODING_STATUS_INTERRUPTED` or `ProgressHandlerDefaultData::ENCODING_STATUS_ERROR` at any point of the encoding process. Generally speaking if either of these constants are given both the ***error*** and ***error_message*** keys within the probed data will also be populated.
 
 The other values returned via the probe data are explained below.
 
