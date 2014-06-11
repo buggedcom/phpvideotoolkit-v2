@@ -211,7 +211,7 @@
                 Binary::locate($config->gifsicle);
                 return true;
             }
-            catch(Excetion $e)
+            catch(Exception $e)
             {
                 return false;
             }
