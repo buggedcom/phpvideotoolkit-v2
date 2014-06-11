@@ -34,6 +34,10 @@
         protected $_qtfaststart;
         protected $_temp_directory;
         protected $_gif_transcoder;
+        protected $_gif_transcoder_convert_use_dither;
+        protected $_gif_transcoder_convert_dither_order;
+        protected $_gif_transcoder_convert_use_coalesce;
+        protected $_gif_transcoder_convert_use_map;
         protected $_gifsicle;
         protected $_convert;
         protected $_php_exec_infinite_timelimit;
@@ -74,6 +78,10 @@
                 'qtfaststart'    => null, //'qt-faststart', // https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart for fast streaming of mp4/h264 files.
                 'temp_directory' => sys_get_temp_dir(),
                 'gif_transcoder' => null,
+                'gif_transcoder_convert_use_dither'     => true,
+                'gif_transcoder_convert_dither_order'   => 'o8x8,8',
+                'gif_transcoder_convert_use_coalesce'   => true,
+                'gif_transcoder_convert_use_map'        => false,
                 'gifsicle'       => null,
                 'convert'        => null,
                 'php_exec_infinite_timelimit' => true,
@@ -184,9 +192,22 @@
                     
                     return;
                     
+                case 'gif_transcoder_convert_dither_order' :
+
+                    if(preg_match('/o[0-9]+x[0-9]+,[0-9]+/', $value) === 0)
+                    {
+                        throw new ConfigSetException('Unrecognised dither order. Please enter in the following format: oNxN,N where N are numerics.');
+                    }
+                    $this->{'_'.$key} = $value;
+                    
+                    return;
+                    
                 case 'force_enable_qtfaststart' :
                 case 'php_exec_infinite_timelimit' :
                 case 'force_enable_flv_meta' :
+                case 'gif_transcoder_convert_use_dither' :
+                case 'gif_transcoder_convert_use_coalesce' :
+                case 'gif_transcoder_convert_use_map' :
                     
                     if(in_array($value, array(true, false)) === false)
                     {

@@ -48,7 +48,21 @@
             {
                 $process->add($path);
             }
-            
+
+            if($this->_config->gif_transcoder_convert_use_dither === true)
+            {
+                $process->add('-ordered-dither')->add('o8x8,8');
+            }
+            if($this->_config->gif_transcoder_convert_use_coalesce === true)
+            {
+                $process->add('-coalesce');
+            }
+            $process->add('-layers')->add('OptimizeTransparency');
+            if($this->_config->gif_transcoder_convert_use_map === true)
+            {
+                $process->add('+map');
+            }
+
 //          add the output path
             $process->add($save_path);
             
