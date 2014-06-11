@@ -49,6 +49,16 @@
         protected $_frame_delay;
         
         /**
+         * A variable holder that contains the overwrite mode for saving the animated gif.
+         * @var constant One of the following:
+         *  PHPVideoToolkit::Media::OVERWRITE_FAIL
+         *  PHPVideoToolkit::Media::OVERWRITE_EXISTING
+         *  PHPVideoToolkit::Media::OVERWRITE_UNIQUE
+         * @access protected
+         */
+        protected $_overwrite_mode;
+        
+        /**
          * Constructor
          *
          * @access public
@@ -127,21 +137,41 @@
             return $this;
         }
         
+        /**
+         * Sets the overwrite mode for when performing the save of the animated gif.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @param constant $mode Determines the file overwrite status. Can be one of the following values.
+         *  PHPVideoToolkit\Media::OVERWRITE_FAIL
+         *  PHPVideoToolkit\Media::OVERWRITE_EXISTING
+         *  PHPVideoToolkit\Media::OVERWRITE_UNIQUE
+         * @return PHPVideoTookit\AnimatedGifTranscoderAbstract Returns the current object.
+         * @throws \InvalidArgumentException If the $mode is not a valid mode.
+         */
+        public function setOverwriteMode($mode)
+        {
+            if(in_array($mode, array(Media::OVERWRITE_FAIL, Media::OVERWRITE_EXISTING, Media::OVERWRITE_UNIQUE)))
+            {
+                throw new \InvalidArgumentException('The $mode argument must be one of the following values: PHPVideoToolkit\Media::OVERWRITE_FAIL, PHPVideoToolkit\Media::OVERWRITE_EXISTING, PHPVideoToolkit\Media::OVERWRITE_UNIQUE');
+            }
+            $this->_overwrite_mode = $mode;
+            
+            return $this;
+        }
+        
        /**
          * Saves the animated gif.
          *
          * @access public
          * @author: Oliver Lillie
          * @param  string $save_path The path to save the animated gif to.
-         * @param  constant $overwrite Determines the file overwrite status. Can be one of the following values.
-         *  PHPVideoToolkit::Media::OVERWRITE_FAIL
-         *  PHPVideoToolkit::Media::OVERWRITE_EXISTING
-         *  PHPVideoToolkit::Media::OVERWRITE_UNIQUE
          * @return string Returns the save path of the animated gif.
+         * @throws \InvalidArgumentException If no frames have been given to create an animated gif.
          * @throws \RuntimeException If $overwrite is set to PHPVideoToolkit::Media::OVERWRITE_FAIL and the $save_path already exists.
          * @throws \RuntimeException If $overwrite is set to PHPVideoToolkit::Media::OVERWRITE_EXISTING and the $save_path is not writable.
          */
-        public function save($save_path, $overwrite=Media::OVERWRITE_FAIL)
+        public function save($save_path)
         {
             if(empty($this->_frames) === true)
             {
@@ -150,16 +180,16 @@
             
             if(is_file($save_path) === true)
             {
-                if(empty($overwrite) === true || $overwrite === Media::OVERWRITE_FAIL)
+                if(empty($this->_overwrite_mode) === true || $this->_overwrite_mode === Media::OVERWRITE_FAIL)
                 {
                     throw new \RuntimeException('The output file already exists and overwriting is disabled.');
                 }
-                else if($overwrite === Media::OVERWRITE_EXISTING && is_writeable(dirname($save_path)) === false)
+                else if($this->_overwrite_mode === Media::OVERWRITE_EXISTING && is_writeable(dirname($save_path)) === false)
                 {
                     throw new \RuntimeException('The output file already exists, overwriting is enabled however the file is not writable.');
                 }
 
-                switch($overwrite)
+                switch($this->_overwrite_mode)
                 {
                     case Media::OVERWRITE_EXISTING :
                         @unlink($save_path);

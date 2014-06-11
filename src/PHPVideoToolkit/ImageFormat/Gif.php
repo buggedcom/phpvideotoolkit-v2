@@ -138,8 +138,9 @@
             $save_path = $path.DIRECTORY_SEPARATOR.$name;
             
 //          save the gif
-            $gif->setFrameDelay($gif_frame_delay);
-            $image = $gif->save($save_path, $overwrite);
+            $image = $gif->setFrameDelay($gif_frame_delay)
+                         ->setOverwriteMode($overwrite)
+                         ->save($save_path, $overwrite);
             
 //          remove tmp frame files
             foreach ($output as $output_image)
