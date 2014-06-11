@@ -74,9 +74,19 @@
             if($this->_config->convert)
             {
                 $process = new ProcessBuilder('convert', $this->_config);
-                $exec = $process->add($frame_path)
-                                ->add($frame_path.'.convert-convert.gif')
-                                ->getExecBuffer();
+                $process->add($frame_path)
+                        ->add($frame_path.'.convert-convert.gif');
+
+                if($this->_config->gif_transcoder_convert_use_dither === true)
+                {
+                    $process->add('-ordered-dither')->add('o8x8,8');
+                }
+                if($this->_config->gif_transcoder_convert_use_map === true)
+                {
+                    $process->add('+map');
+                }
+
+                $exec = $process->getExecBuffer();
                 $exec->setBlocking(true)
                      ->execute();
                 if($exec->hasError() === true)
