@@ -37,14 +37,14 @@
         public function save($save_path)
         {
             $save_path = parent::save($save_path);
-            
+
 //          build the gif creator process
             require_once dirname(dirname(dirname(__FILE__))).'/vendor/sybio/gif-creator/src/GifCreator/GifCreator.php';
             $gc = new \GifCreator\GifCreator();
             
 //          add in all the frames
             $durations = array();
-            $frame_duration = $frame_delay*100;
+            $frame_duration = $this->_frame_delay*100;
             foreach ($this->_frames as $path)
             {
                 array_push($durations, $frame_duration);
