@@ -34,9 +34,9 @@
          * @param float $frame_delay The delay of each frame.
          * @return Image
          */
-        public function save($save_path, $frame_delay=0.1, $overwrite=Media::OVERWRITE_FAIL)
+        public function save($save_path)
         {
-            $save_path = parent::save($save_path, $frame_delay, $overwrite);
+            $save_path = parent::save($save_path);
             
 //          build the gif creator process
             require_once dirname(dirname(dirname(__FILE__))).'/vendor/sybio/gif-creator/src/GifCreator/GifCreator.php';

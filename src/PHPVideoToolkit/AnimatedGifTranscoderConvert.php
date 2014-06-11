@@ -32,15 +32,15 @@
          * @param float $frame_delay The delay of each frame.
          * @return Image
          */
-        public function save($save_path, $frame_delay=0.1, $overwrite=Media::OVERWRITE_FAIL)
+        public function save($save_path)
         {
-            $save_path = parent::save($save_path, $frame_delay, $overwrite);
+            $save_path = parent::save($save_path);
             
 //          build the gifsicle process
             $process = new ProcessBuilder('convert', $this->_config);
             
 //          set the frame duration
-            $process->add('-delay')->add($frame_delay*100);
+            $process->add('-delay')->add($this->_frame_delay*100);
             $process->add('-loop')->add($this->_loop_count === AnimatedGif::UNLIMITED_LOOPS ? '0' : $this->_loop_count+1);
 
 //          add in all the frames
