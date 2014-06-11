@@ -14,12 +14,10 @@
     namespace PHPVideoToolkit;
      
     /**
-     * This class provides generic data parsing for the output from FFmpeg.
+     * This class provides an animated gif transcoder engine that uses imagemagick convert server programme to create the
+     * animated gif.
      *
-     * @access public
      * @author Oliver Lillie
-     * @author Jorrit Schippers
-     * @package default
      */
     class AnimatedGifTranscoderConvert extends AnimatedGifTranscoderAbstract
     {
@@ -28,9 +26,9 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $save_path
-         * @param float $frame_delay The delay of each frame.
-         * @return Image
+         * @param  string $save_path The path to save the animated gif to.
+         * @return PHPVideoToolkit\Image Returns a new instance of PHPVideoToolkit\Image with the new animated gif as the src.
+         * @throws PHPVideoToolkit\AnimatedGifException If the convert process encounters an error.
          */
         public function save($save_path)
         {
@@ -74,13 +72,22 @@
 //          check for any gifsicle errors
             if($exec->hasError() === true)
             {
-                throw new FfmpegProcessPostProcessException('AnimatedGif save using `convert` "'.$save_path.'" failed. Any additional convert message follows: 
+                throw new AnimatedGifException('AnimatedGif save using `convert` "'.$save_path.'" failed. Any additional convert message follows: 
 '.$exec->getBuffer());
             }
             
             return new Image($save_path, $this->_config);
         }
         
+        /**
+         * Determines if the convert transcoder engine is available on the current system.
+         *
+         * @access public
+         * @static
+         * @author: Oliver Lillie
+         * @param  PHPVideoToolkit\Config $config The configuration object.
+         * @return boolean Returns true if this engine can be used, otherwise false.
+         */
         public static function available(Config $config)
         {
             if($config->convert === null)
@@ -93,7 +100,7 @@
                 Binary::locate($config->convert);
                 return true;
             }
-            catch(Excetion $e)
+            catch(BinaryException $e)
             {
                 return false;
             }
