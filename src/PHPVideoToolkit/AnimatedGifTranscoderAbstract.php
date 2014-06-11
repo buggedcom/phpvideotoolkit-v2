@@ -70,6 +70,7 @@
             $this->_config = $config === null ? Config::getInstance() : $config;
             $this->_frames = array();
             $this->_loop_count = AnimatedGif::UNLIMITED_LOOPS;
+            $this->_frame_delay = 0.1;
         }
         
         /**
