@@ -14,12 +14,19 @@
     namespace PHPVideoToolkit;
 
     /**
-     * @access public
+     * PHPVideoToolkit's caching driver for storing the cache inside the specified temp directory.
+     *
      * @author Oliver Lillie
-     * @package default
      */
     class Cache_InTempDirectory extends CacheAbstract
     {
+        /**
+         * Determines if this caching driver is available on the current system.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @return boolean Returns true if the driver is available, false otherwise.
+         */
         public function isAvailable()
         {
             $dir = $this->_config->temp_directory;
@@ -40,12 +47,28 @@
             return true;
         }
 
+        /**
+         * Creates the file path prefix for a cache file based off the given key.
+         *
+         * @access protected
+         * @author Oliver Lillie
+         * @param  string $key The cache key string.
+         * @return string Returns the generated file path prefix.
+         */
         protected function _getFilePathPrefix($key)
         {
             $dir = $this->_config->temp_directory;
             return $dir.'/'.$this->_key_prefix.'_cache/'.md5($key).'_';
         }
 
+        /**
+         * Returns the file path for the given key. Returning the most recent version and clearing old cache keys.
+         *
+         * @access protected
+         * @author Oliver Lillie
+         * @param  string $key The cache key string.
+         * @return string Returns the found file path for the given cache key.
+         */
         protected function _getFile($key)
         {
             $file_prefix = $this->_getFilePathPrefix($key);
@@ -76,6 +99,15 @@
             return null;
         }
 
+        /**
+         * Returns the unserialized contents for the given cache key if the file exists. 
+         * Otherwise returns null.
+         *
+         * @access protected
+         * @author Oliver Lillie
+         * @param  string $key The cache key string.
+         * @return mixed Returns null if the key does not exist, otherwise returns a mixed value depending on what has been stored.
+         */
         protected function _get($key)
         {
             $file = $this->_getFile($key);
@@ -87,11 +119,28 @@
             return null;
         }
         
+        /**
+         * Determines if the cache for the given key exists.
+         *
+         * @access protected
+         * @author Oliver Lillie
+         * @param  string $key The cache key string.
+         * @return boolean Returns true if the key cache exists, otherwise false.
+         */
         protected function _isMiss($key)
         {
-            return $this->_getFile($key) === null;
+            return !is_file($this->_getFile($key));
         }
         
+        /**
+         * Sets data to the given cache key with an optional expiration date.
+         *
+         * @access protected
+         * @author Oliver Lillie
+         * @param  string $key [description]
+         * @param  mixed $value The data to be stored by the cache driver.
+         * @param  mixed $expiration Integer timestamp if the data is too expire, otherwise null as the cache defaults to expire in 1 hour.
+         */
         protected function _set($key, $value, $expiration=null)
         {
             if($expiration === null)
