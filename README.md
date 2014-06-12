@@ -157,8 +157,11 @@ Generally speaking if you are just transcoding from one format to another, you d
 
 _Audio_
 
+- `AudioFormat_Acc`
 - `AudioFormat_Flac`
 - `AudioFormat_Mp3`
+- `AudioFormat_Oga`
+- `AudioFormat_Wav`
 
 _Image_
 
@@ -178,6 +181,7 @@ _Video_
 - `VideoFormat_Ogg`
 - `VideoFormat_Webm`
 - `VideoFormat_Wmv`
+- `VideoFormat_Wmv3`
 
 For the most part all these format specific Format classes do is set the neccessary codecs and settings required to generate the desired output, however, formats like `VideoFormat_Mp4`, `VideoFormat_H264` or `VideoFormat_Flv` contain further functionality and make use of encoding completion callbacks to further process the media after FFmpeg has finished encoding them. For example the flv format runs the resulting output from FFmpeg through the yamdi server library to inject meta data, or the mp4 format uses qtfaststart to create a fast start streaming mp4.
 

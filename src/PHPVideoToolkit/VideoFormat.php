@@ -110,6 +110,12 @@
         public function updateFormatOptions(&$save_path, $overwrite)
         {
             parent::updateFormatOptions($save_path, $overwrite);
+
+//          adjust the sample frequency if the audio codec is acc and frequency is not already set.
+            if(in_array($this->_format['audio_codec'], array('libfdk_aac', 'aac')) === true && $this->_format['audio_sample_frequency'] === null)
+            {
+                $this->setAudioSampleFrequency(22050);
+            }
             
             $video_data = $this->_media_object->readVideoComponent();
 

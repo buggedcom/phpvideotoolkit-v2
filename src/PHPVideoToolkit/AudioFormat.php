@@ -165,6 +165,7 @@
          * corrected depending on their availability on the current system. These codecs are:
          * - mp3 and libmp3lame
          * - vorbis and libvorbis
+         * - acc and libfdk_aac
          *
          * @access public
          * @author Oliver Lillie
@@ -196,6 +197,11 @@
             else if($audio_codec === 'vorbis' || $audio_codec === 'libvorbis')
             {
                 $audio_codec = in_array('libvorbis', $codecs) === true ? 'libvorbis' : 'vorbis';
+            }
+//          fix acc
+            else if($audio_codec === 'aac' || $audio_codec === 'libfdk_aac')
+            {
+                $audio_codec = in_array('libfdk_aac', $codecs) === true ? 'libfdk_aac' : 'aac';
             }
             
             if(in_array($audio_codec, $codecs) === false)
