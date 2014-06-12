@@ -84,7 +84,7 @@
          *
          * @access public
          * @static
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  PHPVideoToolkit\Config $config The configuration object.
          * @return boolean Returns true if this engine can be used, otherwise false.
          */

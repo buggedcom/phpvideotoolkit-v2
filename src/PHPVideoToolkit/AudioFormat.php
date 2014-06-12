@@ -42,7 +42,7 @@
          * Constructor
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  constant $input_output_type Determines the input/output type of the Format. Either PHPVideoToolkit\Format::INPUT 
          *  or PHPVideoToolkit\Format::OUTPUT
          * @param  PHPVideoToolkit\Config $config The config object.

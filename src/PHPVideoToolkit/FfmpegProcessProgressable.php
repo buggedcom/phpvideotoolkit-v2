@@ -282,7 +282,7 @@
          * Checks to see if the ffmpeg output is a %d format and if so performs the rename of the output.
          *
          * @access protected
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @return mixed If %d output is expected then an array of path names is returned, otherwise a string path is returned.
          */
         protected function _renameMultiOutput()
@@ -315,7 +315,7 @@
          * Returns a Media object based class for the given file path.
          *
          * @access protected
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $output_path The file path to convert.
          * @return object Either "Media", "Video", "Audio" or "Image" PHPVideoToolkit objects.
          */
@@ -331,7 +331,7 @@
          * Renames any output from ffmpeg that would have been outputted in a sequence, ie using %d. Typically used with imagery.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $output_path The string notation for the output path.
          * @return array Returns an array of modified file paths.
          */

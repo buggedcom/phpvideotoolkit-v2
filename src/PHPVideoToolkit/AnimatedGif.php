@@ -50,7 +50,7 @@
          * Constructor
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  mixed $gif_path If a gif is given then the string path, otherwise if a gif is to be generated, null.
          * @param  PHPVideoToolkit\Config $config The PHPVideoToolkit\Config object
          * @throws \RuntimeException If the gif path is set but doesn't exist.
@@ -132,7 +132,7 @@
          * Returns the current gif file path, if set.   
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @return string The path of the current gif if set.
          */
         public function getFilePath()
@@ -167,7 +167,7 @@
          *
          * @access public
          * @static
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  array $image_object_array An array of PHPVideoToolkit\Image objects to use to create the animated gif.
          * @param  mixed $frame_delay An integer or float value to determine the delay between gif frames.  
          * @param  integer $loop_count The number of times the animated gif should loop. Specify -1 for an endless loop.

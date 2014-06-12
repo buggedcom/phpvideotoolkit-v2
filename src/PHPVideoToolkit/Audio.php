@@ -25,7 +25,7 @@
          * Constructor
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $audio_file_path The path to the audio file.
          * @param  PHPVideoToolkit\Config $config The config object.
          * @param  PHPVideoToolkit\AudioFormant $audio_input_format The input format object to use, if any. Otherwise null
@@ -47,7 +47,7 @@
          * Determines the default format class name if none is set when calling Formats::getFormatFor.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @return string
          */
         public function getDefaultFormatClassName()
@@ -59,7 +59,7 @@
          * Adds some commands to the FFmpeg command string if the media file is being split into parts.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  PHPVideoToolkit\Format $output_format The output format being used to save the output media.
          * @param  string $save_path The save path of the output media.
          * @param  constant $overwrite The Media constant used to determine the overwrite status of the save. One of the 

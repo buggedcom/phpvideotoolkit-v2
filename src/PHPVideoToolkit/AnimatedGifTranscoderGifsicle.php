@@ -31,7 +31,7 @@
          * Constructor
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  PHPVideoToolkit\Config $config The PHPVideoToolit\Config object.
          */
         public function __construct(Config $config=null)
@@ -45,7 +45,7 @@
          * Destructor. Automatically removes temporary gif files.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          */
         public function __destruct()
         {
@@ -64,7 +64,7 @@
          * Adds a frame to the gif. This overrides the parent abstract class addFrame function.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  PHPVideoToolkit\Image $image The image source that you wish to add as a frame to the gif.
          * @return PHPVideoToolkit\AnimatedGifTranscoderGifsicle Returns the current object.
          */
@@ -84,7 +84,7 @@
          * Convert is preferred as it is quicker.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $frame_path The file paht of the image to convert.
          * @return string Returns the new file path if the image was converted, otherwise returns the old file path.
          * @throws PHPVideoToolkit\AnimatedGifException If imagemagick convert is user but encounters an error.
@@ -249,7 +249,7 @@
          *
          * @access public
          * @static
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  PHPVideoToolkit\Config $config The configuration object.
          * @return boolean Returns true if this engine can be used, otherwise false.
          */

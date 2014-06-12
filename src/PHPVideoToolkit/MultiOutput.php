@@ -30,7 +30,7 @@
          * Constructor for MultiOutput object.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $output_path If provided then it is given as the initial output path.
          * @param  Format $output_format If provided then it is given as the initial output paths's output format object.
          * @param  Config $config The PHPVideoToolkit configuration options.
@@ -52,7 +52,7 @@
          * Returns output paths and formats for the desired ffmpeg output.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @return array Returns and array of path=>output format pairs.
          */
         public function getOutput()
@@ -69,7 +69,7 @@
          * Adds an output path and output format to the Output object.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @Muaram  string $output_path The output path of the desired generated output.
          * @param  Format $output_format The output Format object of the output format. If null is supplied then a best
          *  guess format object is generated and used.
@@ -92,7 +92,7 @@
          * Removes output from the output path.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $output_path The output to remove.
          * @return void
          */
@@ -105,7 +105,7 @@
          * Returns the best guess output format object based on the given path.
          *
          * @access protected
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $path The output path of the resulting output.
          * @return object Returns an instance of a Format object or child class.
          */

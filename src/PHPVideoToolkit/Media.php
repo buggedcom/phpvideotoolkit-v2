@@ -673,7 +673,7 @@
          * Converts a string path and output format into a MultiOutput object.
          *
          * @access protected
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $save_path The string based path of a MultiObject.
          * @param  Format $output_format An output format object.
          * @return MultiObject

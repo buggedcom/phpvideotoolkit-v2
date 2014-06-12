@@ -62,7 +62,7 @@
          * Constructor
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  PHPVideoToolkit\Config $config The PHPVideoToolkit\Config object
          */
         public function __construct(Config $config=null)
@@ -165,7 +165,7 @@
          * Saves the animated gif.
          *
          * @access public
-         * @author: Oliver Lillie
+         * @author Oliver Lillie
          * @param  string $save_path The path to save the animated gif to.
          * @return string Returns the save path of the animated gif.
          * @throws \InvalidArgumentException If no frames have been given to create an animated gif.
