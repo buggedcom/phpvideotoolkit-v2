@@ -14,7 +14,7 @@
      namespace PHPVideoToolkit;
 
     /**
-     * Automatically sets the required codecs and formats for the wav audio format.
+     * Automatically sets the required codecs and formats for the oga audio format.
      *
      * @author Oliver Lillie
      */
@@ -39,6 +39,6 @@
                      ->setFormat('oga');
             }
             
-            $this->_restricted_audio_codecs = array('vorbis');
+            $this->_restricted_audio_codecs = array('vorbis', 'libvorbis');
         }
     }

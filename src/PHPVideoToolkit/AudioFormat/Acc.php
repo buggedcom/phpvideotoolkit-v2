@@ -14,7 +14,7 @@
      namespace PHPVideoToolkit;
 
     /**
-     * Automatically sets the required codecs and formats for the wav audio format.
+     * Automatically sets the required codecs and formats for the acc audio format.
      *
      * @author Oliver Lillie
      */
@@ -35,10 +35,10 @@
             
             if($input_output_type === 'output')
             {
-                $this->setAudioCodec('libfdk_aac')
+                $this->setAudioCodec('acc')
                      ->setFormat('acc');
             }
             
-            $this->_restricted_audio_codecs = array('libfdk_aac');
+            $this->_restricted_audio_codecs = array('libfdk_aac', 'acc');
         }
     }
