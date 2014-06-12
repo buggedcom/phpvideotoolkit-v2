@@ -14,19 +14,46 @@
     namespace PHPVideoToolkit;
     
     /**
-     * @access public
+     * If tbe ffmpeg process can be used in conjunction with a process handler, then this class is used to extend
+     * the FfmpegProcess object.
+     * 
      * @author Oliver Lillie
-     * @package default
      */
     class FfmpegProcessProgressable extends FfmpegProcess 
     {
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         private $_output_renamed;
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         private $_final_output;
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         private $_progress_callbacks;
         
-        public function __construct($binary_path, Config $config=null)
+        /**
+         * Constructor
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param string $program The programme to call. Note this is not the path. If you wish to call ffmpeg/aconv you should jsut
+         *  supply 'ffmpeg' and then set the aconv path as the ffmpeg configuration option in Config.   
+         * @param PHPVideoToolkit\Config $config The config object.
+         */
+        public function __construct($programme, Config $config=null)
         {
-            parent::__construct($binary_path, $config);
+            parent::__construct($programme, $config);
             
             $this->_progress_callbacks = array();
             $this->_output_renamed = null;
@@ -34,12 +61,15 @@
         }
         
         /**
-         * Sets a command on ffmpeg that sets a timelimit
+         * Sets a command on ffmpeg that sets a timelimit for the process. If this timelimit is exceeded then ffmpeg bails.
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $timelimit_in_seconds 
-         * @return self
+         * @param integer $timelimit_in_seconds The timelimit to impose in seconds.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @throws PHPVideoToolkit\FfmpegProcessCommandUnavailableException If the timelimit command is not available on the configured ffmpeg.
+         * @throws \InvalidArgumentException If the timelimit is not an integer.
+         * @throws \InvalidArgumentException If the timelimit is less than or equal to 0.
          */
         public function setProcessTimelimit($timelimit_in_seconds)
         {
@@ -47,12 +77,16 @@
             $commands = $parser->getCommands();
             if(isset($commands['timelimit']) === false)
             {
-                throw new Exception('The -timelimit command is not supported by your version of FFmpeg.');
+                throw new FfmpegProcessCommandUnavailableException('The -timelimit command is not supported by your version of FFmpeg.');
             }
             
-            if($timelimit_in_seconds <= 0)
+            if(is_int($timelimit_in_seconds) === false)
             {
-                throw new Exception('The timelimit must be greater than 0 seconds.');
+                throw new \InvalidArgumentException('The timelimit in seconds argument must be an integer.');
+            }
+            else if($timelimit_in_seconds <= 0)
+            {
+                throw new \InvalidArgumentException('The timelimit must be greater than 0 seconds.');
             }
             
             $this->addCommand('-timelimit', $timelimit_in_seconds);
@@ -63,12 +97,14 @@
         /**
          * Attaches a progress handler to the ffmpeg progress. 
          * The progress handler is executed during the ffmpeg process.
-         * Attaching a handler causes PHP to block.
+         * Attaching a handler can cause a blocking process depending on the progress handler object or function used.
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $callback 
-         * @return self
+         * @param mixed $callback Can be a callable callback, or an object that extends PHPVideoToolkit\ProgressHandlerAbstract
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @throws \InvalidArgumentException If the callback is an object and is not a subclass of PHPVideoToolkit\ProgressHandlerAbstract
+         * @throws \InvalidArgumentException If the callback is not callable if not an object.
          */
         public function attachProgressHandler($callback)
         {
@@ -76,14 +112,14 @@
             {
                 if(is_subclass_of($callback, 'PHPVideoToolkit\ProgressHandlerAbstract') === false)
                 {
-                    throw new Exception('If supplying an object to attach as a progress handler, that object must inherit from ProgressHandlerAbstract.');
+                    throw new \InvalidArgumentException('If supplying an object to attach as a progress handler, that object must inherit from ProgressHandlerAbstract.');
                 }
 
                 $callback->attachFfmpegProcess($this, $this->_config);
             }
             else if(is_callable($callback) === false)
             {
-                throw new Exception('The progress handler must either be a class that extends from ProgressHandlerAbstract or a callable function.');
+                throw new \InvalidArgumentException('The progress handler must either be a class that extends from ProgressHandlerAbstract or a callable function.');
             }
             
             array_push($this->_progress_callbacks, $callback);
@@ -122,7 +158,8 @@
          * @access public
          * @author Oliver Lillie
          * @param mixed $callback If given it must be a valid function that is callable.
-         * @return self
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @throws \InvalidArgumentException If the callback is not callable.
          */
         public function execute($callback=null)
         {
@@ -130,7 +167,7 @@
             {
                 if(is_callable($callback) === false)
                 {
-                    throw new Exception('Callback is not callable.');
+                    throw new \InvalidArgumentException('Callback is not callable.');
                 }
 
                 $this->attachProgressHandler($callback);
@@ -148,6 +185,14 @@
             return $this;
         }
 
+        /**
+         * Returns the output of the process if the process has completed.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param  mixed $post_process_callback
+         * @return array Returns an array of output if more than 1 output file is expected, otherwise returns a string.
+         */
         public function getOutput($post_process_callback=null)
         {
 //          get the output of the process
@@ -164,7 +209,17 @@
          *
          * @access public
          * @author Oliver Lillie
+         * @param  mixed $post_process_callback
          * @return mixed
+         * @throws \InvalidArgumentException If a callback is supplied but is not callable.
+         * @throws PHPVideoToolkit\FfmpegProcessOutputException If the function is called but the process has not completed
+         *  yet.
+         * @throws PHPVideoToolkit\FfmpegProcessOutputException If the process was aborted.
+         * @throws PHPVideoToolkit\FfmpegProcessOutputException If the process completed with a termination signal.
+         * @throws PHPVideoToolkit\FfmpegProcessOutputException If the process completed with an error.
+         * @throws PHPVideoToolkit\FfmpegProcessOutputException If returned output is empty.
+         * @throws PHPVideoToolkit\FfmpegProcessOutputException If returned output files does not exist.
+         * @throws PHPVideoToolkit\FfmpegProcessOutputException If returned output files does exist but is a 0 byte file.
          */
         public function completeProcess($post_process_callback=null)
         {
@@ -177,7 +232,7 @@
             {
                 if(is_callable($post_process_callback) === false)
                 {
-                    throw new Exception('The supplied post process callback is not callable.');
+                    throw new \InvalidArgumentException('The supplied post process callback is not callable.');
                 }
             }
 
@@ -395,8 +450,8 @@
          *
          * @access protected
          * @author Oliver Lillie
-         * @param string $path 
-         * @return string
+         * @param string $path The file pathe of the file to find the media class for.
+         * @return string Returns the class name of the PHPVideoToolkit class related to the given $path argument.
          */
         protected function _findMediaClass($path)
         {

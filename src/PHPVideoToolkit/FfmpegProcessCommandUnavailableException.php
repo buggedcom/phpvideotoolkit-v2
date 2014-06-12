@@ -13,6 +13,6 @@
      
     namespace PHPVideoToolkit;
      
-    class FfmpegProcessOutputException extends FfmpegProcessException
+    class FfmpegProcessCommandUnavailableException extends Exception
     {
     }

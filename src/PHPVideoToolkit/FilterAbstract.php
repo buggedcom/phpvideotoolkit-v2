@@ -13,11 +13,6 @@
      
     namespace PHPVideoToolkit;
 
-    /**
-     * @access public
-     * @author Oliver Lillie
-     * @package default
-     */
     class FilterAbstract
     {
     }

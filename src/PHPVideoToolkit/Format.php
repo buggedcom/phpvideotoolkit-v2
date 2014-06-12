@@ -14,25 +14,90 @@
     namespace PHPVideoToolkit;
 
     /**
-     * @access public
+     * This is the base format class that is extended to audio, image and video formats.
+     * It provides functions that are shared by all media types.
+     * 
      * @author Oliver Lillie
-     * @package default
      */
     class Format extends FfmpegParser
     {
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         protected $_format;
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         protected $_type;
-        
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         protected $_media_object;
-        
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         protected $_format_to_command;
-        
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         protected $_additional_commands;
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         protected $_removed_commands;
 
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         const INPUT = 'input';
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
         const OUTPUT = 'output';
-        
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access private
+         */
+        const STRICTNESS_VERY = 'very';
+        const STRICTNESS_STRICT = 'strict';
+        const STRICTNESS_NORMAL = 'normal';
+        const STRICTNESS_UNOFFICIAL = 'unofficial';
+        const STRICTNESS_EXPERIMENTAL = 'experimental';
+
+        /**
+         * Constructor
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param  constant $input_output_type Either Format::INPUT or Format::OUTPUT. Defaults to OUTPUT. It determines the format
+         *  mode used to set various commands in the final ffmpeg exec call.
+         * @param  PHPVideoToolkit\Config $config The config object.
+         * @throws \InvalidArgumentException If the $input_output_type is not valid.
+         */
         public function __construct($input_output_type=Format::OUTPUT, Config $config=null)
         {
             parent::__construct($config);
@@ -71,7 +136,7 @@
             }
             else
             {
-                throw new Exception('Unrecognised input/output type "'.$input_output_type.'" set in \\PHPVideoToolkit\\Format::__construct');
+                throw new \InvalidArgumentException('Unrecognised input/output type "'.$input_output_type.'" set in \\PHPVideoToolkit\\Format::__construct');
             }
             
         }
@@ -81,19 +146,24 @@
          * If a default format is not found then the fallback_format_class is used.
          *
          * @access public
+         * @static
          * @author Oliver Lillie
-         * @package default
-         * @param $path
-         * @param $config Config
-         * @param $fallback_format_class
-         * @param $type
-         * @return Format
+         * @param string $path The file path to get the format for.
+         * @param  PHPVideoToolkit\Config $config The config object.
+         * @param string $fallback_format_class The fallback class to use of the format for the given path cannot be automatically determined.
+         *  If null is given then a RuntimeException is thrown.
+         * @param  constant $input_output_type Either Format::INPUT or Format::OUTPUT. Defaults to OUTPUT. It determines the format
+         *  mode used to set various commands in the final ffmpeg exec call.
+         * @return PHPVideToolkit\Format Returns an object extended from the PHPVideToolkit\Format class.
+         * @throws \InvalidArgumentException If the $input_output_type is not valid.
+         * @throws \InvalidArgumentException If the specified fallback class is attempted to be used but is not found.
+         * @throws \LogicException If the generated class does not extend from PHPVideToolkit\Format.
          */
-        public static function getFormatFor($path, $config, $fallback_format_class='Format', $type='output')
+        public static function getFormatFor($path, $config, $fallback_format_class='Format', $type=Format::OUTPUT)
         {
-            if(in_array($type, array('input', 'output')) === false)
+            if(in_array($type, array(Format::OUTPUT, Format::INPUT)) === false)
             {
-                throw new Exception('Unrecognised format type "'.$type.'".');
+                throw new \InvalidArgumentException('Unrecognised format type "'.$type.'".');
             }
             
             $format = null;
@@ -107,28 +177,42 @@
             $class_name = '\\PHPVideoToolkit\\'.$fallback_format_class.(empty($format) === false ? '_'.ucfirst(strtolower($format)) : '');
             if(class_exists($class_name) === false)
             {
+                if($fallback_format_class === null)
+                {
+                    throw new \RuntimeException('It was not possible to generate the format class for `'.$path.'` and a fallback class was not given.');
+                }
                 $requested_class_name = $class_name;
                 $class_name = '\\PHPVideoToolkit\\'.$fallback_format_class;
                 if(class_exists($class_name) === false)
                 {
-                    throw new Exception('Requested default format class does not exist, "'.($requested_class_name === $class_name ? $class_name : $requested_class_name.'" and "'.$class_name.'"').'".');
+                    throw new \InvalidArgumentException('Requested default format class does not exist, "'.($requested_class_name === $class_name ? $class_name : $requested_class_name.'" and "'.$class_name.'"').'".');
                 }
             }
-            
+
 //          check that it extends from the base Format class.
             if($class_name !== '\\PHPVideoToolkit\\Format' && is_subclass_of($class_name, '\\PHPVideoToolkit\\Format') === false)
             {
-                throw new Exception('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
+                throw new \LogicException('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
             }
             
             return new $class_name($type, $config);
         }
         
+        /**
+         * Sets a filter onto the format.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param  string $format_key The filter type, ie audio, video etc.
+         * @param  FilterAbstract $filter The filter object to apply to the output format.
+         * @return integer Returns the position of the filter in the filters array.
+         * @throws \InvalidArgumentException If the specified format key does not exist.
+         */
         protected function _setFilter($format_key, FilterAbstract $filter)
         {
             if(isset($this->_format[$format_key]) === false)
             {
-                throw new Exception('Unknown format key uncountered when setting a filter.');
+                throw new \InvalidArgumentException('Unknown format key uncountered when setting a filter.');
             }
             
             if($this->_format[$format_key] === null)
@@ -140,11 +224,11 @@
         }
         
         /**
-         * undocumented function
+         * Returns the format options array. The format options are the key name => value pairs.
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return array
          */
         public function getFormatOptions()
         {
@@ -152,12 +236,12 @@
         }
         
         /**
-         * undocumented function
+         * Sets the PHPVideoToolkit\Media object into the format so that format object can modify the Media object.     
          *
          * @access public
          * @author Oliver Lillie
-         * @param Media $media 
-         * @return void
+         * @param PHPVideoToolkit\Media $media 
+         * @return PHPVideoToolkit\Format Returns the current object.
          */
         public function setMedia(Media $media)
         {
@@ -166,34 +250,39 @@
         }
         
         /**
-         * undocumented function
+         * Blocks a particular setting from being set if it is attempted to be set on an input format.
+         * This is usefull from preventing the input formats from adding junk commands to the ffmpeg call that would result in 
+         * an error.
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $setting_name 
+         * @param string $setting_name The setting name being set.
          * @return void
+         * @throws \LogicException If the format type is INPUT.
          */
         protected function _blockSetOnInputFormat($setting_name)
         {
-            if($this->_type === 'input')
+            if($this->_type === Format::INPUT)
             {
                 $backtrace = debug_backtrace();
-                throw new Exception('The '.$setting_name.' cannot be set on an input \\'.get_class($backtrace[1]['object']).'::'.$backtrace[1]['function'].'.');
+                throw new \LogicException('The '.$setting_name.' cannot be set on an input \\'.get_class($backtrace[1]['object']).'::'.$backtrace[1]['function'].'.');
             }
         }
         
         /**
-         * undocumented function
+         * Base function extended by the child format classes. Checks to see if the media option has been set yet
+         * and if not an exception is thrown.
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return PHPVideoToolkit\Format Returns the current object.
+         * @throws \LogicException If the media object has not yet been set into the current format object.
          */
         public function updateFormatOptions(&$save_path, $overwrite)
         {
             if(empty($this->_media_object) === true)
             {
-                throw new Exception('Unable to update format options as a Media object has not been set through '.get_class($this).'::setMedia');
+                throw new \LogicException('Unable to update format options as a Media object has not been set through '.get_class($this).'::setMedia');
             }
             
             return $this;
@@ -224,11 +313,12 @@
         }
         
         /**
-         * Builds a returnable command string for the give options and additional commands.
+         * Builds a returnable command array hash for the give options and additional commands.
+         * The array is in ffmpeg command => argument key value pairs.
          *
          * @access public
          * @author Oliver Lillie
-         * @return string
+         * @return array
          */
         public function getCommandsHash()
         {
@@ -286,7 +376,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return array
+         * @return array Returns an array of additional commands that have been compiled into strings.
          */
         protected function _getAdditionalCommands()
         {
@@ -309,6 +399,7 @@
          * @access protected
          * @author Oliver Lillie
          * @return array
+         * @throws \UnexpectedValueException if an unexpected command options is encountered.
          */
         protected function _mapFormatToCommands()
         {
@@ -325,7 +416,7 @@
                 
                 if(isset($this->_format_to_command[$option]) === false)
                 {
-                    throw new Exception('Unable to map format option to command option as the command option does not exist in the map.');
+                    throw new \UnexpectedValueException('Unable to map format option to command option as the command option does not exist in the map.');
                 }
                 
 //              get the full command option string
@@ -397,29 +488,26 @@
             $this->_additional_commands[$option] = $arg;
         }
         
-        public function removeCommand()
-        {
-            
-        }
-        
         /**
          * Sets the format type, either input or output
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $type 
-         * @return void
+         * @param  constant $type Either Format::INPUT or Format::OUTPUT. Defaults to OUTPUT. It determines the format
+         *  mode used to set various commands in the final ffmpeg exec call.
+         * @return PHPVideoToolkit\Format Returns the current object.
+         * @throws \InvalidArgumentException If the type is not a valid type.
          */
         public function setType($type)
         {
 //          validate input
-            if(in_array($type, array('input', 'output')) === true)
+            if(in_array($type, array(Format::INPUT, Format::OUTPUT)) === true)
             {
                 $this->_type = $type;
                 return $this;
             }
             
-            throw new Exception('Unrecognised format "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setFormat');
+            throw new \InvalidArgumentException('Unrecognised format "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setFormat');
         }
         
         /**
@@ -431,7 +519,9 @@
          * @author Oliver Lillie
          * @link http://ffmpeg.org/ffmpeg.html#toc-Preset-files
          * @param string $preset_file_path 
-         * @return void
+         * @return PHPVideoToolkit\Format Returns the current object.
+         * @throws \InvalidArgumentException of the file does not exist.
+         * @throws \InvalidArgumentException of the file is not readable.
          */
         public function setPresetOptionsFile($preset_file_path)
         {
@@ -445,25 +535,27 @@
             
             if($preset_file_path === false || is_file($preset_file_path) === false)
             {
-                throw new Exception('Preset options file "'.$preset_file_path.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setPresetOptionsFile does not exist.');
+                throw new \InvalidArgumentException('Preset options file "'.$preset_file_path.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setPresetOptionsFile does not exist.');
             }
             else if(is_readable($preset_file_path) === false)
             {
-                throw new Exception('Preset preset options file "'.$preset_file_path.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setPresetOptionsFile is not readable.');
+                throw new \InvalidArgumentException('Preset preset options file "'.$preset_file_path.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setPresetOptionsFile is not readable.');
             }
             
             $this->_format['preset_options_file'] = $preset_file_path;
             return $this;
         }
-        
+
         /**
          * Sets the output strictness (-strictness) determining what level of stable funcitonality is used.
          * By default "experimental" is used/
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $strictness 
-         * @return void
+         * @param constant $strictness One of the following values. Format::STRICTNESS_VERY, Format::STRICTNESS_STRICT, 
+         *  Format::STRICTNESS_NORMAL, Format::STRICTNESS_UNOFFICIAL, Format::STRICTNESS_EXPERIMENTAL
+         * @return PHPVideoToolkit\Format Returns the current object.
+         * @throws \InvalidArgumentException If an unrecognised strictness value is returned.
          */
         public function setStrictness($strictness)
         {
@@ -473,22 +565,25 @@
                 return $this;
             }
             
-            if(in_array($strictness, array('very', 'strict', 'normal', 'unofficial', 'experimental')) === true)
+            if(in_array($strictness, array(Format::STRICTNESS_VERY, Format::STRICTNESS_STRICT, Format::STRICTNESS_NORMAL, Format::STRICTNESS_UNOFFICIAL, Format::STRICTNESS_EXPERIMENTAL)) === true)
             {
                 $this->_format['strictness'] = $strictness;
                 return $this;
             }
             
-            throw new Exception('Unrecognised strictness "'.$strictness.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setStrictness');
+            throw new \InvalidArgumentException('Unrecognised strictness "'.$strictness.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setStrictness');
         }
         
         /**
-         * Sets the output format of the ffmpeg process.
+         * Sets the output format of the ffmpeg process, ie the -f <format> ffmpeg command
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $format 
-         * @return void
+         * @param string $format One of the values returned from FfmpegParser::getFormats.
+         * @return PHPVideoToolkit\Format Returns the current object.
+         * @throws \InvalidArgumentException If the format requested is "segment". This is a special ffmpeg format to split a file, however PHPVideoToolkit
+         *  has a special function to segment files. 
+         * @throws \InvalidArgumentException If an unregognised format is given.
          */
         public function setFormat($format)
         {
@@ -507,23 +602,25 @@
 //              check to see if segmenting has been requested. If it has warn of the Media::split function instead.
                 if($format === 'segment')
                 {
-                    throw new Exception('You cannot set the format to segment, please use instead the function \\PHPVideoToolkit\\Media::segment.');
+                    throw new \InvalidArgumentException('You cannot set the format to segment, please use instead the function \\PHPVideoToolkit\\Media::segment.');
                 }
                     
                 $this->_format['format'] = $format;
                 return $this;
             }
             
-            throw new Exception('Unrecognised format "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setFormat');
+            throw new \InvalidArgumentException('Unrecognised format "'.$format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setFormat');
         }
         
         /**
-         * undocumented function
+         * Sets the -threads <setting>
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $threads 
-         * @return void
+         * @param integer $threads Between 1-64
+         * @return PHPVideoToolkit\Format Returns the current object.
+         * @throws \InvalidArgumentException If the threads value is not an integer.
+         * @throws \InvalidArgumentException If the threads value is not between 1-64.
          */
         public function setThreads($threads)
         {
@@ -535,23 +632,29 @@
                 return $this;
             }
             
-            if($threads < 1 || $threads > 64)
+            if(is_int($threads) === false)
             {
-                throw new InvalidArgumentException('Invalid `threads` value; the value must fit in range 1 - 64.');
+                throw new \InvalidArgumentException('The threads value must be an integer.');
+            }
+            else if($threads < 1 || $threads > 64)
+            {
+                throw new \InvalidArgumentException('Invalid `threads` value; the value must fit in range 1 - 64.');
             }
 
-            $this->_format['threads'] = (int) $threads;
+            $this->_format['threads'] = $threads;
             return $this;
         }
         
         /**
-         * undocumented function
+         * Sets the -qscale <setting>
          *
          * @access public
          * @author Oliver Lillie
          * @see http://www.kilobitspersecond.com/2007/05/24/ffmpeg-quality-comparison/
-         * @param string $qscale 
-         * @return void
+         * @param integer $qscale Between 1-31
+         * @return PHPVideoToolkit\Format Returns the current object.
+         * @throws \InvalidArgumentException If the qscale value is not an integer.
+         * @throws \InvalidArgumentException If the qscale value is not between 1-64.
          */
         public function setQualityVsStreamabilityBalanceRatio($qscale)
         {
@@ -563,12 +666,16 @@
                 return $this;
             }
             
-            if($qscale < 1 || $qscale > 31)
+            if(is_int($qscale) === false)
             {
-                throw new InvalidArgumentException('Invalid quality stream ability balance ratio (qscale) value; the value must fit in range 1 - 31.');
+                throw new \InvalidArgumentException('The qscale value must be an integer.');
+            }
+            else if($qscale < 1 || $qscale > 31)
+            {
+                throw new \InvalidArgumentException('Invalid quality stream ability balance ratio (qscale) value; the value must fit in range 1 - 31.');
             }
             
-            $this->_format['quality'] = (int) $qscale;
+            $this->_format['quality'] = $qscale;
             return $this;
         }
         
