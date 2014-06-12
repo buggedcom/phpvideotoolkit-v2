@@ -14,23 +14,74 @@
     namespace PHPVideoToolkit;
      
     /**
-     * undocumented class
+     * This class is the base class for creating a specific ffmpeg command call.
      *
-     * @access public
      * @author Oliver Lillie
-     * @package default
      */
     class FfmpegProcess extends ProcessBuilder
     {
+        /**
+         * Variable placeholder for containing the ExecBuffer object.
+         * @access protected
+         * @var PHPVideoToolkit\ExecBuffer
+         */
         protected $_exec;
+
+        /**
+         * An array of commands to give to ffmpeg befor the -i input command.
+         * @access protected
+         * @var array
+         */
         protected $_pre_input_commands;
+
+        /**
+         * An array of input media. 
+         * @access protected
+         * @var array
+         */
         protected $_input;
+
+        /**
+         * Variable placeholder for the current output index.
+         * @access protected
+         * @var integer
+         */
         protected $_output_index;
+
+        /**
+         * An array of commands to give to ffmpeg after the input -i commands are given.
+         * @access protected
+         * @var array
+         */
         protected $_post_input_commands;
+
+        /**
+         * An array of output paths.
+         * @access protected
+         * @var array
+         */
         protected $_output;
+
+        /**
+         * An array of commands to give to ffmpeg after the output is given.
+         * @access protected
+         * @var array
+         */
         protected $_post_output_commands;
+
+        /**
+         * Variable placeholder for the progress handler, if any, that is attached to the process.
+         * @access protected
+         * @var PHPVideoToolkit\ProgressHandlerAbstract
+         */
         protected $_progress_handler;
-        protected $_detect_error;
+
+        /**
+         * Variable placeholder for a boolean value that determins if the commands supplied to this object have already
+         * been combined together into a command string.
+         * @access protected
+         * @var boolean
+         */
         protected $_combined;
         
         /**
@@ -38,9 +89,9 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $binary_path The path of ffmpeg or ffprobe or whatever program you will be
-         *  executing the command on.
-         * @param string $temp_directory The path of the temp directory.
+         * @param string $program The programme to call. Note this is not the path. If you wish to call ffmpeg/aconv you should jsut
+         *  supply 'ffmpeg' and then set the aconv path as the ffmpeg configuration option in Config.   
+         * @param PHPVideoToolkit\Config $config The config object.
          */
         public function __construct($program, Config $config=null)
         {
@@ -63,11 +114,17 @@
          * @access public
          * @author Oliver Lillie
          * @param integer $index The index integer to set the output index to.
-         * @return self
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @throws \InvalidArgumentException If the $index is not an integer.
          */
         public function setOutputIndex($index)
         {
-            $this->_output_index = (int) $index;
+            if(is_int($index) === false)
+            {
+                throw new \InvalidArgumentException('The output index must be an integer.');
+            }
+
+            $this->_output_index = $index;
             return $this;
         }
         
@@ -76,15 +133,29 @@
          * onto the begining of the input array.
          *
          * @access public
-         * @param string $input
-         * @param integer $index
-         * @return self
+         * @author Oliver Lillie
+         * @param string $input The string file path to the input media.
+         * @param integer $index The index to which the input is being added. If null then the input is just appended to the
+         *  list of input media. If a positive index then it is set at the given index, it will overwrite anything already in that
+         *  position. If -1 then the input is shifted onto the beinging of the input array.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @throws \InvalidArgumentException If the input path does not exist.
+         * @throws \InvalidArgumentException If the $index is not an integer.
          */
         public function setInputPath($input, $index=null)
         {
+            if(file_exists($input) === false || is_file($input) === false)
+            {
+                throw new \InvalidArgumentException('The input supplied `'.$input.'` is not a file or it does not exist.');
+            }
+
             if($index === null)
             {
                 array_push($this->_input, $input);
+            }
+            else if(is_int($index) === false)
+            {
+                throw new \InvalidArgumentException('The input index must be an integer.');
             }
             else if($index === -1)
             {
@@ -94,6 +165,7 @@
             {
                 $this->_input[$index] = $input;
             }
+
             return $this;
         }
 
@@ -101,24 +173,33 @@
          * Gets the input path at the given index.
          *
          * @access public
+         * @author Oliver Lillie
          * @param integer $index The index of which to return the input for.
-         * @return string
+         * @return string Returns the input from the requested index if exists.
+         * @throws \InvalidArgumentException If the input index is not an integer.
+         * @throws \LogicException If the input at the requested index does not exist.
          */
         public function getInputPath($index=0)
         {
+            if(is_int($index) === false)
+            {
+                throw new \InvalidArgumentException('The input index must be an integer.');
+            }
+
             if(isset($this->_input[$index]) === true)
             {
                 return $this->_input[$index];
             }
             
-            throw new InvalidArgumentException('No input existed for given index `'.$index.'`');
+            throw new \LogicException('No input existed for given index `'.$index.'`');
         }
         
         /**
          * Gets ALL the input given to the process.
          *
          * @access public
-         * @return array
+         * @author Oliver Lillie
+         * @return array Returns an array of all the current input paths.
          */
         public function getAllInput()
         {
@@ -129,7 +210,8 @@
          * Gets ALL the output given to the process.
          *
          * @access public
-         * @return array
+         * @author Oliver Lillie
+         * @return array Returns an array of all the current output paths.
          */
         public function getAllOutput()
         {
@@ -137,34 +219,66 @@
         }
         
         /**
-         * Sets the output.
+         * Sets the output at the current output index.
          *
          * @access public
-         * @param string $output
-         * @return self
+         * @author Oliver Lillie
+         * @param string $output The path to where the output media is to be saved to from ffmpeg.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
          */
         public function setOutputPath($output)
         {
             $this->_output[$this->_output_index] = $output;
+
             return $this;
         }
 
+        /**
+         * Returns the current number of output files that the FfmpegProcess object contains.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @return integer
+         */
         public function getOutputCount()
         {
             return count($this->_output);
         }
 
         /**
-         * Gets the output.
+         * Gets the output path at the index requested, or no index is request gets the output from the current index.
          *
          * @access public
+         * @author: Oliver Lillie
          * @param integer $index The index of the output to return. If left null defaults to the currently incremented
          *  index.
-         * @return string
+         * @return mixed If the index has not been set and the output does not exist then null is returned, if the output
+         *  does not exist but index has been set then a LogicException is thrown. If the output does exist then the string 
+         *  path is returned.
+         * @throws \InvalidArgumentException If the output index requested is not null and not an integer.
+         * @throws \LogicException If the output does not exist and index has been set.
          */
         public function getOutputPath($index=null)
         {
-            $index = $index === null ? $this->_output_index : $index;
+            $throw_exception_if_not_exist = false;
+            if($index !== null && is_int($index) === false)
+            {
+                throw new \InvalidArgumentException('The output path index must be an integer.');
+            }
+            else if($index === null)
+            {
+                $index = $this->_output_index;
+            }
+            else
+            {
+                $throw_exception_if_not_exist = true;
+            }
+
+            if($throw_exception_if_not_exist === true && isset($this->_output[$index]) === false)
+            {
+                throw new \LogicException('The requested output index has not been set.');
+            }
+
             return isset($this->_output[$index]) === true ? $this->_output[$index] : null;
         }
 
@@ -173,13 +287,17 @@
          * added to the command line call before the input file is added.
          *
          * @access public
-         * @param string $command
-         * @param mixed $argument
-         * @return self
+         * @author: Oliver Lillie
+         * @param string $command The command to add.
+         * @param mixed $argument Any optional arguments to add. If none, false should be given.
+         * @param boolean $allow_command_repetition If this command can only be added once then set this to true to prevent
+         *  it from being added again.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
          */
         public function addPreInputCommand($command, $argument=false, $allow_command_repetition=false)
         {
             $this->_add($this->_pre_input_commands, $command, $argument, $allow_command_repetition);
+
             return $this;
         }
 
@@ -188,9 +306,12 @@
          * added to the command line call after the input file is added.
          *
          * @access public
-         * @param string $command
-         * @param mixed $argument
-         * @return self
+         * @author: Oliver Lillie
+         * @param string $command The command to add.
+         * @param mixed $argument Any optional arguments to add. If none, false should be given.
+         * @param boolean $allow_command_repetition If this command can only be added once then set this to true to prevent
+         *  it from being added again.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
          */
         public function addCommand($command, $argument=false, $allow_command_repetition=false)
         {
@@ -199,17 +320,21 @@
                 $this->_post_input_commands[$this->_output_index] = array();
             }
             $this->_add($this->_post_input_commands[$this->_output_index], $command, $argument, $allow_command_repetition);
+
             return $this;
         }
 
         /**
          * Adds a command to be bundled into command line call to be 
-         * added to the command line call after the ouput file is added.
+         * added to the command line call after the ouput file(s) is added.
          *
          * @access public
-         * @param string $command
-         * @param mixed $argument
-         * @return self
+         * @author: Oliver Lillie
+         * @param string $command The command to add.
+         * @param mixed $argument Any optional arguments to add. If none, false should be given.
+         * @param boolean $allow_command_repetition If this command can only be added once then set this to true to prevent
+         *  it from being added again.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
          */
         public function addPostOutputCommand($command, $argument=false, $allow_command_repetition=false)
         {
@@ -218,11 +343,12 @@
         }
 
         /**
-         * Determines if the the command exits.
+         * Determines if the the command exits in the pre-input commands.
          *
          * @access public
+         * @author: Oliver Lillie
          * @param string $command
-         * @return mixed boolean if failure or value if exists.
+         * @return mixed boolean If not found then false is returned. If found then the argument for that command (if any) is returned. Otherwise false is returned.
          */
         public function hasPreInputCommand($command)
         {
@@ -233,8 +359,9 @@
          * Returns a pre input command.
          *
          * @access public
+         * @author: Oliver Lillie
          * @param string $command
-         * @return mixed boolean if failure or value if exists.
+         * @return mixed If the command does not exist then false is returned, otherwise the command argument (if any is returned).
          */
         public function getPreInputCommand($command)
         {
@@ -250,10 +377,11 @@
          * Determines if the the command exits.
          *
          * @access public
+         * @author: Oliver Lillie
          * @param string $command
          * @param integer $index The index of the output to return. If left null defaults to the currently incremented
          *  index.
-         * @return mixed boolean if failure or value if exists.
+         * @return mixed If the command does not exist then false is returned, otherwise the command argument (if any is returned).
          */
         public function hasCommand($command, $index=null)
         {
@@ -266,13 +394,14 @@
         }
         
         /**
-         * Returns a pre input command.
+         * Returns an output command.
          *
          * @access public
+         * @author: Oliver Lillie
          * @param string $command
          * @param integer $index The index of the output to return. If left null defaults to the currently incremented
          *  index.
-         * @return mixed boolean if failure or value if exists.
+         * @return mixed If the command does not exist then false is returned, otherwise the command argument (if any is returned).
          */
         public function getCommand($command, $index=null)
         {
@@ -286,11 +415,12 @@
         }
         
         /**
-         * Determines if the the command exits.
+         * Determines if the post output command exits.
          *
          * @access public
+         * @author: Oliver Lillie
          * @param string $command
-         * @return mixed boolean if failure or value if exists.
+         * @return mixed If the command does not exist then false is returned, otherwise the command argument (if any is returned).
          */
         public function hasPostOutputCommand($command)
         {
@@ -301,8 +431,9 @@
          * Returns a post output command.
          *
          * @access public
+         * @author: Oliver Lillie
          * @param string $command
-         * @return mixed boolean if failure or value if exists.
+         * @return mixed If the command does not exist then false is returned, otherwise the command argument (if any is returned).
          */
         public function getPostOutputCommand($command)
         {
@@ -315,9 +446,10 @@
         }
         
         /**
-         * Combines the commands stored into a string
+         * Combines the commands stored into a string internaly.
          *
          * @access protected
+         * @author: Oliver Lillie
          * @return void
          */
         protected function _combineCommands()
@@ -437,8 +569,8 @@
          *
          * @access protected
          * @author Oliver Lillie
-         * @param string $function 
-         * @param array $arguments 
+         * @param string $function The name of the function to call on the ExecBuffer object.
+         * @param array $arguments An array of arguments to supply to the called function.
          * @return mixed
          */
         protected function _callExecBufferFunction($function, $arguments=array())
@@ -462,7 +594,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return array
+         * @return array Returns an array of strings if any messages are present.
          */
         public function getMessages()
         {
@@ -524,6 +656,8 @@
          * @access public
          * @author Oliver Lillie
          * @see ExecBuffer::getBuffer
+         * @param boolean $raw If true then the raw command is returned from the buffer, otherwise
+         *  the original command is returned.
          * @return mixed
          */
         public function getBuffer($raw=false)
@@ -606,7 +740,7 @@
          * @access public
          * @author Oliver Lillie
          * @see ExecBuffer::isCompleted
-         * @return boolean
+         * @return boolean Returns true if the process is completed, otherwise false.
          */
         public function isCompleted()
         {
