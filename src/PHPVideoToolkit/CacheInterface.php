@@ -13,11 +13,6 @@
      
     namespace PHPVideoToolkit;
 
-    /**
-     * @access public
-     * @author Oliver Lillie
-     * @package default
-     */
     interface CacheInterface
     {
         public function __construct(Config $config=null);

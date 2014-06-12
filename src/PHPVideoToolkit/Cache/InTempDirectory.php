@@ -137,9 +137,10 @@
          *
          * @access protected
          * @author Oliver Lillie
-         * @param  string $key [description]
+         * @param  string $key The cache key string.
          * @param  mixed $value The data to be stored by the cache driver.
          * @param  mixed $expiration Integer timestamp if the data is too expire, otherwise null as the cache defaults to expire in 1 hour.
+         * @return boolean Returns true if the cache was saved to file.
          */
         protected function _set($key, $value, $expiration=null)
         {

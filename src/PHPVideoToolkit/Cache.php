@@ -14,12 +14,21 @@
     namespace PHPVideoToolkit;
 
     /**
-     * @access public
+     * Small wrapper for creating a cacher driver based on the given config settings.
+     *
      * @author Oliver Lillie
-     * @package default
      */
     class Cache
     {
+        /**
+         * Creates a singleton instance of a caching driver from the given PHPVideoToolkit\Config settings.
+         *
+         * @access public
+         * @static
+         * @author: Oliver Lillie
+         * @param  PHPVideoToolkit\Config $config The config object.
+         * @return PHPVideoToolkit\CacheAbstract Returns the cacher object.
+         */
         public static function getCacher(Config $config)
         {
             static $cachers = array();

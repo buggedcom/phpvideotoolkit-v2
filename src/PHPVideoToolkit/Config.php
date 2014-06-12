@@ -14,20 +14,25 @@
     namespace PHPVideoToolkit;
      
     /**
-     * @access public
+     * A configuration object to store all the configuration values required for PHPVideoToolkit.
+     * Typically speaking this object is created once and set as a singleton instance for ease of use.
+     *
      * @author Oliver Lillie
-     * @author Jorrit Schippers
-     * @package default
      */
     class Config
     {
         /**
-         * PlaceHolder for self (Singlton)
-         *
-         * @var App_Config
+         * A variable container for the singleton instance.
+         * @var PHPVideoToolkit\Config
+         * @access protected
          */
-        public static $instance = null;
+        protected static $_instance = null;
         
+        /**
+         * Variable containers for the various configuration settings that Config contains.
+         * @var mixed
+         * @access protected
+         */
         protected $_ffmpeg;
         protected $_ffprobe;
         protected $_yamdi;
@@ -46,22 +51,25 @@
         protected $_cache_driver;
 
         /**
-         * Get the Instance of self
+         * Returns the singletone instance of itself.
          *
-         * @return App_Config
+         * @access public
+         * @static
+         * @author Oliver Lillie
+         * @return PHPVideoToolkit\Config
          */
         public static function getInstance()
         {
-            if(self::$instance === null)
+            if(self::$_instance === null)
             {
-                self::$instance = new self;
+                self::$_instance = new self;
             }
 
-            return self::$instance;
+            return self::$_instance;
         }
 
         /**
-         * Constructs and merges the given config data with the defaul settings.
+         * Constructs and merges the given config data with the default settings.
          *
          * @access public
          * @author Oliver Lillie
@@ -72,22 +80,22 @@
         public function __construct(array $options=array(), $set_as_default=false)
         {
             $default_options = array(
-                'ffmpeg'         => 'ffmpeg',
-                'ffprobe'        => 'ffprobe',
-                'yamdi'          => null, //'yamdi', // http://yamdi.sourceforge.net/ for flv meta injection
-                'qtfaststart'    => null, //'qt-faststart', // https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart for fast streaming of mp4/h264 files.
-                'temp_directory' => sys_get_temp_dir(),
-                'gif_transcoder' => null,
+                'ffmpeg'                                => 'ffmpeg',
+                'ffprobe'                               => 'ffprobe',
+                'yamdi'                                 => null, //'yamdi', // http://yamdi.sourceforge.net/ for flv meta injection
+                'qtfaststart'                           => null, //'qt-faststart', // https://ffmpeg.org/trac/ffmpeg/wiki/UbuntuCompilationGuide#qt-faststart for fast streaming of mp4/h264 files.
+                'temp_directory'                        => sys_get_temp_dir(),
+                'gif_transcoder'                        => null,
                 'gif_transcoder_convert_use_dither'     => true,
                 'gif_transcoder_convert_dither_order'   => 'o8x8,8',
                 'gif_transcoder_convert_use_coalesce'   => true,
                 'gif_transcoder_convert_use_map'        => false,
-                'gifsicle'       => null,
-                'convert'        => null,
-                'php_exec_infinite_timelimit' => true,
-                'force_enable_qtfaststart'    => false,
-                'force_enable_flv_meta'       => true,
-                'cache_driver'   => 'Null',
+                'gifsicle'                              => null,
+                'convert'                               => null,
+                'php_exec_infinite_timelimit'           => true,
+                'force_enable_qtfaststart'              => false,
+                'force_enable_flv_meta'                 => true,
+                'cache_driver'                          => 'Null',
             );
             $this->_setConfig(array_merge($default_options, $options));
 
@@ -103,18 +111,19 @@
          *
          * @access public
          * @author Oliver Lillie
+         * @return void
          */
         public function setAsDefaultInstance()
         {
-            self::$instance = $this;
+            self::$_instance = $this;
         }
 
         /**
-         * Set config options array
+         * Set config options array.
          *
          * @param array $options
          * @access private
-         * @return Config
+         * @return PHPVideoToolkit\Config Returns the current object
          */
         private function _setConfig(array $options=array())
         {
@@ -133,7 +142,7 @@
          * the App_Config instance or subInstance, so we throw an Exception
          *
          * @param string $name
-         * @throws Exception
+         * @throws PHPVideoToolkit\ConfigSetException Thrown if any of the values for the related config settings is invalid.
          */
         public function __set($key, $value)
         {
@@ -250,7 +259,7 @@
          * the App_Config instance or subInstance, so we throw an Exception
          *
          * @param string $key
-         * @return mixed
+         * @return mixed Returns null if the key does not exist, otherwise returns the stored value for the given key.
          */
         public function __get($key)
         {

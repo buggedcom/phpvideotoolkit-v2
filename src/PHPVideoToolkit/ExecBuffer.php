@@ -14,46 +14,187 @@
     namespace PHPVideoToolkit;
      
     /**
-     * undocumented class
+     * The very lowest base class in PHPVideoToolkit. It is the exec() wrapper than can determine if a call to exec fails or completes successfully.
+     * It also returns any error messages encountered if the exec() fails.
      *
-     * @access public
      * @author Oliver Lillie
-     * @package default
      */
-    class ExecBuffer //extends Loggable
+    class ExecBuffer
     {
+        /**
+         * Variable placeholder for determinining if we are tracking failures from the exec() call.
+         * @var bool
+         * @access protected
+         */
         protected $_failure_tracking;
+
+        /**
+         * Variable placeholder for determining if the exec() call is to block php execution or be run in the background.
+         * @var bool
+         * @access protected
+         */
         protected $_blocking;
+
+        /**
+         * Variable placeholder for the output file for the output from the exec() call.
+         * @var string
+         * @access protected
+         */
         protected $_output;
+
+        /**
+         * Variable placeholder for the temp directory used for generating temp files. 
+         * @var string
+         * @access protected
+         */
         protected $_temp_directory;
         
+        /**
+         * Variable placeholder for the final executed command to exec().
+         * @var string
+         * @access protected
+         */
         protected $_executed_command;
+
+        /**
+         * Variable placeholder for the requested executed command to exec() without ExecBuffers wrapping.
+         * @var string
+         * @access protected
+         */
         protected $_command;
+
+        /**
+         * Variable placeholder for the exec() buffer output which is found in the output file.
+         * @var string
+         * @access protected
+         */
         protected $_buffer;
+
+        /**
+         * Variable placeholder for any error code encountered by ExecBuffer
+         * @var string
+         * @access protected
+         */
         protected $_error_code;
             
+        /**
+         * Variable placeholder for determining if the current process is running. Only used when the blocking mode 
+         * of the exec() call is set to run in the background.
+         * @var boolean
+         * @access protected
+         */
         protected $_running;
+
+        /**
+         * Variable placeholder for containing the start timestamp of the exec() call.
+         * @var integer
+         * @access protected
+         */
         protected $_start_time;
+
+        /**
+         * Variable placeholder for containing the end timestamp of the exec() call.
+         * @var integer
+         * @access protected
+         */
         protected $_end_time;
+
+        /**
+         * Variable placeholder for wait period used before once again checking the buffer output for completion or failure
+         * tokens.
+         * @var integer
+         * @access protected
+         */
         protected $_callback_period_interval;
-        
+
+        /**
+         * Variable placeholder for the default placeholder boundary token used within the failure, completion and error code
+         * boundary markers.
+         * @var string
+         * @access protected
+         */
         protected $_boundary;
+
+        /**
+         * Variable placeholder for the token used to detect failures in the exec() call.
+         * @var string
+         * @access protected
+         */
         protected $_failure_boundary;
+
+        /**
+         * Variable placeholder for the token used to detect a completed exec call.
+         * @var string
+         * @access protected
+         */
         protected $_completion_boundary;
+
+        /**
+         * Variable placeholder for the token to detect a error code in the exec call.
+         * @var string
+         * @access protected
+         */
         protected $_error_code_boundary;
-        
+
+        /**
+         * Variable placeholder for determining if the exec call should be put into set_time_limit(0).
+         * @var boolean
+         * @access protected
+         */
         protected $_php_exec_infinite_timelimit;
-        
+
+        /**
+         * Variable placeholder for an array of temporary files that need to be garbage collected at the end of the process.
+         * @var array
+         * @access protected
+         */
         protected $_tmp_files;
+
+        /**
+         * Variable placeholder for determining if the temp files should be garbage collected on destruction of the ExecBuffer
+         * object.
+         * @var boolean
+         * @access protected
+         */
         protected $_gc_temp_files;
 
+        /**
+         * Variable placeholder for an array of completion callbacks that are fired when the process has completed.
+         * @var array
+         * @access protected
+         */
         protected $_completion_callbacks;
         
+        /**
+         * The path to /dev/null
+         * @var string
+         */
         const DEV_NULL = '/dev/null';
+
+        /**
+         * The constant value for determining if the temp directory should be used to write the output buffer to.
+         * @var integer
+         */
         const TEMP = -1;
 
+        /**
+         * Static variable placeholder for determining if the current system is a windows system.
+         * @var boolean
+         * @access protected
+         * @static
+         */
         protected static $_is_windows = null;
         
+        /**
+         * The ExecBuffer constructor.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @param  string $exec_command_string The command to call through to exec()
+         * @param  string $temp_directory The temp directory to use if any, otherwise null.
+         * @param  boolean $php_exec_infinite_timelimit Determines if php should be put into set_time_limit(0) mode
+         *  to endlessly run for the command, rather than timeout.
+         */
         public function __construct($exec_command_string, $temp_directory=null, $php_exec_infinite_timelimit=true)
         {
             if(self::$_is_windows === null)
@@ -63,6 +204,9 @@
 
             $this->setTempDirectory($temp_directory);
             
+            $this->_tmp_files = array();
+            $this->setGarbageCollection(true);
+
             $this->_failure_tracking = true;
             $this->_blocking = true;
             $this->_output = self::TEMP;
@@ -76,9 +220,6 @@
             
             $this->_php_exec_infinite_timelimit = $php_exec_infinite_timelimit;
             
-            $this->_tmp_files = array();
-            $this->setGarbageCollection(true);
-
             $this->_completion_callbacks = array();
             
             $id = uniqid(rand(99999, 999999).'-').'-'.md5(__FILE__);
@@ -90,6 +231,17 @@
             $this->_command = $exec_command_string;
         }
         
+        /**
+         * Sets the temp directory.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @param  string $temp_directory The file path to the temp directory to use.
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
+         * @throws \InvalidArgumentException If the temp directory path is not a directory.
+         * @throws \InvalidArgumentException If the temp directory path is not readable.
+         * @throws \InvalidArgumentException If the temp directory path is not writable.
+         */
         public function setTempDirectory($temp_directory=null)
         {
             if($temp_directory === null)
@@ -98,32 +250,44 @@
             }
             if(is_dir($temp_directory) === false)
             {
-                throw new Exception('The temp directory does not exist or is not a directory.');
+                throw new \InvalidArgumentException('The temp directory does not exist or is not a directory.');
             }
             else if(is_readable($temp_directory) === false)
             {
-                throw new Exception('The temp directory is not readable.');
+                throw new \InvalidArgumentException('The temp directory is not readable.');
             }
             else if(is_writable($temp_directory) === false)
             {
-                throw new Exception('The temp directory is not writeable.');
+                throw new \InvalidArgumentException('The temp directory is not writeable.');
             }
             $this->_temp_directory = $temp_directory;
             
             return $this;
         }
 
+        /**
+         * Sets the garabage collection status so that any temp files are or are not garabage collected on the 
+         * destruct of ExecBuffer.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @param  boolean $gc True determines that the temp files are garbage collected. False means they are not.
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
+         * @throws \InvalidArgumentException If the $gc value is not a boolean.
+         */
         public function setGarbageCollection($gc)
         {
             if(is_bool($gc) === false)
             {
-                throw new Exception('The $gc garabage collection value must be a boolean value.');
+                throw new \InvalidArgumentException('The $gc garabage collection value must be a boolean value.');
             }
             $this->_gc_temp_files = $gc;
+
+            return $this;
         }
         
         /**
-         * Destruct function automatically tidies up tmp files.
+         * Destruct function automatically tidies up tmp files if garabge collection is enabled.
          *
          * @access public
          * @author Oliver Lillie
@@ -144,11 +308,14 @@
         }
         
         /**
-         * Start the exec, essentially call exec().
+         * Start the exec, essentially this is the call to php exec() whilst wrapping up the command string.
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @param mixed $callback A function if provided is called when the exec() call is completed. Otherwise null.
+         *  It should be noted that if a callback is supplied the resulting call to exec() is made blocking.
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
+         * @throws \InvalidArgumentException If a callback is supplied but not callable.
          */
         public function execute($callback=null)
         {
@@ -157,7 +324,7 @@
             {
                 if(is_callable($callback) === false)
                 {
-                    throw new Exception('The supplied callback is not callable.');
+                    throw new \InvalidArgumentException('The supplied callback is not callable.');
                 }
                 $this->setBlocking(true);
             }
@@ -220,6 +387,13 @@
             return $this;
         }
 
+        /**
+         * Calls the registered completion callbacks on completion of the exec() call.
+         *
+         * @access protected
+         * @author Oliver Lillie
+         * @return void
+         */
         protected function _callCompletionCallbacks()
         {
             if(empty($this->_completion_callbacks) === false)
@@ -231,14 +405,24 @@
             }
         }
 
+        /**
+         * Registers an exec() call completion callback that will be called when the exec() call completes.
+         * It should be noted that if the PHP script exits before the exec call is completed, then these callbacks are never fired.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @param  mixed $callback A callable callback function.
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
+         * @throws \InvalidArgumentException If a callback is supplied but not callable.
+         */
         public function registerCompletionCallback($callback)
         {
             if(is_callable($callback) === true)
             {
                 array_push($this->_completion_callbacks, $callback);
-                return true;
+                return $this;
             }
-            return false;
+            throw new \InvalidArgumentException('The completion callback was not callable.');
         }
         
         /**
@@ -246,13 +430,14 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return float Returns the total time taken by the current process.
+         * @throws \LogicException If the start time is not yet defined.
          */
         public function getRunTime()
         {
             if(empty($this->_start_time) === true)
             {
-                throw new Exception('Unable to read runtime as command has not yet been executed.');
+                throw new \LogicException('Unable to read runtime as command has not yet been executed.');
             }
             if(empty($this->_end_time) === false)
             {
@@ -267,15 +452,23 @@
         }
         
         /**
-         * Runs the read/wait loop.
+         * If the process is made non-blocking, this runs the read/wait loop to determine the current status of the
+         * ongoing process.
+         * When the process is detected as being completed the completion callbacks are executed from this function.
          *
-         * @access public
+         * @access protected
          * @author Oliver Lillie
-         * @param mixed $callback 
+         * @param mixed $callback The callback should be a callable function.
          * @return void
+         * @throws \InvalidArgumentException If the callback is supplied but not callable.
          */
         protected function _run($callback)
         {
+            if($callback !== null && is_callable($callback) === false)
+            {
+                throw new \InvalidArgumentException('The ExecBuffer run callback was not callable.');
+            }
+
             while($this->_running !== false)
             {
 //              get the buffer regardless of wether or not there is a callback as it updates and 
@@ -308,11 +501,12 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
          */
         public function wait($seconds=1)
         {
             usleep($seconds*100000);
+            return $this;
         }
         
         /**
@@ -320,15 +514,16 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
          */
         public function stop()
         {
             $this->_running = false;
+            return $this;
         }
         
         /**
-         * Returns the buffer.
+         * Returns the current buffer from the output of the exec() call.
          *
          * @access public
          * @author Oliver Lillie
@@ -350,7 +545,7 @@
         }
         
         /**
-         * Returns the buffer.
+         * Returns the expected buffer without the completion, error and failure boundaries.
          *
          * @access public
          * @author Oliver Lillie
@@ -362,7 +557,7 @@
         }
         
         /**
-         * Returns the buffer.
+         * Returns the last line of the buffer.
          *
          * @access public
          * @author Oliver Lillie
@@ -376,7 +571,7 @@
         }
         
         /**
-         * Returns the buffer.
+         * Returns the last split line of the buffer.
          *
          * @access public
          * @author Oliver Lillie
@@ -390,11 +585,11 @@
         }
         
         /**
-         * Deletes the output buffer file.
+         * Deletes the output buffer file. If garabage collection is disabled, then the file is not deleted
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return boolean If the file is deleted then true, otherwise false.
          */
         public function deleteOutputFile()
         {
@@ -404,8 +599,13 @@
                 {
                     @unlink($this->_output);
                 }
+                else
+                {
+                    return false;
+                }
                 $this->_output = null;
             }
+            return true;
         }
         
         /**
@@ -413,14 +613,14 @@
          *
          * @access protected
          * @author Oliver Lillie
-         * @param boolean $update_buffer 
+         * @param boolean $update_buffer If true the buffer is re-read from the output file.
          * @return boolean
          */
         protected function _detectFailureBoundaryInOutput($update_buffer=false)
         {
             if($this->_failure_tracking !== true)
             {
-                throw new Exception('Failure tracking is not enabled. Unable to determine if command failed.');
+                return false;
             }
             
 //          do we need to update the buffer?
@@ -432,21 +632,50 @@
             return strpos($this->_buffer, $this->_failure_boundary) !== false;
         }
         
+        /**
+         * Returns any error code found in the output buffer.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @return mixed Returns null if no code is found, otherwise returns a string representation of the code.
+         */
         public function getErrorCode()
         {
             return $this->_getErrorCodeInOutput();
         }
         
+        /**
+         * Returns if a failure boundary token is returned in the buffer output.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @return boolean Returns true if an error has been found, otherwise false.
+         */
         public function hasError()
         {
             return $this->_detectFailureBoundaryInOutput(true);
         }
         
+        /**
+         * Returns a boolean to determine if the process has completed.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @return boolean Returns true if the process has been completed, otherwise false.
+         */
         public function isCompleted()
         {
             return $this->_detectCompletionBoundaryInOutput(true);
         }
         
+        /**
+         * Detects any completion and or failure/error codes in the output. If the process is completed
+         * it then stops the process and deletes the output file.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @return void
+         */
         protected function _detectCompletionAndEnd()
         {
 //          detect if the output has completed, and if it does
@@ -462,6 +691,14 @@
             }
         }
         
+        /**
+         * Tries to find an error code in the buffer output and optionaly re-reads the buffer output.
+         *
+         * @access public
+         * @author Oliver Lillie
+         * @param  boolean $update_buffer If true the buffer is re-read from the output file.
+         * @return mixed If no error is found then null is return, otherwise a string representation of the error code is.
+         */
         protected function _getErrorCodeInOutput($update_buffer=false)
         {
 //          do we need to update the buffer?
@@ -476,15 +713,14 @@
             }
             return null;
         }
-                
         
         /**
          * Detects the completion boundary in the output.
          *
          * @access protected
          * @author Oliver Lillie
-         * @param boolean $update_buffer 
-         * @return boolean
+         * @param  boolean $update_buffer If true the buffer is re-read from the output file.
+         * @return boolean Returns true if the completion token is detected in the buffer output.
          */
         protected function _detectCompletionBoundaryInOutput($update_buffer=false)
         {
@@ -546,7 +782,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $string 
+         * @param string $string The boundary token to escape.
          * @return string
          */
         protected function _escapeBoundaryInEcho($boundary)
@@ -555,24 +791,25 @@
         }
         
         /**
-         * Returns the executred command.
+         * Returns the executed command.
          *
          * @access public
          * @author Oliver Lillie
-         * @return string
+         * @return string The command string executed by the ExecBuffer exec() call.
+         * @throws \LogicException if the exec() call has not yet been made.
          */
         public function getExecutedCommand()
         {
             if(empty($this->_executed_command) === true)
             {
-                throw new Exception('The command has not yet been executed.');
+                throw new \LogicException('The command has not yet been executed.');
             }
             
             return $this->_executed_command;
         }
         
         /**
-         * Returns the original command.
+         * Returns the original command that was passed through ExecBuffer.
          *
          * @access public
          * @author Oliver Lillie
@@ -584,12 +821,12 @@
         }
         
         /**
-         * Sets the pid tracking status of the query.
+         * Sets wether or not we are to track failures of this exec() call.
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $enable_pid_tracking 
-         * @return void
+         * @param boolean $enable_failure_tracking True means that failure tracking is enabled, false turns it off.
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
          */
         public function setFailureTracking($enable_failure_tracking)
         {
@@ -607,7 +844,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return mixed
+         * @return boolean Or null.
          */
         public function getFailureTracking()
         {
@@ -615,18 +852,19 @@
         }
         
         /**
-         * Sets the callback period wait interval.
+         * Sets the callback period wait interval used in the _run() read/wait loop process when the exec call is non blocking.
          *
          * @access public
          * @author Oliver Lillie
          * @param integer $callback_period_interval
-         * @return void
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
+         * @throws \InvalidArgumentException If the callback period interval is not an integer.
          */
         public function setCallbackWaitInterval($callback_period_interval)
         {
-            if(is_int($pid) === false)
+            if(is_int($callback_period_interval) === false)
             {
-                throw new Exception('$callback_period_interval must be an integer.');
+                throw new \InvalidArgumentException('$callback_period_interval must be an integer.');
             }
             
             $this->_callback_period_interval = $callback_period_interval;
@@ -638,7 +876,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return mixed
+         * @return integer
          */
         public function getCallbackWaitInterval()
         {
@@ -650,8 +888,9 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param boolean $enable_blocking 
-         * @return void
+         * @param boolean $enable_blocking If true the exec() call is made blocking, false means it is non-blocking.
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
+         * @throws \InvalidArgumentException If the blocking value is not a boolean.
          */
         public function setBlocking($enable_blocking)
         {
@@ -693,9 +932,13 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param mixed $enable_pid_tracking Can be one of the following constants. ExecBuffer::DEV_NULL, ExecBuffer::TEMP, 
+         * @param mixed $buffer_output Can be one of the following constants. ExecBuffer::DEV_NULL, ExecBuffer::TEMP, 
          *  a string will be interpretted as a file or null will output everything to sdout.
-         * @return void
+         * @return PHPVideoToolkit\ExecBuffer Returns the current object.
+         * @throws \InvalidArgumentException If the buffer output value is not null, ExecBuffer::DEV_NULL or ExecBuffer::TEMP
+         *  and the directory path supplied is not a directory.
+         * @throws \InvalidArgumentException If the buffer output value is not null, ExecBuffer::DEV_NULL or ExecBuffer::TEMP
+         *  and the directory path supplied is not readable or not writable.
          */
         public function setBufferOutput($buffer_output)
         {
@@ -704,11 +947,11 @@
                 $dir = dirname($buffer_ouput);
                 if(is_dir($dir) === false)
                 {
-                    throw new Exception('Buffer output parent directory "'.$dir.'" is not a directory.');
+                    throw new \InvalidArgumentException('Buffer output parent directory "'.$dir.'" is not a directory.');
                 }
                 else if(is_readable($dir) === false || is_writeable($dir) === false)
                 {
-                    throw new Exception('Buffer output parent directory "'.$dir.'" is not read-writable by the webserver.');
+                    throw new \InvalidArgumentException('Buffer output parent directory "'.$dir.'" is not read-writable by the webserver.');
                 }
             }
             
@@ -717,7 +960,8 @@
         }
         
         /**
-         * Gets the status of the buffer output.
+         * On first call it creates a temporary output file if set to null or ExecBuffer::TEMP, and the process is non-blocking.
+         * Otherwise the current value help in ExecBuffer::$_output is returned.
          *
          * @access public
          * @author Oliver Lillie

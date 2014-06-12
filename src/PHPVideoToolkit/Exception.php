@@ -13,14 +13,6 @@
      
     namespace PHPVideoToolkit;
      
-    /**
-     * This class provides generic data parsing for the output from FFmpeg.
-     *
-     * @access public
-     * @author Oliver Lillie
-     * @author Jorrit Schippers
-     * @package default
-     */
     class Exception extends \Exception
     {
     }
