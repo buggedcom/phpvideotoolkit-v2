@@ -115,6 +115,8 @@
          */
         public function setSeconds($seconds)
         {
+            $seconds = (float) $seconds;
+
 //          convert to totals
             $this->_total_milliseconds = $seconds*1000;
             $this->_total_seconds = $seconds;
@@ -131,7 +133,7 @@
             {
                 $seconds -= 60;
                 $this->_minutes += 1;
-                if($this->_minutes === 60)
+                if($this->_minutes == 60)
                 {
                     $this->_hours += 1;
                     $this->_minutes = 0;
@@ -146,7 +148,13 @@
                 $this->_milliseconds = 0;
                 $this->_seconds += 1;
             }
-            
+
+            if($this->_seconds == 60)
+            {
+                $this->_minutes += 1;
+                $this->_seconds = 0;
+            }
+
 //          if we have a frame rate then set those values.
             if($this->_frame_rate !== null)
             {
@@ -342,6 +350,15 @@
                 {
                     $value = $this->_seconds;
                 }
+
+                Trace::vars('secs', $value, $this);
+
+                // if($value === 60)
+                // {
+                //     $this->_minutes += 1;
+                //     $this->_seconds = 0;
+                // }
+
                 array_push($searches, '%ss');
                 array_push($replacements, str_pad($value, 2, '0', STR_PAD_LEFT));
             }
@@ -414,6 +431,7 @@
                     array_push($replacements, $round_frames + $excess_frames);
                 }
             }
+            Trace::vars($searches, $replacements, $timecode_format);
             return str_replace($searches, $replacements, $timecode_format);
         }
         
