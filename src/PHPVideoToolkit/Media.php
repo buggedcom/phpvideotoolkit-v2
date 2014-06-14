@@ -196,7 +196,7 @@
         protected function _getDefaultFormat($type, $default_class_name, $format)
         {
             // TODO replace with reference to Format::getFormatFor
-            if(in_array($type, array(Format::OUTPUT, Format::Input)) === false)
+            if(in_array($type, array(Format::OUTPUT, Format::INPUT)) === false)
             {
                 throw new Exception('Unrecognised format type "'.$type.'".');
             }
