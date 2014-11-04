@@ -40,6 +40,8 @@
         protected $_seconds;
         protected $_minutes;
         protected $_hours;
+
+        protected $_is_negative;
         
         protected $_frame_rate;
         
@@ -68,12 +70,28 @@
             $this->_total_minutes = 0;
             $this->_total_hours = 0;
             
-            $this->_frame_rate = $frame_rate;
-            
+            $this->setFrameRate($frame_rate);
+
 //          convert the timecode to 
             $seconds = $this->_convertTimeInputToSeconds($input_value, $value_format, $timecode_format);
             
             $this->setSeconds($seconds);
+        }
+
+        /**
+         * Sets the timecodes frame rate.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param  mixed $frame_rate Integer, Float or null.
+         */
+        public function setFrameRate($frame_rate)
+        {
+            if(is_integer($frame_rate) === false && is_float($frame_rate) === false && is_null($frame_rate) === false)
+            {
+                throw new Exception('The frame rate must be specified as either null, float or an integer value.');
+            }
+            $this->_frame_rate = $frame_rate;
         }
         
         /**
@@ -129,9 +147,10 @@
             $this->_hours = 0;
 
 //          convert to grouped
-            while($seconds > 60)
+            $abs_seconds = abs($seconds);
+            while($abs_seconds > 60)
             {
-                $seconds -= 60;
+                $abs_seconds -= 60;
                 $this->_minutes += 1;
                 if($this->_minutes == 60)
                 {
@@ -139,8 +158,8 @@
                     $this->_minutes = 0;
                 }
             }
-            $this->_milliseconds = $seconds-floor($seconds);
-            $this->_seconds = floor($seconds);
+            $this->_milliseconds = $abs_seconds-floor($abs_seconds);
+            $this->_seconds = floor($abs_seconds);
             
 //          if the milliseconds are 1, then make a seconds adjust
             if(abs($this->_milliseconds-1) < self::EPSILON)
@@ -155,6 +174,16 @@
                 $this->_seconds = 0;
             }
 
+//          determine if the value is negative.
+            $this->_is_negative = $this->_total_seconds < 0;
+            if($this->_is_negative === true)
+            {
+                $this->_milliseconds = -$this->_milliseconds;
+                $this->_seconds = -$this->_seconds;
+                $this->_minutes = -$this->_minutes;
+                $this->_hours = -$this->_hours;
+            }
+
 //          if we have a frame rate then set those values.
             if($this->_frame_rate !== null)
             {
@@ -163,6 +192,18 @@
             }
             
             return $this;
+        }
+
+        /**
+         * Resets the timecode to 00:00:00.000
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @return [type] [description]
+         */
+        public function reset()
+        {
+            $this->setSeconds(0);
         }
         
         /**
@@ -180,34 +221,58 @@
             {
                 case 'hours' :
                 
-                    $this->_total_seconds += ($value * 60 * 60);
+                    if($value > 0)
+                    {
+                        $this->_total_hours = $this->_total_hours - $this->_hours + $value;
+                    }
+                    else
+                    {
+                        $this->_total_hours = $this->_total_hours + ($value - $this->_hours);
+                    }
+                    $this->_total_seconds = $this->_total_hours * 60 * 60;
                     
                     break;
                     
-                case 'min' :
                 case 'mins' :
-                case 'minute' :
                 case 'minutes' :
                 
-                    $this->_total_seconds += ($value * 60);
+                    if($value > 0)
+                    {
+                        $this->_total_minutes = $this->_total_minutes - $this->_minutes + $value;
+                    }
+                    else
+                    {
+                        $this->_total_minutes = $this->_total_minutes + ($value - $this->_minutes);
+                    }
+                    $this->_total_seconds = $this->_total_minutes * 60;
                     
                     break;
                     
-                case 'sec' :
                 case 'secs' :
-                case 'second' :
                 case 'seconds' :
-                    $this->_total_seconds += $value;
-                    
+                    if($value > 0)
+                    {
+                        $this->_total_seconds = $this->_total_seconds - $this->_seconds + $value;
+                    }
+                    else
+                    {
+                        $this->_total_seconds = $this->_total_seconds + ($value - $this->_seconds);
+                    }
                     break;
                     
-                case 'millisec' :
                 case 'millisecs' :
-                case 'millisecond' :
                 case 'milliseconds' :
                 
-                    $this->_total_seconds += ($value / 1000);
-                    
+                    if($value > 0)
+                    {
+                        $this->_total_milliseconds = $this->_total_milliseconds - $this->_milliseconds + $value;
+                    }
+                    else
+                    {
+                        $this->_total_milliseconds = $this->_total_milliseconds + ($value - $this->_milliseconds);
+                    }
+                    $this->_total_seconds = $this->_total_milliseconds/1000;
+
                     break;
                     
                 case 'frame' :
@@ -217,7 +282,15 @@
                     {
                         throw new Exception('You cannot set '.$property.' because the frame rate has not been set.');
                     }
-                    $this->_total_seconds += ($value / $this->_frame_rate);
+                    if($value > 0)
+                    {
+                        $this->_total_frames = $this->_total_frames - $this->_frames + $value;
+                    }
+                    else
+                    {
+                        $this->_total_frames = $this->_total_frames + ($value - $this->_frames);
+                    }
+                    $this->_total_seconds = ($this->_total_frames / $this->_frame_rate);
                     
                     break;
                     
@@ -226,7 +299,7 @@
                     throw new Exception('You cannot set '.$property.'.');
             }
             
-            $this->setSeconds($this->_total_seconds);
+           $this->setSeconds($this->_total_seconds);
         }
         
         /**
@@ -262,15 +335,19 @@
                 case 'hours' :
                     return $this->_hours;
                     
+                case 'mins' :
                 case 'minutes' :
                     return $this->_minutes;
                     
+                case 'secs' :
                 case 'seconds' :
                     return $this->_seconds;
                     
+                case 'millisecs' :
                 case 'milliseconds' :
                     return $this->_milliseconds;
                
+                case 'frame' :
                 case 'frames' :
                     return $this->_frames;
                 
@@ -312,7 +389,7 @@
             if($using_hours === true)
             {
                 array_push($searches, '%hh');
-                array_push($replacements, str_pad($this->_hours, 2, '0', STR_PAD_LEFT));
+                array_push($replacements, str_pad(abs($this->_hours), 2, '0', STR_PAD_LEFT));
             }
 
 //          replace the minutes
@@ -329,7 +406,7 @@
                 {
                     $value = $this->_minutes;
                 }
-                array_push($replacements, str_pad($value, 2, '0', STR_PAD_LEFT));
+                array_push($replacements, str_pad(abs($value), 2, '0', STR_PAD_LEFT));
             }
 
 //          replace the seconds
@@ -357,37 +434,37 @@
                 // }
 
                 array_push($searches, '%ss');
-                array_push($replacements, str_pad($value, 2, '0', STR_PAD_LEFT));
+                array_push($replacements, str_pad(abs($value), 2, '0', STR_PAD_LEFT));
             }
 //          replace the milliseconds
             if(strpos($timecode_format, '%ms') !== false)
             {
                 array_push($searches, '%ms');
-                array_push($replacements, str_pad(round($this->_milliseconds, 2)*100, 2, '0', STR_PAD_LEFT));
+                array_push($replacements, str_pad(round(abs($this->_milliseconds), 3)*1000, 3, '0', STR_PAD_LEFT));
             }
 //          replace the total seconds (rounded)
             if(strpos($timecode_format, '%st') !== false)
             {
                 array_push($searches, '%st');
-                array_push($replacements, str_pad(round($this->_seconds), 2, '0', STR_PAD_LEFT));
+                array_push($replacements, str_pad(round(abs($this->_seconds)), 2, '0', STR_PAD_LEFT));
             }
 //          replace the total seconds (floored)
             if(strpos($timecode_format, '%sf') !== false)
             {
                 array_push($searches, '%sf');
-                array_push($replacements, str_pad(floor($this->_seconds+$this->_milliseconds), 2, '0', STR_PAD_LEFT));
+                array_push($replacements, str_pad(floor(abs($this->_seconds+$this->_milliseconds)), 2, '0', STR_PAD_LEFT));
             }
 //          replace the total seconds (ceiled)
             if(strpos($timecode_format, '%sc') !== false)
             {
                 array_push($searches, '%sc');
-                array_push($replacements, str_pad(ceil($this->_seconds+$this->_milliseconds), 2, '0', STR_PAD_LEFT));
+                array_push($replacements, str_pad(ceil(abs($this->_seconds+$this->_milliseconds)), 2, '0', STR_PAD_LEFT));
             }
 //          replace the total seconds
             if(strpos($timecode_format, '%mt') !== false)
             {
                 array_push($searches, '%mt');
-                array_push($replacements, round($this->_seconds+$this->_milliseconds, 3));
+                array_push($replacements, round(abs($this->_seconds+$this->_milliseconds), 3));
             }
 //          these are the more complicated as they depend on $frames_per_second / frames per second of the current input
             $has_frames = strpos($timecode_format, '%fn') !== false;
@@ -414,7 +491,7 @@
                 {
                     $excess_frames = ceil(($this->_seconds - floor($this->_seconds)) * $frames_per_second);
                     array_push($searches, '%fn');
-                    array_push($replacements, $excess_frames);
+                    array_push($replacements, abs($excess_frames));
                 }
 //              replace the total frames (ie frame number)
                 if($has_total_frames === true)
@@ -425,10 +502,10 @@
                         $excess_frames = ceil(($this->_seconds - floor($this->_seconds)) * $frames_per_second);
                     }
                     array_push($searches, '%ft');
-                    array_push($replacements, $round_frames + $excess_frames);
+                    array_push($replacements, abs($round_frames + $excess_frames));
                 }
             }
-            return str_replace($searches, $replacements, $timecode_format);
+            return ($this->_is_negative === true ? '-' : '').str_replace($searches, $replacements, $timecode_format);
         }
         
         /**

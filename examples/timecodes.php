@@ -19,19 +19,44 @@
         echo 'new Timecode(.028427778, Timecode::INPUT_FORMAT_HOURS); = '.$timecode.'<br />';
         $timecode = new Timecode('00:01:42.34', Timecode::INPUT_FORMAT_TIMECODE);
         echo 'new Timecode(\'00:01:42.34\', Timecode::INPUT_FORMAT_TIMECODE); = '.$timecode.'<br />';
+        $timecode = new Timecode(60);
+        echo 'new Timecode(60); = '.$timecode.'<br />';
         
         echo '<hr />';
         echo '<h2>Adjusting timecode values</h2>';
         
-        $timecode = new Timecode('00:01:42.34', Timecode::INPUT_FORMAT_TIMECODE);
-        echo 'new Timecode(\'00:01:42.34\', Timecode::INPUT_FORMAT_TIMECODE); = '.$timecode.'<br />';
-        $timecode->hours += 15;
-        echo '$timecode->hours += 15; = '.$timecode.'<br />';
-        $timecode->seconds -= 54125.5;
-        echo '$timecode->seconds -= 54125.5; = '.$timecode.'<br />';
-        $timecode->milliseconds -= 18840;
-        echo '$timecode->milliseconds -= 18840; = '.$timecode.'<br />';
-
+        $timecode = new Timecode('00:01:42.34', Timecode::INPUT_FORMAT_TIMECODE, 24);
+        echo '$timecode = new Timecode(\'00:01:42.34\', Timecode::INPUT_FORMAT_TIMECODE); = '.$timecode.'<br />';
+        $adjustments = array(
+            array(15, 'hours', true),
+            array(-54102.34, 'seconds', true),
+            array(-99, 'milliseconds', true),
+            array(59, 'seconds', true),
+            array(1, 'seconds', false),
+            array(59, 'seconds', true),
+            array(999, 'milliseconds', true),
+            array(1, 'milliseconds', true),
+            array(48, 'frames', false),
+            array(-15, 'frames', true),
+            array(-1, 'seconds', true),
+            array(-375, 'milliseconds', true),
+        );
+        foreach ($adjustments as $value)
+        {
+            if($value[2] === true)
+            {
+                $timecode->{$value[1]} += $value[0];
+                echo '$timecode->'.$value[1].' += '.$value[0].'; // = '.$timecode->getTimecode('%hh:%mm:%ss:%ms').'<br />';
+            }
+            else
+            {
+                echo '<Br />$timecode->reset();<br />';
+                $timecode->reset();
+                $timecode->{$value[1]} = $value[0];
+                echo '$timecode->'.$value[1].' = '.$value[0].'; // = '.$timecode->getTimecode('%hh:%mm:%ss:%ms').'<br />';
+            }
+        }
+        
         echo '<hr />';
         echo '<h2>Setting a timecode value</h2>';
 
