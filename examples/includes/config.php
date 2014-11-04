@@ -16,6 +16,7 @@
             'gifsicle'                    => '/opt/local/bin/gifsicle',
             'php_exec_infinite_timelimit' => true,
             'cache_driver'                => 'InTempDirectory',
+            'set_default_output_format'   => true,
         ), true);
     }
     catch(\PHPVideoToolkit\Exception $e)
@@ -26,5 +27,6 @@
     }
 
     $example_video_path = BASE.'examples/media/BigBuckBunny_320x180.mp4';
+    $example_video_path1 = BASE.'examples/media/tc.mov';
     $example_audio_path = BASE.'examples/media/Ballad_of_the_Sneak.mp3';
     
