@@ -49,6 +49,7 @@
         protected $_force_enable_qtfaststart;
         protected $_force_enable_flv_meta;
         protected $_cache_driver;
+        protected $_set_default_output_format;
 
         /**
          * Returns the singletone instance of itself.
@@ -96,6 +97,7 @@
                 'force_enable_qtfaststart'              => false,
                 'force_enable_flv_meta'                 => true,
                 'cache_driver'                          => 'Null',
+                'set_default_output_format'             => true,
             );
             $this->_setConfig(array_merge($default_options, $options));
 
@@ -217,6 +219,7 @@
                 case 'gif_transcoder_convert_use_dither' :
                 case 'gif_transcoder_convert_use_coalesce' :
                 case 'gif_transcoder_convert_use_map' :
+                case 'set_default_output_format' :
                     
                     if(in_array($value, array(true, false)) === false)
                     {

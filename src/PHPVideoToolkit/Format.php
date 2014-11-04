@@ -127,9 +127,12 @@
 //          add default input/output commands
             if($input_output_type === 'output')
             {
-                $this->setThreads(1)
-                     ->setStrictness('experimental')
-                     ->setQualityVsStreamabilityBalanceRatio(4);
+                if($this->_config->set_default_output_format === true)
+                {
+                    $this->setThreads(1)
+                         ->setStrictness('experimental')
+                         ->setQualityVsStreamabilityBalanceRatio(4);
+                }
             }
             else if($input_output_type === 'input')
             {
