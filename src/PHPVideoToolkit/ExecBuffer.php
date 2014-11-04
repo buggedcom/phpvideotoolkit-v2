@@ -896,7 +896,7 @@
         {
             if(is_bool($enable_blocking) === false && is_null($enable_blocking) === false)
             {
-                throw new Exception('$enable_blocking must be a boolean (or null) value.');
+                throw new \InvalidArgumentException('$enable_blocking must be a boolean (or null) value.');
             }
             
             $this->_blocking = $enable_blocking;

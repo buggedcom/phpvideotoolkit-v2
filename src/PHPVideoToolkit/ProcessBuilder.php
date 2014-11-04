@@ -64,7 +64,7 @@
         {
             if(empty($commands) === true)
             {
-                throw new Exception('Commands cannot be empty.');
+                throw new \InvalidArgumentException('Commands cannot be empty.');
             }
             
             foreach ($commands as $key => $value)

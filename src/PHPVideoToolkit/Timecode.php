@@ -84,6 +84,7 @@
          * @access public
          * @author: Oliver Lillie
          * @param  mixed $frame_rate Integer, Float or null.
+         * @throws \InvalidArgumentException If the supplied from rate is not an integer, a float or a null value.
          */
         public function setFrameRate($frame_rate)
         {
