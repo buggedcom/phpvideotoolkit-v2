@@ -115,6 +115,7 @@
                 'strictness' => null,
                 'preset_options_file' => null,
                 'threads' => null,
+                'threads_indexed' => null,
             );
             $this->_format_to_command = array(
                 'quality' => '-qscale <setting>',
@@ -122,6 +123,7 @@
                 'strictness'  => '-strict <setting>',
                 'preset_options_file'  => '-fpre <setting>',
                 'threads'  => '-threads <setting>',
+                'threads_indexed'  => '-threads:<index> <setting>',
             );
             
 //          add default input/output commands
@@ -334,6 +336,13 @@
             $commands = array();
             if(empty($merged_commands) === false)
             {
+                foreach ($merged_commands as $key=>$command)
+                {
+                    if(is_array($command) === true)
+                    {
+                        array_splice($merged_commands, $key, 1, $command);
+                    }
+                }
                 foreach ($merged_commands as $command)
                 {
                     if(preg_match('/^([^\s]+)\s+(.*)/', $command, $matches) > 0)
@@ -456,12 +465,25 @@
 //              otherwise if the value is an array, that means we have multiple options to replace into the command
                 if(is_array($value) === true)
                 {
-                    $find = array_keys($value);
-                    array_walk($find, function(&$value, $key)
+//                  if we have an index then we have multiple singles of this command.
+                    if(strpos($full_command, '<index>') !== false)
                     {
-                        $value = '<'.$value.'>';
-                    });
-                    $command = str_replace($find, $value, $full_command);
+                        $commands = array();
+                        foreach ($value as $k1=>$v1) 
+                        {
+                            array_push($commands, str_replace(array('<index>', '<setting>'), array((string) $k1, (string) $v1), $full_command));
+                        }
+                        $command = $commands;
+                    }
+                    else
+                    {
+                        $find = array_keys($value);
+                        array_walk($find, function(&$value, $key)
+                        {
+                            $value = '<'.$value.'>';
+                        });
+                        $command = str_replace($find, $value, $full_command);
+                    }
                 }
 //              otherwise, it's jsut a <setting> that is to be replaced
                 else
@@ -471,7 +493,7 @@
                 
                 $options[$option] = $command;
             }
-            
+
             return $options;
         }
         
@@ -620,12 +642,15 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param integer $threads Between 1-64
+         * @param integer $threads Between 0-64
+         * @param integer $stream_index Between 0-48. If specified then the threads option is given a stream specifier to 
+         *  specify a particular audiovideo stream, i.e. -threads:1 4. If a previous setThreads has been called without specifiying
+         *  a stream_index, then the 
          * @return PHPVideoToolkit\Format Returns the current object.
          * @throws \InvalidArgumentException If the threads value is not an integer.
          * @throws \InvalidArgumentException If the threads value is not between 1-64.
          */
-        public function setThreads($threads)
+        public function setThreads($threads, $stream_index=null)
         {
             $this->_blockSetOnInputFormat('thread level');
             
@@ -642,6 +667,26 @@
             else if($threads < 0 || $threads > 64)
             {
                 throw new \InvalidArgumentException('Invalid `threads` value; the value must fit in range 0 - 64.');
+            }
+
+            // if we have a specified stream index then store the threads format differently.
+            if($stream_index !== null)
+            {
+                if(is_int($stream_index) === false)
+                {
+                    throw new \InvalidArgumentException('The stream_index value must be an integer.');
+                }
+                else if($stream_index < 0 || $stream_index > 48)
+                {
+                    throw new \InvalidArgumentException('Invalid `stream_index` value; the value must fit in range 0 - 48.');
+                }
+
+                if($this->_format['threads_indexed'] === null)
+                {
+                    $this->_format['threads_indexed'] = array();
+                }
+                $this->_format['threads_indexed'][$stream_index] = $threads;
+                return $this;
             }
 
             $this->_format['threads'] = $threads;
