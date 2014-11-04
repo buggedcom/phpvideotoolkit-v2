@@ -45,7 +45,7 @@
             {
                 if($allow_command_repetition === false)
                 {
-                    throw new Exception('The command "'.$command.'" has already been given and it cannot be repeated. If you wish to allow a repeating command, set $allow_command_repetition to true.');
+                    throw new \LogicException('The command "'.$command.'" has already been given and it cannot be repeated. If you wish to allow a repeating command, set $allow_command_repetition to true.');
                 }
                 else if(is_array($add_to[$command]) === false)
                 {
@@ -80,7 +80,7 @@
                 else
                 {
                     $this->add($key);
-                    if($value)
+                    if(strlen($value) > 0)
                     {
                         $this->add($value);
                     }
@@ -88,7 +88,7 @@
             }
         }
         
-        public function add($command, $raw_flag=false)
+        public function add($command)
         {
             array_push($this->_arguments, $command);
             
