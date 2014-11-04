@@ -89,7 +89,7 @@
         {
             if(is_integer($frame_rate) === false && is_float($frame_rate) === false && is_null($frame_rate) === false)
             {
-                throw new Exception('The frame rate must be specified as either null, float or an integer value.');
+                throw new \InvalidArgumentException('The frame rate must be specified as either null, float or an integer value.');
             }
             $this->_frame_rate = $frame_rate;
         }
