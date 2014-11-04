@@ -639,9 +639,9 @@
             {
                 throw new \InvalidArgumentException('The threads value must be an integer.');
             }
-            else if($threads < 1 || $threads > 64)
+            else if($threads < 0 || $threads > 64)
             {
-                throw new \InvalidArgumentException('Invalid `threads` value; the value must fit in range 1 - 64.');
+                throw new \InvalidArgumentException('Invalid `threads` value; the value must fit in range 0 - 64.');
             }
 
             $this->_format['threads'] = $threads;
