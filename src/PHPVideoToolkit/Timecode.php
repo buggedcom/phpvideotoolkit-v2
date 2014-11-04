@@ -197,7 +197,6 @@
                 case 'secs' :
                 case 'second' :
                 case 'seconds' :
-                
                     $this->_total_seconds += $value;
                     
                     break;
@@ -351,8 +350,6 @@
                     $value = $this->_seconds;
                 }
 
-                Trace::vars('secs', $value, $this);
-
                 // if($value === 60)
                 // {
                 //     $this->_minutes += 1;
@@ -431,7 +428,6 @@
                     array_push($replacements, $round_frames + $excess_frames);
                 }
             }
-            Trace::vars($searches, $replacements, $timecode_format);
             return str_replace($searches, $replacements, $timecode_format);
         }
         
