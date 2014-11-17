@@ -29,7 +29,8 @@
             
             if($input_output_type === 'output')
             {
-                $this->setFormat('mp4');
+                $this->setFormat('mp4')
+                     ->setAudioCodec('aac');
             }
             
             $this->forceQtFastStartSuccess();
