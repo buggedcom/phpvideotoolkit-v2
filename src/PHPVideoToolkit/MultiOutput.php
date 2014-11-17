@@ -78,7 +78,7 @@
         {
             if(isset($this->_output[$output_path]) === true)
             {
-                throw new Exception('Output for `'.$output_path.'` has already been given. Unable to set new output. If you wish to remove output please call PHPVideoToolkit\Ouput->removeOutput($output_path);.');
+                throw new \LogicException('Output for `'.$output_path.'` has already been given. Unable to set new output. If you wish to remove output please call PHPVideoToolkit\Ouput->removeOutput($output_path);.');
             }
 
             if($output_format === null)
@@ -134,7 +134,7 @@
             // TODO replace with reference to Format::getFormatFor
             if(in_array($type, array('input', 'output')) === false)
             {
-                throw new Exception('Unrecognised format type "'.$type.'".');
+                throw new \InvalidArgumentException('Unrecognised format type "'.$type.'".');
             }
             
 //          check the requested class exists
@@ -145,14 +145,14 @@
                 $class_name = '\\PHPVideoToolkit\\'.$default_class_name;
                 if(class_exists($class_name) === false)
                 {
-                    throw new Exception('Requested default format class does not exist, "'.($requested_class_name === $class_name ? $class_name : $requested_class_name.'" and "'.$class_name.'"').'".');
+                    throw new \InvalidArgumentException('Requested default format class does not exist, "'.($requested_class_name === $class_name ? $class_name : $requested_class_name.'" and "'.$class_name.'"').'".');
                 }
             }
             
 //          check that it extends from the base Format class.
             if($class_name !== '\\PHPVideoToolkit\\Format' && is_subclass_of($class_name, '\\PHPVideoToolkit\\Format') === false)
             {
-                throw new Exception('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
+                throw new \LogicException('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
             }
             
             return new $class_name($type, $this->_config);

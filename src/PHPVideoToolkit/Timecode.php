@@ -523,7 +523,7 @@
         {
             if(in_array($value_format, array(self::INPUT_FORMAT_TIMECODE, self::INPUT_FORMAT_SECONDS, self::INPUT_FORMAT_MINUTES, self::INPUT_FORMAT_HOURS)) === false)
             {
-                throw new Exception('Invalid timecode value format supplied to Timecode::__construct.');
+                throw new \InvalidArgumentException('Invalid timecode value format supplied to Timecode::__construct.');
             }
             
             switch($value_format)

@@ -198,7 +198,7 @@
             // TODO replace with reference to Format::getFormatFor
             if(in_array($type, array(Format::OUTPUT, Format::INPUT)) === false)
             {
-                throw new Exception('Unrecognised format type "'.$type.'".');
+                throw new \InvalidArgumentException('Unrecognised format type "'.$type.'".');
             }
             
 //          check the requested class exists
@@ -209,14 +209,14 @@
                 $class_name = '\\PHPVideoToolkit\\'.$default_class_name;
                 if(class_exists($class_name) === false)
                 {
-                    throw new Exception('Requested default format class does not exist, "'.($requested_class_name === $class_name ? $class_name : $requested_class_name.'" and "'.$class_name.'"').'".');
+                    throw new \InvalidArgumentException('Requested default format class does not exist, "'.($requested_class_name === $class_name ? $class_name : $requested_class_name.'" and "'.$class_name.'"').'".');
                 }
             }
             
 //          check that it extends from the base Format class.
             if($class_name !== '\\PHPVideoToolkit\\Format' && is_subclass_of($class_name, '\\PHPVideoToolkit\\Format') === false)
             {
-                throw new Exception('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
+                throw new \InvalidArgumentException('The class "'.$class_name.'" is not a subclass of \\PHPVideoToolkit\\Format.');
             }
             
             return new $class_name($type, $this->_config);
@@ -247,11 +247,11 @@
                 
             if($real_file_path === false || is_file($real_file_path) === false)
             {
-                throw new Exception('The file "'.$media_file_path.'" cannot be found in \\PHPVideoToolkit\\Media::__construct.');
+                throw new \InvalidArgumentException('The file "'.$media_file_path.'" cannot be found in \\PHPVideoToolkit\\Media::__construct.');
             }
             else if(is_readable($real_file_path) === false)
             {
-                throw new Exception('The file "'.$media_file_path.'" is not readable in \\PHPVideoToolkit\\Media::__construct.');
+                throw new \InvalidArgumentException('The file "'.$media_file_path.'" is not readable in \\PHPVideoToolkit\\Media::__construct.');
             }
             
             $this->_media_file_path = $real_file_path;
@@ -283,7 +283,7 @@
             
             if(empty($key) === true)
             {
-                throw new Exception('Empty metadata key. Metadata keys must be at least one character long.');
+                throw new \InvalidArgumentException('Empty metadata key. Metadata keys must be at least one character long.');
             }
             
 //          check that meta key is supported by this format.
@@ -336,25 +336,25 @@
 //          check that a segment extract has not already been set
             if(empty($this->_extract_segment) === false)
             {
-                throw new Exception('Extract segment options have already been set. You cannot call extractSegment more than once on a '.get_class($this).' object.');
+                throw new \LogicException('Extract segment options have already been set. You cannot call extractSegment more than once on a '.get_class($this).' object.');
             }
             
 //          check that a split has already been set as if it has we can't extract a segment
 //          however we can extract a segment, then split it.
             if(empty($this->_split_options) === false)
             {
-                throw new Exception('You cannot extract a segment once '.get_class($this).'::split has been called. You can however extract a segment, the call '.get_class($this).'::split.');
+                throw new \LogicException('You cannot extract a segment once '.get_class($this).'::split has been called. You can however extract a segment, the call '.get_class($this).'::split.');
             }
             
 //          check the timecodes against the duration
             $duration = $this->readDuration();
             if($from_timecode !== null && $duration->total_seconds < $from_timecode->total_seconds)
             {
-                throw new Exception('The duration of the media is less than the starting timecode specified.');
+                throw new \InvalidArgumentException('The duration of the media is less than the starting timecode specified.');
             }
             else if($to_timecode !== null && $duration->total_seconds < $to_timecode->total_seconds)
             {
-                throw new Exception('The duration of the media is less than the end timecode specified.');
+                throw new \InvalidArgumentException('The duration of the media is less than the end timecode specified.');
             }
             
             $this->_extract_segment = array(
@@ -430,7 +430,7 @@
 //          check to see if split options are already set
             if(empty($this->_split_options) === false)
             {
-                throw new Exception('Split options have already been set. You cannot call split more than once on a '.get_class($this).' object.');
+                throw new \LogicException('Split options have already been set. You cannot call split more than once on a '.get_class($this).' object.');
             }
             
             $this->_split_options = array();
@@ -439,7 +439,7 @@
 //          check the split by
             if(empty($split_by) === true)
             {
-                throw new Exception('The split by value is empty, in \\PHPVideoToolkit\\'.get_class($this).'::split');
+                throw new \InvalidArgumentException('The split by value is empty, in \\PHPVideoToolkit\\'.get_class($this).'::split');
             }
 //          if we have an array, it's either timecodes (seconds) or integers (frames)
             else if(is_array($split_by) === true)
@@ -452,14 +452,14 @@
                     {
                         if(get_class($timecode) !== 'PHPVideoToolkit\Timecode')
                         {
-                            throw new Exception('The split by timecode specified in index '.$key.' is not a \\PHPVideoToolkit\\Timecode object.');
+                            throw new \InvalidArgumentException('The split by timecode specified in index '.$key.' is not a \\PHPVideoToolkit\\Timecode object.');
                         }
                         
 //                      check the timecode against the total number of seconds in the media duration.
                         $seconds = $timecode->total_seconds;
                         if($seconds > $duration->total_seconds)
                         {
-                            throw new Exception('The split by timecode specified in index '.$key.' is greater than the duration of the media ('.$duration->total_seconds.' seconds).');
+                            throw new \InvalidArgumentException('The split by timecode specified in index '.$key.' is greater than the duration of the media ('.$duration->total_seconds.' seconds).');
                         }
                         
                         array_push($times, $seconds);
@@ -475,7 +475,7 @@
                     {
                         if(is_int($integer) === false)
                         {
-                            throw new Exception('The split by frame number specified in index '.$key.' is not an integer.');
+                            throw new \InvalidArgumentException('The split by frame number specified in index '.$key.' is not an integer.');
                         }
                         
                         
@@ -498,13 +498,13 @@
             {
                 if($split_by < 1)
                 {
-                    throw new Exception('The split by value must be >= 1, in \\PHPVideoToolkit\\'.get_class($this).'::split');
+                    throw new \InvalidArgumentException('The split by value must be >= 1, in \\PHPVideoToolkit\\'.get_class($this).'::split');
                 }
                         
 //              check the split time against the total number of seconds in the media duration.
                 if($split_by > $duration->total_seconds)
                 {
-                    throw new Exception('The split by value is greater than the duration of the media ('.$duration->total_seconds.' seconds).');
+                    throw new \InvalidArgumentException('The split by value is greater than the duration of the media ('.$duration->total_seconds.' seconds).');
                 }
                         
                 $this->_split_options['segment_time'] = (int) $split_by;
@@ -513,7 +513,7 @@
 //          check time delta
             if($time_delta < 0)
             {
-                throw new Exception('The time delta specified "'.$time_delta.'", in \\PHPVideoToolkit\\'.get_class($this).'::split must be >= 0');
+                throw new \InvalidArgumentException('The time delta specified "'.$time_delta.'", in \\PHPVideoToolkit\\'.get_class($this).'::split must be >= 0');
             }
             else if($time_delta > 0)
             {
@@ -527,11 +527,11 @@
                 $output_list_dir = dirname($output_list);
                 if(is_dir($output_list_dir) === false)
                 {
-                    throw new Exception('The directory for the output list file "'.$output_list_path.'" does not exist, in \\PHPVideoToolkit\\'.get_class($this).'::split');
+                    throw new \InvalidArgumentException('The directory for the output list file "'.$output_list_path.'" does not exist, in \\PHPVideoToolkit\\'.get_class($this).'::split');
                 }
                 else if(is_writeable($output_list_dir) === false)
                 {
-                    throw new Exception('The directory for the output list file "'.$output_list_path.'" is not writeable, in \\PHPVideoToolkit\\'.get_class($this).'::split');
+                    throw new \InvalidArgumentException('The directory for the output list file "'.$output_list_path.'" is not writeable, in \\PHPVideoToolkit\\'.get_class($this).'::split');
                 }
                 
                 $this->_split_options['segment_list'] = $output_list_path;
@@ -631,11 +631,11 @@
         {
             if(is_callable($callback) === false)
             {
-                throw new Exception('The callback "'.$callback.'" is not callable.');
+                throw new \InvalidArgumentException('The callback "'.$callback.'" is not callable.');
             }
             if(is_array($args) === false)
             {
-                throw new Exception('The $args argument is not an array.');
+                throw new \InvalidArgumentException('The $args argument is not an array.');
             }
             array_push($this->_post_process_callbacks, array($callback, $args));
 
@@ -806,7 +806,7 @@
 //          non-blocking and must trigger error.
             if($this->_blocking === true)
             {
-                throw new Exception('The blocking mode has been enabled by a function that you have enabled, or a Format that you have supplied. As a result you cannot use saveNonBlocking() and must use the blocking save method save() instead.');
+                throw new \LogicException('The blocking mode has been enabled by a function that you have enabled, or a Format that you have supplied. As a result you cannot use saveNonBlocking() and must use the blocking save method save() instead.');
             }
             
 //          set the non blocking of the exec process
@@ -818,7 +818,7 @@
 //              because only certain types of handlers are compatible with non blocking saves we need to check for compatibility.
                 if($progress_handler->getNonBlockingCompatibilityStatus() === false)
                 {
-                    throw new Exception('The progress handler given is not compatible with a non blocking save. This typically means that you have supplied a callback function in the constructor of the progress handler. Any progress handler with a supplied callback blocks PHP. Instead you should call $handler->probe() after the saveNonBlocking function call to get the progress of the encode.');
+                    throw new \LogicException('The progress handler given is not compatible with a non blocking save. This typically means that you have supplied a callback function in the constructor of the progress handler. Any progress handler with a supplied callback blocks PHP. Instead you should call $handler->probe() after the saveNonBlocking function call to get the progress of the encode.');
                 }
             }
             
@@ -860,17 +860,17 @@
             $save_dir = realpath($save_dir);
             if($save_dir === false || is_dir($save_dir) === false)
             {
-                throw new Exception('The directory that the output is to be saved to, "'.$save_dir.'" does not exist.');
+                throw new \InvalidArgumentException('The directory that the output is to be saved to, "'.$save_dir.'" does not exist.');
             }
             else if(is_writeable($save_dir) === false || is_readable($save_dir) === false)
             {
-                throw new Exception('The directory that the output is to be saved to, "'.$save_dir.'" is not read-writeable.');
+                throw new \RuntimeException('The directory that the output is to be saved to, "'.$save_dir.'" is not read-writeable.');
             }
 //          check to see if we have a split output name.
 //          although this is technically still allowed by ffmpeg, phpvideotoolkit has depreciated %d in favour of its own %index
             else if(preg_match('/\%([0-9]*)d/', $save_path) > 0)
             {
-                throw new Exception('The output file appears to be using FFmpeg\'s %d notation for multiple file output. The %d notation is depreciated in PHPVideoToolkit in favour of the %index or %timecode notations.');
+                throw new \InvalidArgumentException('The output file appears to be using FFmpeg\'s %d notation for multiple file output. The %d notation is depreciated in PHPVideoToolkit in favour of the %index or %timecode notations.');
             }
 //          if a %index or %timecode output is added then we can't check for exact file existence
 //          we can however check for possible interfering matches.
@@ -882,18 +882,18 @@
 //          check to see if we have to have a timecode or index in the output and that we actually have one.
             else if($has_timecode_or_index === false && $this->_require_d_in_output === true)
             {
-                throw new Exception('It is required that either "%timecode" or "%index" to the save path as more that one file is expected be outputed. When using %index, it is possible to specify a number to be padded with a specific amount of 0s. For example adding %5index.jpg will output files like 00001.jpg, 00002.jpg etc.');
+                throw new \InvalidArgumentException('It is required that either "%timecode" or "%index" to the save path as more that one file is expected be outputed. When using %index, it is possible to specify a number to be padded with a specific amount of 0s. For example adding %5index.jpg will output files like 00001.jpg, 00002.jpg etc.');
             }
 //          otherwise check that a file exists and the overrwite status of the request.
             else
             {
                 if(is_file($save_dir.DIRECTORY_SEPARATOR.$basename) === true && (empty($overwrite) === true || $overwrite === self::OVERWRITE_FAIL))
                 {
-                    throw new Exception('The output file already exists and overwriting is disabled.');
+                    throw new \LogicException('The output file already exists and overwriting is disabled.');
                 }
                 else if(is_file($save_dir.DIRECTORY_SEPARATOR.$basename) === true && $overwrite === self::OVERWRITE_EXISTING && is_writeable($save_dir.DIRECTORY_SEPARATOR.$basename) === false)
                 {
-                    throw new Exception('The output file already exists, overwriting is enabled however the file is not writable.');
+                    throw new \LogicException('The output file already exists, overwriting is enabled however the file is not writable.');
                 }
             }
             $save_path = $save_dir.DIRECTORY_SEPARATOR.$basename;
@@ -916,9 +916,9 @@
                 {
                     if(empty($ext) === true)
                     {
-                        throw new Exception('The output path of the file extension has not be given. Please either set a file extension of the output path - or - call setFormat() on the output format to set the format of the output media.');
+                        throw new \LogicException('The output path of the file extension has not be given. Please either set a file extension of the output path - or - call setFormat() on the output format to set the format of the output media.');
                     }
-                    throw new Exception('Un-recognised file extension. Please call setFormat() on the output format to set the format of the output media.');
+                    throw new \LogicException('Un-recognised file extension. Please call setFormat() on the output format to set the format of the output media.');
                 }
             }
             
@@ -1038,7 +1038,7 @@
                     }
                     if($frame_rate <= 0)
                     {
-                        throw new Exception('Unable to access the output frame rate value and as a result we cannot generate a timecode based filename output.');
+                        throw new \RuntimeException('Unable to access the output frame rate value and as a result we cannot generate a timecode based filename output.');
                     }
                     else if(preg_match('/[0-9]+\/[0-9]+/', $frame_rate) > 0)
                     {

@@ -832,7 +832,7 @@
         {
             if(is_bool($enable_failure_tracking) === false && is_null($enable_failure_tracking) === false)
             {
-                throw new Exception('$enable_failure_tracking must be a boolean (or null) value.');
+                throw new \InvalidArgumentException('$enable_failure_tracking must be a boolean (or null) value.');
             }
             
             $this->_failure_tracking = $enable_failure_tracking;

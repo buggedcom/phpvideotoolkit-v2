@@ -217,7 +217,7 @@
         {
             if($this->_type === 'input')
             {
-                throw new Exception('Video cannot be disabled on an input '.get_class($this).'.');
+                throw new \LogicException('Video cannot be disabled on an input '.get_class($this).'.');
             }
             
             $this->_format['disable_video'] = true;
@@ -280,7 +280,7 @@
 //          validate the video codecs that are available from ffmpeg.
             if(isset($codecs[$video_codec]) === false)
             {
-                throw new Exception('Unrecognised video codec "'.$video_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
+                throw new \InvalidArgumentException('Unrecognised video codec "'.$video_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
             }
             
 //          now check the class settings to see if restricted codecs have been set and have to be obeys
@@ -288,7 +288,7 @@
             {
                 if(in_array($video_codec, $this->_restricted_video_codecs) === false)
                 {
-                    throw new Exception('The video codec "'.$video_codec.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_video_codecs));
+                    throw new \LogicException('The video codec "'.$video_codec.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_video_codecs));
                 }
             }
             

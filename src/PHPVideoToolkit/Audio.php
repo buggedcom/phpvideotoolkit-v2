@@ -111,7 +111,7 @@
             $options = $output_format->getFormatOptions();
             if($options['disable_audio'] === true && empty($this->_layers) === true && empty($this->_prepends) === true && empty($this->_appends) === true)
             {
-                throw new Exception('Unable to process output format to send to ffmpeg as audio has been disabled and no other inputs have been found.');
+                throw new \LogicException('Unable to process output format to send to ffmpeg as audio has been disabled and no other inputs have been found.');
             }
         }
     }

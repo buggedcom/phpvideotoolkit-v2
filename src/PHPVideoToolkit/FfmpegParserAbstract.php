@@ -288,7 +288,7 @@
 //          if both version and build are not available throw a new exception to get the user to provide their ffmpeg data to github so we can start building up different formats of ffmpeg output.
             if($version === null && $build === null)
             {
-                throw new Exception('Unable to determine your FFmpeg version or build. Please create an issue at the github repository for PHPVideoToolkit 2; https://github.com/buggedcom/phpvideotoolkit-v2/issues. Please add the following data to the ticket:<br />
+                throw new FfmpegProcessException('Unable to determine your FFmpeg version or build. Please create an issue at the github repository for PHPVideoToolkit 2; https://github.com/buggedcom/phpvideotoolkit-v2/issues. Please add the following data to the ticket:<br />
 <br />              
 <code>'.$this->getRawFfmpegData($read_from_cache).'</code>');
             }

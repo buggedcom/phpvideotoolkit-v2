@@ -59,7 +59,7 @@
             
             if($loop_count !== null && $loop_count < -1)
             {
-                throw new Exception('The loop count cannot be less than -1. (-1 specifies unlimited looping)');
+                throw new \InvalidArgumentException('The loop count cannot be less than -1. (-1 specifies unlimited looping)');
             }
             
             $this->_format['gif_loop_count'] = (int) $loop_count;
@@ -79,11 +79,11 @@
             
             if($frame_delay !== null && $frame_delay <= 0)
             {
-                throw new Exception('The animated gif frame delay cannot be equal to or less than 0.');
+                throw new \InvalidArgumentException('The animated gif frame delay cannot be equal to or less than 0.');
             }
             if(is_int($frame_delay) === false && is_float($frame_delay) === false)
             {
-                throw new Exception('The animated gif frame delay value must either be an integer or a float.');
+                throw new \InvalidArgumentException('The animated gif frame delay value must either be an integer or a float.');
             }
             
             $this->_format['gif_frame_delay'] = $frame_delay;

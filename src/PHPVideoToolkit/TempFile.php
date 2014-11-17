@@ -27,15 +27,15 @@
         {
             if(is_dir($temp_directory) === false)
             {
-                throw new Exception('The temp directory does not exist or is not a directory.');
+                throw new \InvalidArgumentException('The temp directory does not exist or is not a directory.');
             }
             else if(is_readable($temp_directory) === false)
             {
-                throw new Exception('The temp directory is not readable.');
+                throw new \InvalidArgumentException('The temp directory is not readable.');
             }
             else if(is_writable($temp_directory) === false)
             {
-                throw new Exception('The temp directory is not writeable.');
+                throw new \InvalidArgumentException('The temp directory is not writeable.');
             }
             $this->_temp_directory = $temp_directory;
             

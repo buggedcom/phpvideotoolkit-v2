@@ -39,14 +39,14 @@
         {
             if($callback !== null && is_callable($callback) === false)
             {
-                throw new Exception('The progress handler callback is not callable.');
+                throw new \InvalidArgumentException('The progress handler callback is not callable.');
             }
             
             $this->_config = $config === null ? Config::getInstance() : $config;
             
             if(empty($process_id) === true)
             {
-                throw new Exception('The process id must not be empty.');
+                throw new \InvalidArgumentException('The process id must not be empty.');
             }
             $this->_process_id = $process_id;
             
@@ -75,11 +75,11 @@
             {
                 if(is_int($seconds) === false)
                 {
-                    throw new Exception('$seconds must be an integer.');
+                    throw new \InvalidArgumentException('$seconds must be an integer.');
                 }
                 else if($seconds <= 0)
                 {
-                    throw new Exception('$seconds must be an integer greater than 0.');
+                    throw new \InvalidArgumentException('$seconds must be an integer greater than 0.');
                 }
                 
                 usleep($seconds*100000);

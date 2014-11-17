@@ -33,11 +33,11 @@
 //          validate the file exists and is readable.
             if($real_file_path === false || is_file($real_file_path) === false)
             {
-                throw new Exception('The file "'.$file_path.'" cannot be found in '.get_class($this).'::_checkMediaFilePath.');
+                throw new \LogicException('The file "'.$file_path.'" cannot be found in '.get_class($this).'::_checkMediaFilePath.');
             }
             else if(is_readable($real_file_path) === false)
             {
-                throw new Exception('The file "'.$file_path.'" is not readable in '.get_class($this).'::_checkMediaFilePath.');
+                throw new \LogicException('The file "'.$file_path.'" is not readable in '.get_class($this).'::_checkMediaFilePath.');
             }
             
             return $real_file_path;
