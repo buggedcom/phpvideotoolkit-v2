@@ -658,6 +658,8 @@ So you see whilst the two examples look very similar and both block PHP, the sec
 
 This example (a better example is found in /examples/progress-handler-portability.php) shows that a non blocking save can be made in one request, and then subsequent requests (i.e. ajax) can be made to a different script to probe the encoding progress.
 
+**IMPORTANT:** Please remember that any ```Config``` object used in either of the below scripts must be the same in BOTH scripts in order to ensure the progress data can be retrieved in the progress script.
+
 Encoding script:
 ```php
 
