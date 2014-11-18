@@ -43,6 +43,11 @@
         
         protected function _getRawData()
         {
+            if(is_file($this->_progress_file) === false)
+            {
+                return '';
+            }
+
 //          there is a problem reading from the chunking file, so we must copy and then read, then delete the copy
 //          in order to succesfully read the data.
             $copy = $this->_progress_file.'.'.time().'.txt';
@@ -64,13 +69,13 @@
 
             if(empty($raw_data) === true)
             {
-                if($this->_last_probe_data === null)
+                if(empty($this->_last_probe_data) === true)
                 {
                     $return_data['status'] = self::ENCODING_STATUS_PENDING;
                 }
                 else
                 {
-                    $return_data = $last_data;
+                    $return_data['percentage'] = 100;
                     $return_data['finished'] = true;
                     $return_data['status'] = self::ENCODING_STATUS_FINISHED;
                 }
