@@ -117,8 +117,20 @@
                 'threads' => null,
                 'threads_indexed' => null,
             );
+
+            $ffmpeg = new FfmpegParser();
+            $available_commands = $ffmpeg->getCommands();
+            if(isset($available_commands['q']) === true)
+            {
+                $quality_command = '-q <setting>';
+            }
+            else
+            {
+                $quality_command = '-qscale <setting>';
+            }
+
             $this->_format_to_command = array(
-                'quality' => '-qscale <setting>',
+                'quality' => $quality,
                 'format'  => '-f <setting>',
                 'strictness'  => '-strict <setting>',
                 'preset_options_file'  => '-fpre <setting>',
