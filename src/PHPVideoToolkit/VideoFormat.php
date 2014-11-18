@@ -269,7 +269,7 @@
          * @throws \LogicException If the current format has a set of restricted codecs.
          * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setVideoCodec($video_codec)
+        public function setVideoCodec($video_codec, $stream_specifier=null)
         {
             $this->_blockSetOnInputFormat('video codec');
             
