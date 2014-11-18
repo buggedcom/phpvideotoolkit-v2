@@ -240,7 +240,11 @@
 //          check the video dimensions to see if we need to post process the dimensions
             if(isset($options['video_dimensions']))
             {
-                $dimensions = $options['video_dimensions'];
+                $dimensions = null;
+                if(isset($options['video_dimensions'][Format::DEFAULT_STREAM_SPECIFIER]) === true)
+                {
+                    $dimensions = $options['video_dimensions'][Format::DEFAULT_STREAM_SPECIFIER];
+                }
                 if(empty($dimensions) === false && $dimensions['auto_adjust_dimensions'] === true)
                 {
 //                  get the optimal dimensions for this video based on the aspect ratio

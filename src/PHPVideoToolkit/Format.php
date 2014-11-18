@@ -95,7 +95,7 @@
         const STRICTNESS_UNOFFICIAL = 'unofficial';
         const STRICTNESS_EXPERIMENTAL = 'experimental';
 
-        const DEFAULT_STREAM_SPECIFIER = '-1';
+        const DEFAULT_STREAM_SPECIFIER = -1;
 
         /**
          * Constructor
@@ -360,14 +360,22 @@
             $commands = array();
             if(empty($merged_commands) === false)
             {
+                $shunted = array();
                 foreach ($merged_commands as $key=>$command)
                 {
-                    if(is_array($command) === true)
+                    if(empty($command) === false)
                     {
-                        array_splice($merged_commands, $key, 1, $command);
+                        if(is_array($command) === true)
+                        {
+                            $shunted = array_merge($shunted, $command);
+                        }
+                        else
+                        {
+                            array_push($shunted, $command);
+                        }
                     }
                 }
-                foreach ($merged_commands as $command)
+                foreach ($shunted as $command)
                 {
                     if(preg_match('/^([^\s]+)\s+(.*)/', $command, $matches) > 0)
                     {
@@ -440,12 +448,11 @@
         protected function _mapFormatToCommands()
         {
             $options = array();
-
             foreach ($this->_format as $option => $value)
             {
 //              if the value is explicitly null or false we ignore it as it has not been set.
 //              if the value is to be set but not be ignored then it should be set as an empty string, ie '';
-                if($value === null || $value === false)
+                if($value === null || $value === false || (is_array($value) === true && empty($value) === true))
                 {
                     continue;
                 }
@@ -486,28 +493,38 @@
                     continue;
                 }
                 
-//              otherwise if the value is an array, that means we have multiple options to replace into the command
-                if(is_array($value) === true)
+//              if we have an stream_specifier then we have multiple singles of this command.
+                if(strpos($full_command, '(:<stream_specifier>)') !== false)
                 {
-//                  if we have an index then we have multiple singles of this command.
-                    if(strpos($full_command, '<stream_specifier>') !== false)
+                    $commands = array();
+                    foreach ($value as $k1=>$v1) 
                     {
-                        $commands = array();
-                        foreach ($value as $k1=>$v1) 
+                        if($k1 === self::DEFAULT_STREAM_SPECIFIER)
                         {
-                            array_push($commands, str_replace(array('<stream_specifier>', '<setting>'), array((string) $k1, (string) $v1), $full_command));
+                            $k1 = '';
                         }
-                        $command = $commands;
-                    }
-                    else
-                    {
-                        $find = array_keys($value);
-                        array_walk($find, function(&$value, $key)
+                        if(is_array($v1) === true)
                         {
-                            $value = '<'.$value.'>';
-                        });
-                        $command = str_replace($find, $value, $full_command);
+                            $find = array_keys($v1);
+                            array_walk($find, function(&$value, $key)
+                            {
+                                $value = '<'.$value.'>';
+                            });
+                            $v1 = str_replace($find, $v1, $full_command);
+                        }
+                        array_push($commands, str_replace(array('(:<stream_specifier>)', '<setting>'), array((string) $k1, (string) $v1), $full_command));
                     }
+                    $command = $commands;
+                }
+//              otherwise if the value is an array, that means we have multiple options to replace into the command
+                else if(is_array($value) === true)
+                {
+                    $find = array_keys($value);
+                    array_walk($find, function(&$value, $key)
+                    {
+                        $value = '<'.$value.'>';
+                    });
+                    $command = str_replace($find, $value, $full_command);
                 }
 //              otherwise, it's jsut a <setting> that is to be replaced
                 else
@@ -744,7 +761,7 @@
             {
                 $stream_specifier = self::DEFAULT_STREAM_SPECIFIER;
             }
-            
+
             if($qscale === null)
             {
                 if(is_array($this->_format['quality']) === true)
