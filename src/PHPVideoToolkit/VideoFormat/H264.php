@@ -80,7 +80,7 @@
             
             if(in_array($tune, array('film', 'animation', 'grain', 'stillimage', 'psnr', 'ssim', 'fastdecode', 'zerolatency')) === false)
             {
-                throw new Exception('Unrecognised h264 preset "'.$preset.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setH264Tune');
+                throw new Exception('Unrecognised h264 tune "'.$tune.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setH264Tune');
             }
             
             $this->_format['h264_tune'] = $tune;
