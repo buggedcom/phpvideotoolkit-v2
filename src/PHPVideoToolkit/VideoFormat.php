@@ -60,17 +60,28 @@
         {
             parent::__construct($input_output_type, $config);
             
+            if($this->_q_available === true)
+            {
+                $quality_command = '-q:v(:<stream_specifier>) <setting>';
+                $quality_default_value = array();
+            }
+            else
+            {
+                $quality_command = '-qscale:v <setting>';
+                $quality_default_value = null;
+            }
+
             $this->_format = array_merge($this->_format, array(
                 'disable_video' => null,
                 'video_codec' => null,
-                'video_quality' => null,
-                'video_dimensions' => null,
-                'video_scale' => null,
+                'video_quality' => $quality_default_value,
+                'video_dimensions' => array(),
+                'video_scale' => array(),
                 'video_padding' => null,
-                'video_aspect_ratio' => null,
-                'video_frame_rate' => null,
-                'video_bitrate' => null,
-                'video_pixel_format' => null,
+                'video_aspect_ratio' => array(),
+                'video_frame_rate' => array(),
+                'video_bitrate' => array(),
+                'video_pixel_format' => array(),
                 'video_rotation' => null,
                 'video_flip_horizontal' => null,
                 'video_flip_vertical' => null,
@@ -79,18 +90,18 @@
             ));
             $this->_format_to_command = array_merge($this->_format_to_command, array(
                 'disable_video'             => '-vn',
-                'video_quality'             => '-qscale:v <setting>',
-                'video_codec'               => '-vcodec <setting>',
-                'video_dimensions'          => '-s <width>x<height>',
-                'video_scale'               => '-vf scale=<width>:<height>',
-                'video_padding'             => '-vf pad=<width>:<height>:<x>:<y>:<colour>',
-                'video_aspect_ratio'        => '-aspect <ratio>',
-                'video_frame_rate'          => '-r <setting>',
-                'video_bitrate'             => '-b:v <setting>',
-                'video_pixel_format'        => '-pix_fmt <setting>',
-                'video_rotation'            => '-vf transpose=<setting>',
-                'video_flip_horizontal'     => '-vf hflip',
-                'video_flip_vertical'       => '-vf vflip',
+                'video_quality'             => $quality_command,
+                'video_codec'               => '-codec:v(:<stream_specifier>) <setting>',
+                'video_dimensions'          => '-s(:<stream_specifier>) <width>x<height>',
+                'video_scale'               => '-vf "scale=<width>:<height>"',
+                'video_padding'             => '-vf "pad=<width>:<height>:<x>:<y>:<colour>"',
+                'video_aspect_ratio'        => '-aspect(:<stream_specifier>) <ratio>',
+                'video_frame_rate'          => '-r(:<stream_specifier>) <setting>',
+                'video_bitrate'             => '-b:v(:<stream_specifier>) <setting>',
+                'video_pixel_format'        => '-pix_fmt(:<stream_specifier>) <setting>',
+                'video_rotation'            => '-vf "transpose=<setting>"',
+                'video_flip_horizontal'     => '-vf "hflip"',
+                'video_flip_vertical'       => '-vf "vflip"',
                 'video_max_frames'          => '-vframes <setting>',
             ));
             
@@ -240,20 +251,40 @@
         }
         
         /**
-         * undocumented function
+         * Sets the video codec for the video stream. The video codec must be one of the codecs given from
+         * PHPVideoToolkit\FfmpegParser::getCodecs or 'copy'. 
          *
          * @access public
          * @author Oliver Lillie
          * @param string $video_codec 
-         * @return void
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
+         * @throws \InvalidArgumentException If a codec is not found.
+         * @throws \InvalidArgumentException If a codec is not available in the restricted codecs array.
+         * @throws \LogicException If the current format has a set of restricted codecs.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
         public function setVideoCodec($video_codec)
         {
             $this->_blockSetOnInputFormat('video codec');
             
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoCodec') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($video_codec === null)
             {
-                $this->_format['video_codec'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['video_codec'] = array();
+                }
+                else if(isset($this->_format['video_codec'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['video_codec'][$stream_specifier]);
+                }
                 return $this;
             }
             
@@ -292,7 +323,7 @@
                 }
             }
             
-            $this->_format['video_codec'] = $video_codec;
+            $this->_format['video_codec'][$stream_specifier] = $video_codec;
             return $this;
         }
         
@@ -301,31 +332,50 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param string $width 
-         * @param string $height 
-         * @param string $auto_adjust_dimensions_to_optimal 
-         * @param string $force_aspect_ratio 
-         * @return void
+         * @param mixed $width 
+         * @param integer $height 
+         * @param boolean $auto_adjust_dimensions_to_optimal 
+         * @param boolean $force_aspect_ratio 
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
+         * @throws \InvalidArgumentException If a codec is not found.
+         * @throws \InvalidArgumentException If a codec is not available in the restricted codecs array.
+         * @throws \LogicException If the current format has a set of restricted codecs.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setVideoDimensions($width, $height=null, $auto_adjust_dimensions_to_optimal=false, $force_aspect_ratio=false)
+        public function setVideoDimensions($width, $height=null, $auto_adjust_dimensions_to_optimal=false, $force_aspect_ratio=false, $stream_specifier=null)
         {
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoDimensions') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($width === null)
             {
-                $this->_format['video_dimensions'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['video_dimensions'] = array();
+                }
+                else if(isset($this->_format['video_dimensions'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['video_dimensions'][$stream_specifier]);
+                }
                 return $this;
             }
-            
+
             if($height === null)
             {
                 if(in_array($width, array(self::DIMENSION_SAME_AS_SOURCE, self::DIMENSION_SQCIF, self::DIMENSION_QCIF, self::DIMENSION_CIF, self::DIMENSION_4CIF, self::DIMENSION_QQVGA, self::DIMENSION_QVGA, self::DIMENSION_VGA, self::DIMENSION_SVGA, self::DIMENSION_XGA, self::DIMENSION_UXGA, self::DIMENSION_QXGA, self::DIMENSION_SXGA, self::DIMENSION_QSXGA, self::DIMENSION_HSXGA, self::DIMENSION_WVGA, self::DIMENSION_WXGA, self::DIMENSION_WSXGA, self::DIMENSION_WUXGA, self::DIMENSION_WOXGA, self::DIMENSION_WQSXGA, self::DIMENSION_WQUXGA, self::DIMENSION_WHSXGA, self::DIMENSION_WHUXGA, self::DIMENSION_CGA, self::DIMENSION_EGA, self::DIMENSION_HD480, self::DIMENSION_HD720, self::DIMENSION_HD1080)) === false)
                 {
-                    throw new Exception();
+                    throw new \InvalidArgumentException('The width provided is not a recognised default width constant. If the $height argument is not provided then the $width argument must be one of the following constants: PHPVideoToolkit\VideoFormat::DIMENSION_SAME_AS_SOURCE, PHPVideoToolkit\VideoFormat::DIMENSION_SQCIF, PHPVideoToolkit\VideoFormat::DIMENSION_QCIF, PHPVideoToolkit\VideoFormat::DIMENSION_CIF, PHPVideoToolkit\VideoFormat::DIMENSION_4CIF, PHPVideoToolkit\VideoFormat::DIMENSION_QQVGA, PHPVideoToolkit\VideoFormat::DIMENSION_QVGA, PHPVideoToolkit\VideoFormat::DIMENSION_VGA, PHPVideoToolkit\VideoFormat::DIMENSION_SVGA, PHPVideoToolkit\VideoFormat::DIMENSION_XGA, PHPVideoToolkit\VideoFormat::DIMENSION_UXGA, PHPVideoToolkit\VideoFormat::DIMENSION_QXGA, PHPVideoToolkit\VideoFormat::DIMENSION_SXGA, PHPVideoToolkit\VideoFormat::DIMENSION_QSXGA, PHPVideoToolkit\VideoFormat::DIMENSION_HSXGA, PHPVideoToolkit\VideoFormat::DIMENSION_WVGA, PHPVideoToolkit\VideoFormat::DIMENSION_WXGA, PHPVideoToolkit\VideoFormat::DIMENSION_WSXGA, PHPVideoToolkit\VideoFormat::DIMENSION_WUXGA, PHPVideoToolkit\VideoFormat::DIMENSION_WOXGA, PHPVideoToolkit\VideoFormat::DIMENSION_WQSXGA, PHPVideoToolkit\VideoFormat::DIMENSION_WQUXGA, PHPVideoToolkit\VideoFormat::DIMENSION_WHSXGA, PHPVideoToolkit\VideoFormat::DIMENSION_WHUXGA, PHPVideoToolkit\VideoFormat::DIMENSION_CGA, PHPVideoToolkit\VideoFormat::DIMENSION_EGA, PHPVideoToolkit\VideoFormat::DIMENSION_HD480, PHPVideoToolkit\VideoFormat::DIMENSION_HD720, or PHPVideoToolkit\VideoFormat::DIMENSION_HD1080.');
                 }
                 
 //              if we have the same as source dimensions...
                 if($width === self::DIMENSION_SAME_AS_SOURCE)
                 {
-                    $this->_format['video_dimensions'] = 'sas';
+                    $this->_format['video_dimensions'][$stream_specifier] = 'sas';
                     return $this;
                 }
                 else
@@ -343,14 +393,14 @@
             
             if(empty($width) === true || $width <= 0)
             {
-                throw new Exception('Unrecognised width dimension "'.$width.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoDimensions');
+                throw new \InvalidArgumentException('Unrecognised width dimension "'.$width.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoDimensions');
             }
             if(empty($height) === true || $height <= 0)
             {
-                throw new Exception('Unrecognised height dimension "'.$height.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoDimensions');
+                throw new \InvalidArgumentException('Unrecognised height dimension "'.$height.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoDimensions');
             }
             
-            $this->_format['video_dimensions'] = array(
+            $this->_format['video_dimensions'][$stream_specifier] = array(
                 'width' => $width,
                 'height' => $height,
                 'auto_adjust_dimensions' => $auto_adjust_dimensions_to_optimal,
@@ -366,7 +416,7 @@
          * @author Oliver Lillie
          * @param string $width 
          * @param string $height 
-         * @return void
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
          */
         public function setVideoScale($width, $height)
         {
@@ -380,11 +430,11 @@
             
             if($width <= 0)
             {
-                throw new Exception('Unrecognised width dimension "'.$width.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoScale');
+                throw new \InvalidArgumentException('Unrecognised width dimension "'.$width.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoScale');
             }
             if($height <= 0)
             {
-                throw new Exception('Unrecognised height dimension "'.$height.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoScale');
+                throw new \InvalidArgumentException('Unrecognised height dimension "'.$height.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoScale');
             }
             
             $this->_format['video_scale'] = array(
@@ -409,7 +459,7 @@
          * @param string $width 
          * @param string $height 
          * @param string $colour 
-         * @return void
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
          */
         public function setVideoPadding($top, $right, $bottom, $left, $width=null, $height=null, $colour='black')
         {
@@ -471,24 +521,40 @@
          * @author Oliver Lillie
          * @param string $aspect_ratio 
          * @param string $auto_adjust_dimensions 
-         * @return void
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setVideoAspectRatio($aspect_ratio, $auto_adjust_dimensions=false)
+        public function setVideoAspectRatio($aspect_ratio, $auto_adjust_dimensions=false, $stream_specifier=null)
         {
             $this->_blockSetOnInputFormat('video aspect ratio');
             
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoAspectRatio') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($aspect_ratio === null)
             {
-                $this->_format['video_aspect_ratio'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['video_aspect_ratio'] = array();
+                }
+                else if(isset($this->_format['video_aspect_ratio'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['video_aspect_ratio'][$stream_specifier]);
+                }
                 return $this;
             }
             
             if(preg_match('/^[0-9]+.[0-9]+$/', $aspect_ratio) === 0 && preg_match('/^[0-9]+:[0-9]+$/', $aspect_ratio) === 0)
             {
-                throw new Exception('Unrecognised aspect ratio "'.$aspect_ratio.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoAspectRatio');
+                throw new \InvalidArgumentException('Unrecognised aspect ratio "'.$aspect_ratio.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoAspectRatio');
             }
             
-            $this->_format['video_aspect_ratio'] = array(
+            $this->_format['video_aspect_ratio'][$stream_specifier] = array(
                 'ratio' => $aspect_ratio,
                 'auto_adjust_dimensions' => $auto_adjust_dimensions,
             );
@@ -501,24 +567,40 @@
          * @access public
          * @author Oliver Lillie
          * @param string $frame_rate 
-         * @return void
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setVideoFrameRate($frame_rate)
+        public function setVideoFrameRate($frame_rate, $stream_specifier=null)
         {
             // PEG1/2 does not support 5/1 fps
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoFrameRate') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($frame_rate === null)
             {
-                $this->_format['video_frame_rate'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['video_frame_rate'] = array();
+                }
+                else if(isset($this->_format['video_frame_rate'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['video_frame_rate'][$stream_specifier]);
+                }
                 return $this;
             }
-            
+                        
             if($frame_rate < 1)
             {
-                throw new Exception('Unrecognised frame rate "'.$frame_rate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate');
+                throw new \InvalidArgumentException('Unrecognised frame rate "'.$frame_rate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate');
             }
             else if(is_int($frame_rate) === false && is_float($frame_rate) === false && (is_string($frame_rate) === true && preg_match('/[0-9]+\/[0-9]+/', $frame_rate) === 0))
             {
-                throw new Exception('If setting a frame rate please make sure it is either an integer, a float or a string in the "1/n" format (i.e. 1/60 = 1 frame every 60 seconds).');
+                throw new \InvalidArgumentException('If setting a frame rate please make sure it is either an integer, a float or a string in the "1/n" format (i.e. 1/60 = 1 frame every 60 seconds).');
             }
             
 //          now check the class settings to see if restricted codecs have been set and have to be obeys
@@ -526,11 +608,11 @@
             {
                 if(in_array($frame_rate, $this->_restricted_video_frame_rates) === false)
                 {
-                    throw new Exception('The frame rate "'.$frame_rate.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate. Please select one of the following frame rates: '.implode(', ', $this->_restricted_video_frame_rates));
+                    throw new \LogicException('The frame rate "'.$frame_rate.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate. Please select one of the following frame rates: '.implode(', ', $this->_restricted_video_frame_rates));
                 }
             }
             
-            $this->_format['video_frame_rate'] = $frame_rate;
+            $this->_format['video_frame_rate'][$stream_specifier] = $frame_rate;
             return $this;
         }
         
@@ -540,7 +622,7 @@
          * @access public
          * @author Oliver Lillie
          * @param string $max_frame_count 
-         * @return void
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
          */
         public function setVideoMaxFrames($max_frame_count)
         {
@@ -553,7 +635,7 @@
             
             if($max_frame_count < 1)
             {
-                throw new Exception('Unrecognised max frame count "'.$max_frame_count.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate');
+                throw new \InvalidArgumentException('Unrecognised max frame count "'.$max_frame_count.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoFrameRate');
             }
             
             $this->_format['video_max_frames'] = $max_frame_count;
@@ -566,16 +648,32 @@
          * @access public
          * @author Oliver Lillie
          * @param string $bitrate 
-         * @return void
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setVideoBitrate($bitrate)
+        public function setVideoBitrate($bitrate, $stream_specifier=null)
         {
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoBitrate') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($bitrate === null)
             {
-                $this->_format['video_bitrate'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['video_bitrate'] = array();
+                }
+                else if(isset($this->_format['video_bitrate'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['video_bitrate'][$stream_specifier]);
+                }
                 return $this;
             }
-            
+                        
 //          expand out any short hand
             if(preg_match('/^[0-9]+k$/', $bitrate) > 0)
             {
@@ -587,14 +685,13 @@
             {
                 if(in_array($bitrate, $this->_restricted_video_bitrates) === false)
                 {
-                    throw new Exception('The bitrate "'.$bitrate.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoBitrate. Please select one of the following bitrates: '.implode(', ', $this->_restricted_video_bitrates));
+                    throw new \LogicException('The bitrate "'.$bitrate.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoBitrate. Please select one of the following bitrates: '.implode(', ', $this->_restricted_video_bitrates));
                 }
             }
             
-            $this->_format['video_bitrate'] = $bitrate;
+            $this->_format['video_bitrate'][$stream_specifier] = $bitrate;
             return $this;
             
-            //throw new Exception('Unrecognised video bitrate "'.$bitrate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoBitrate');
         }
         
         /**
@@ -603,33 +700,49 @@
          * @access public
          * @author Oliver Lillie
          * @param string $pixel_format 
-         * @return void
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setVideoPixelFormat($pixel_format)
+        public function setVideoPixelFormat($pixel_format, $stream_specifier=null)
         {
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoPixelFormat') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($pixel_format === null)
             {
-                $this->_format['video_pixel_format'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['video_pixel_format'] = array();
+                }
+                else if(isset($this->_format['video_pixel_format'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['video_pixel_format'][$stream_specifier]);
+                }
                 return $this;
             }
-            
+                                    
 //          now check the class settings to see if restricted pixel formats have been set and have to be obeyed
             if($this->_restricted_video_pixel_formats !== null)
             {
                 if(in_array($video_codec, $this->_restricted_video_pixel_formats) === false)
                 {
-                    throw new Exception('The video pixel format "'.$pixel_format.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoPixelFormat. Please select one of the following pixel formats: '.implode(', ', $this->_restricted_video_pixel_formats));
+                    throw new \LoginException('The video pixel format "'.$pixel_format.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoPixelFormat. Please select one of the following pixel formats: '.implode(', ', $this->_restricted_video_pixel_formats));
                 }
             }
             
             $valid_pixel_formats = $this->getPixelFormats();
-            if(in_array($pixel_format, array_keys($valid_pixel_formats)) === true)
+            if(in_array($pixel_format, array_keys($valid_pixel_formats)) === false)
             {
-                $this->_format['video_pixel_format'] = $pixel_format;
-                return $this;
+                throw new \InvalidArgumentException('Unrecognised pixel format "'.$pixel_format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoPixelFormat');
             }
             
-            throw new Exception('Unrecognised pixel format "'.$pixel_format.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoPixelFormat');
+            $this->_format['video_pixel_format'][$stream_specifier] = $pixel_format;
+            return $this;
         }
         
         /**
@@ -638,26 +751,43 @@
          * @access public
          * @author Oliver Lillie
          * @param string $quality 
-         * @return void
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setVideoQuality($quality)
+        public function setVideoQuality($quality, $stream_specifier=null)
         {
             $this->_blockSetOnInputFormat('video quality');
             
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoQuality') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($quality === null)
             {
-                $this->_format['video_quality'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['video_quality'] = array();
+                }
+                else if(isset($this->_format['video_quality'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['video_quality'][$stream_specifier]);
+                }
                 return $this;
             }
+                                    
             
 //          interpret quality into ffmpeg value
             $quality = 31 - round(($quality / 100) * 31);
             if($quality > 31 || $quality < 1)
             {
-                throw new Exception('Unrecognised quality "'.$quality.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setQuality');
+                throw new \InvalidArgumentException('Unrecognised quality "'.$quality.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setQuality');
             }
             
-            $this->_format['video_quality'] = $quality;
+            $this->_format['video_quality'][$stream_specifier] = $quality;
             return $this;
         }
         
@@ -667,7 +797,7 @@
          * @access public
          * @author Oliver Lillie
          * @param string $rotation 
-         * @return void
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
          */
         public function setVideoRotation($rotation)
         {
@@ -675,7 +805,7 @@
             
             if(in_array('transpose', $this->getFilters()) === false)
             {
-                throw new Exception('Unable to rotate the video as your version of ffmpeg does not support the transpose video filter.');
+                throw new \InvalidArgumentException('Unable to rotate the video as your version of ffmpeg does not support the transpose video filter.');
             }
             
             if($rotation === null)
@@ -696,7 +826,7 @@
 //          90 is the same as -270, etc.
             if(in_array($rotation, array(0, 90, 180, 270, -90, -270, -180)) === false)
             {
-                throw new Exception('Unrecognised rotation "'.$rotation.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoRotation');
+                throw new \InvalidArgumentException('Unrecognised rotation "'.$rotation.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoRotation');
             }
             
 //          get the transpose code. Note that we can't transpose 180 degrees, for that we must perform flips
@@ -720,7 +850,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
          */
         public function videoFlipVertical()
         {
@@ -743,7 +873,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return void
+         * @return PHPVideoToolkit\VideoFormat Returns the current object.
          */
         public function videoFlipHorizontal()
         {

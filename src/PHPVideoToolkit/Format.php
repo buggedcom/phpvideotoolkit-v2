@@ -24,44 +24,51 @@
         /**
          * [$_output_renamed description]
          * @var [type]
-         * @access private
+         * @access protected
          */
         protected $_format;
 
         /**
          * [$_output_renamed description]
          * @var [type]
-         * @access private
+         * @access protected
          */
         protected $_type;
 
         /**
          * [$_output_renamed description]
          * @var [type]
-         * @access private
+         * @access protected
          */
         protected $_media_object;
 
         /**
          * [$_output_renamed description]
          * @var [type]
-         * @access private
+         * @access protected
          */
         protected $_format_to_command;
 
         /**
          * [$_output_renamed description]
          * @var [type]
-         * @access private
+         * @access protected
          */
         protected $_additional_commands;
 
         /**
          * [$_output_renamed description]
          * @var [type]
-         * @access private
+         * @access protected
          */
         protected $_removed_commands;
+
+        /**
+         * [$_output_renamed description]
+         * @var [type]
+         * @access protected
+         */
+        protected $_q_available;
 
         /**
          * [$_output_renamed description]
@@ -88,6 +95,8 @@
         const STRICTNESS_UNOFFICIAL = 'unofficial';
         const STRICTNESS_EXPERIMENTAL = 'experimental';
 
+        const DEFAULT_STREAM_SPECIFIER = '-1';
+
         /**
          * Constructor
          *
@@ -109,33 +118,36 @@
             
             $this->_media_object = null;
             
-            $this->_format = array(
-                'quality' => null,
-                'format' => null,
-                'strictness' => null,
-                'preset_options_file' => null,
-                'threads' => null,
-                'threads_indexed' => null,
-            );
-
             $ffmpeg = new FfmpegParser();
+
+//          get the quality command depending on if it is available or not
             $available_commands = $ffmpeg->getCommands();
-            if(isset($available_commands['q']) === true)
+            $this->_q_available = isset($available_commands['q']) === true;
+            if($this->_q_available === true)
             {
-                $quality_command = '-q <setting>';
+                $quality_command = '-q(:<stream_specifier>) <setting>';
+                $quality_default_value = array();
             }
             else
             {
                 $quality_command = '-qscale <setting>';
+                $quality_default_value = null;
             }
+
+            $this->_format = array(
+                'quality' => $quality_default_value,
+                'format' => null,
+                'strictness' => null,
+                'preset_options_file' => null,
+                'threads' => array(),
+            );
 
             $this->_format_to_command = array(
                 'quality' => $quality_command,
                 'format'  => '-f <setting>',
                 'strictness'  => '-strict <setting>',
                 'preset_options_file'  => '-fpre <setting>',
-                'threads'  => '-threads <setting>',
-                'threads_indexed'  => '-threads:<index> <setting>',
+                'threads'  => '-threads(:<stream_specifier>) <setting>',
             );
             
 //          add default input/output commands
@@ -478,12 +490,12 @@
                 if(is_array($value) === true)
                 {
 //                  if we have an index then we have multiple singles of this command.
-                    if(strpos($full_command, '<index>') !== false)
+                    if(strpos($full_command, '<stream_specifier>') !== false)
                     {
                         $commands = array();
                         foreach ($value as $k1=>$v1) 
                         {
-                            array_push($commands, str_replace(array('<index>', '<setting>'), array((string) $k1, (string) $v1), $full_command));
+                            array_push($commands, str_replace(array('<stream_specifier>', '<setting>'), array((string) $k1, (string) $v1), $full_command));
                         }
                         $command = $commands;
                     }
@@ -655,20 +667,33 @@
          * @access public
          * @author Oliver Lillie
          * @param integer $threads Between 0-64
-         * @param integer $stream_index Between 0-48. If specified then the threads option is given a stream specifier to 
-         *  specify a particular audiovideo stream, i.e. -threads:1 4. If a previous setThreads has been called without specifiying
-         *  a stream_index, then the 
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
          * @return PHPVideoToolkit\Format Returns the current object.
          * @throws \InvalidArgumentException If the threads value is not an integer.
          * @throws \InvalidArgumentException If the threads value is not between 1-64.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setThreads($threads, $stream_index=null)
+        public function setThreads($threads, $stream_specifier=null)
         {
             $this->_blockSetOnInputFormat('thread level');
             
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setThreads') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($threads === null)
             {
-                $this->_format['threads'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['threads'] = array();
+                }
+                else if(isset($this->_format['threads'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['threads'][$stream_specifier]);
+                }
                 return $this;
             }
             
@@ -681,30 +706,10 @@
                 throw new \InvalidArgumentException('Invalid `threads` value; the value must fit in range 0 - 64.');
             }
 
-            // if we have a specified stream index then store the threads format differently.
-            if($stream_index !== null)
-            {
-                if(is_int($stream_index) === false)
-                {
-                    throw new \InvalidArgumentException('The stream_index value must be an integer.');
-                }
-                else if($stream_index < 0 || $stream_index > 48)
-                {
-                    throw new \InvalidArgumentException('Invalid `stream_index` value; the value must fit in range 0 - 48.');
-                }
-
-                if($this->_format['threads_indexed'] === null)
-                {
-                    $this->_format['threads_indexed'] = array();
-                }
-                $this->_format['threads_indexed'][$stream_index] = $threads;
-                return $this;
-            }
-
-            $this->_format['threads'] = $threads;
+            $this->_format['threads'][$stream_specifier] = $threads;
             return $this;
         }
-        
+
         /**
          * Sets the -qscale <setting>
          *
@@ -712,17 +717,51 @@
          * @author Oliver Lillie
          * @see http://www.kilobitspersecond.com/2007/05/24/ffmpeg-quality-comparison/
          * @param integer $qscale Between 1-31
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
          * @return PHPVideoToolkit\Format Returns the current object.
          * @throws \InvalidArgumentException If the qscale value is not an integer.
          * @throws \InvalidArgumentException If the qscale value is not between 1-64.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setQualityVsStreamabilityBalanceRatio($qscale)
+        public function setQualityVsStreamabilityBalanceRatio($qscale, $stream_specifier=null)
         {
-            $this->_blockSetOnInputFormat('quality stream ability balance ratio (qscale)');
+            $this->_blockSetOnInputFormat('quality stream ability balance ratio (qscale or q)');
+
+            if($stream_specifier !== null)
+            {
+                if(strpos($this->_format_to_command['quality'], ':index') === false)
+                {
+                    throw new \InvalidArgumentException('Your version of ffmpeg does not support stream specifiers. Please upgrade ffmpeg or remove the $stream_specifier argument.');
+                }
+                $stream_specifier = $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setQualityVsStreamabilityBalanceRatio');
+            }
+            else
+            {
+                $stream_specifier = self::DEFAULT_STREAM_SPECIFIER;
+            }
             
             if($qscale === null)
             {
-                $this->_format['quality'] = null;
+                if(is_array($this->_format['quality']) === true)
+                {
+                    if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                    {
+                        $this->_format['quality'] = array();
+                    }
+                    else if(isset($this->_format['quality'][$stream_specifier]) === true)
+                    {
+                        unset($this->_format['quality'][$stream_specifier]);
+                    }
+                }
+                else
+                {
+                    $this->_format['quality'] = null;
+                }
                 return $this;
             }
             
@@ -735,8 +774,103 @@
                 throw new \InvalidArgumentException('Invalid quality stream ability balance ratio (qscale) value; the value must fit in range 1 - 31.');
             }
             
-            $this->_format['quality'] = $qscale;
+            if(is_array($this->_format['quality']) === true)
+            {
+                $this->_format['quality'][$stream_specifier] = $qscale;
+            }
+            else
+            {
+                $this->_format['quality'] = $qscale;
+            }
             return $this;
+        }
+
+        /**
+         * Validates the stream specifiers as described within the ffmpeg docs here:
+         * https://www.ffmpeg.org/ffmpeg.html#Stream-specifiers-1
+         *
+         * @access protected
+         * @author: Oliver Lillie
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
+         * @param string $function_name The name of the function making the check.
+         * @param array $config An array of the checks to be made for this stream specifier in the check => boolean format.
+         * @return string Returns the stream specifier if it is valid.
+         * @throws \InvalidArgumentException If the stream is invalid.
+         */
+        protected function _validateStreamSpecifier($stream_specifier, $function_name, $config=array())
+        {
+            if(is_array($config) === false)
+            {
+                throw new \InvalidArgumentException('The $config argument must be an array.');
+            }
+
+            $default_config = array('integer'=>true, 'stream_type'=>true, 'program_id'=>true, 'stream_id'=>true, 'meta'=>false);
+            $config = $default_config+$config;
+
+//          validate "stream_index"
+            if(preg_match('/^([0-9]+)$/', $stream_specifier) > 0)
+            {
+                $stream_specifier = (int) $stream_specifier;
+            }
+            if(is_int($stream_specifier) === true)
+            {
+                if($config['integer'] === false)
+                {
+                    throw new \InvalidArgumentException('The stream specifier `'.$stream_specifier.'` is invalid as you cannot use this type of stream specifier with '.$function_name.'.');
+                }
+                if($stream_specifier < 0)
+                {
+                    throw new \InvalidArgumentException('The stream specifier `'.$stream_specifier.'` is invalid. If supplied as an integer, the specifier must be greater than or equal to 0.');
+                }
+                return (string) $stream_specifier;
+            }
+
+//          validate stream_type[:stream_index]
+            if(preg_match('/^(v|a|s|d|t)$/', $stream_specifier) > 0 || preg_match('/^(v|a|s|d|t):([0-9]+)$/', $stream_specifier) > 0)
+            {
+                if($config['stream_type'] === true)
+                {
+                    return $stream_specifier;
+                }
+                throw new \InvalidArgumentException('The stream specifier `'.$stream_specifier.'` is invalid as you cannot use this type of stream specifier with '.$function_name.'.');
+            }
+            
+//          validate p:program_id[:stream_index]
+            if(preg_match('/^p:([0-9]+)$/', $stream_specifier) > 0 || preg_match('/^p:([0-9]+):([0-9]+)$/', $stream_specifier) > 0)
+            {
+                if($config['program_id'] === true)
+                {
+                    return $stream_specifier;
+                }
+                throw new \InvalidArgumentException('The stream specifier `'.$stream_specifier.'` is invalid as you cannot use this type of stream specifier with '.$function_name.'.');
+            }
+
+//          validate #stream_id or i:stream_id
+            if(preg_match('/^#([0-9]+)$/', $stream_specifier) > 0 || preg_match('/^i:([0-9]+)$/', $stream_specifier) > 0)
+            {
+                if($config['stream_id'] === true)
+                {
+                    return $stream_specifier;
+                }
+                throw new \InvalidArgumentException('The stream specifier `'.$stream_specifier.'` is invalid as you cannot use this type of stream specifier with '.$function_name.'.');
+            }
+
+//          validate m:key[:value]
+            if(preg_match('/^m:([a-zA-Z0-9\_\-]+)$/', $stream_specifier) > 0 || preg_match('/^m:([a-zA-Z0-9\_\-]+):([a-zA-Z0-9\_\-]+)$/', $stream_specifier) > 0)
+            {
+                if($config['meta'] === true)
+                {
+                    return $stream_specifier;
+                }
+                throw new \InvalidArgumentException('The stream specifier `'.$stream_specifier.'` is invalid as you cannot use this type of stream specifier with '.$function_name.'.');
+            }
+
+            throw new \InvalidArgumentException('The stream specifier `'.$stream_specifier.'` is not in a valid format. Please check https://www.ffmpeg.org/ffmpeg.html#Stream-specifiers-1 for a valid stream specifier format.');
         }
         
     }

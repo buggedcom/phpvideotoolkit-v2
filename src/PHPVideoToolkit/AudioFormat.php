@@ -51,25 +51,36 @@
         {
             parent::__construct($input_output_type, $config);
             
+            if($this->_q_available === true)
+            {
+                $quality_command = '-q:a(:<stream_specifier>) <setting>';
+                $quality_default_value = array();
+            }
+            else
+            {
+                $quality_command = '-qscale:a <setting>';
+                $quality_default_value = null;
+            }
+
             $this->_format = array_merge($this->_format, array(
                 'disable_audio' => false,
-                'audio_quality' => null,
-                'audio_codec' => null,
-                'audio_bitrate' => null,
-                'audio_sample_frequency' => null,
+                'audio_quality' => $quality_default_value,
+                'audio_codec' => array(),
+                'audio_bitrate' => array(),
+                'audio_sample_frequency' => array(),
                 'audio_channels' => null,
                 'audio_volume' => null,
                 'audio_filters' => null,
             ));
             $this->_format_to_command = array_merge($this->_format_to_command, array(
                 'disable_audio'             => '-an',
-                'audio_quality'             => '-qscale:a <setting>',
-                'audio_codec'               => '-acodec <setting>',
-                'audio_bitrate'             => '-ab <setting>',
-                'audio_sample_frequency'    => '-ar <setting>',
+                'audio_quality'             => $quality_command,
+                'audio_codec'               => '-codec:a(:<stream_specifier>) <setting>',
+                'audio_bitrate'             => '-b:a(:<stream_specifier>) <setting>',
+                'audio_sample_frequency'    => '-ar(:<stream_specifier>) <setting>',
                 'audio_channels'            => array(
                     'input' => '-request_channels <setting>',
-                    'output' => '-ac <setting>',
+                    'output' => '-ac(:<index>) <setting>',
                 ),
                 'audio_volume'              => '-af "volume=<setting>"',
             ));
@@ -170,15 +181,31 @@
          * @access public
          * @author Oliver Lillie
          * @param string $audio_codec 
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
          * @return PHPVideoToolkit\AudioFormat Returns the current object.
          * @throws \InvalidArgumentException If a codec is not found.
          * @throws \InvalidArgumentException If a codec is not available in the restricted codecs array.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setAudioCodec($audio_codec)
+        public function setAudioCodec($audio_codec, $stream_specifier=null)
         {
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioCodec') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($audio_codec === null)
             {
-                $this->_format['audio_codec'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['audio_codec'] = array();
+                }
+                else if(isset($this->_format['audio_codec'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['audio_codec'][$stream_specifier]);
+                }
                 return $this;
             }
             
@@ -218,7 +245,7 @@
                 }
             }
             
-            $this->_format['audio_codec'] = $audio_codec;
+            $this->_format['audio_codec'][$stream_specifier] = $audio_codec;
             return $this;
         }
         
@@ -228,17 +255,33 @@
          * @access public
          * @author Oliver Lillie
          * @param string $bitrate 
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
          * @return PHPVideoToolkit\AudioFormat Returns the current object.
          * @throws \InvalidArgumentException If the bitrate is not in one of the restricted bit rates, if any.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          * @todo expand out the shorthand notations of bitrates
          */
-        public function setAudioBitrate($bitrate)
+        public function setAudioBitrate($bitrate, $stream_specifier=null)
         {
             $this->_blockSetOnInputFormat('audio bitrate');
             
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioBitrate') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($bitrate === null)
             {
-                $this->_format['audio_bitrate'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['audio_bitrate'] = array();
+                }
+                else if(isset($this->_format['audio_bitrate'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['audio_bitrate'][$stream_specifier]);
+                }
                 return $this;
             }
             
@@ -257,7 +300,7 @@
                 }
             }
             
-            $this->_format['audio_bitrate'] = $bitrate;
+            $this->_format['audio_bitrate'][$stream_specifier] = $bitrate;
             return $this;
         }
         
@@ -267,16 +310,32 @@
          * @access public
          * @author Oliver Lillie
          * @param string $audio_sample_frequency 
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
          * @return PHPVideoToolkit\AudioFormat Returns the current object.
          * @throws \InvalidArgumentException If the sample frequency is not an integer value.
          * @throws \InvalidArgumentException If the sample frequency is less than 0
          * @throws \InvalidArgumentException If the sample frequency is not in one of the restricted sample frequencies, if any.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setAudioSampleFrequency($audio_sample_frequency)
+        public function setAudioSampleFrequency($audio_sample_frequency, $stream_specifier=null)
         {
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioSampleFrequency') : self::DEFAULT_STREAM_SPECIFIER;
+
             if($audio_sample_frequency === null)
             {
-                $this->_format['audio_sample_frequency'] = null;
+                if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                {
+                    $this->_format['audio_sample_frequency'] = array();
+                }
+                else if(isset($this->_format['audio_sample_frequency'][$stream_specifier]) === true)
+                {
+                    unset($this->_format['audio_sample_frequency'][$stream_specifier]);
+                }
                 return $this;
             }
             else if(is_integer($audio_sample_frequency) === false)
@@ -297,7 +356,7 @@
                 }
             }
                 
-            $this->_format['audio_sample_frequency'] = $audio_sample_frequency;
+            $this->_format['audio_sample_frequency'][$stream_specifier] = $audio_sample_frequency;
             return $this;
         }
         
@@ -307,15 +366,46 @@
          * @access public
          * @author Oliver Lillie
          * @param integer $channels One of the following integers; 0, 1, 2, 6.
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
          * @return PHPVideoToolkit\AudioFormat Returns the current object.
          * @throws \InvalidArgumentException If $channels value is not an integer.
          * @throws \InvalidArgumentException If $channels value is not one of the allowed values.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setAudioChannels($channels)
+        public function setAudioChannels($channels, $stream_specifier=null)
         {
+            if($this->_type === Format::INPUT && $stream_specifier !== null)
+            {
+                throw new \LogicException('It is not possible to set a stream specifier on an input format with setAudioChannels.');
+            }
+
+            if($this->_type === Format::OUTPUT)
+            {
+                $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioChannels') : self::DEFAULT_STREAM_SPECIFIER;
+            }
+
             if($channels === null)
             {
-                $this->_format['audio_channels'] = null;
+                if($this->_type === Format::OUTPUT)
+                {
+                    if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                    {
+                        $this->_format['audio_channels'] = array();
+                    }
+                    else if(isset($this->_format['audio_channels'][$stream_specifier]) === true)
+                    {
+                        unset($this->_format['audio_channels'][$stream_specifier]);
+                    }
+                }
+                else
+                {
+                    $this->_format['audio_channels'] = null;
+                }
                 return $this;
             }
             
@@ -328,7 +418,14 @@
                 throw new \InvalidArgumentException('Unrecognised audio channels "'.$channels.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioChannels. The channels value must be one of the following values: 0, 1, 2, or 6.');
             }
 
-            $this->_format['audio_channels'] = $channels;
+            if($this->_type === Format::OUTPUT)
+            {
+                $this->_format['audio_channels'][$stream_specifier] = $channels;
+            }
+            else
+            {
+                $this->_format['audio_channels'] = $channels;
+            }
             return $this;
         }
         
@@ -369,20 +466,55 @@
          * @access public
          * @author Oliver Lillie
          * @param mixed $quality Integer or Float. The quality level of the audio on a 0-100 scale.
+         * @param  mixed $stream_specifier Either a string or integer. If string it can be in the following formats:
+         *  stream_index -> "1"
+         *  stream_type[:stream_index] -> "v" -> "v:1"
+         *  p:program_id[:stream_index]
+         *  #stream_id or i:stream_id
+         *  m:key[:value]
          * @return PHPVideoToolkit\AudioFormat Returns the current object.
          * @throws \InvalidArgumentException If $qaulity value is not an integer or float.
          * @throws \InvalidArgumentException If $qaulity value does not eventually work out to be between 0-31.
+         * @throws \InvalidArgumentException If the $stream_specifier value is not a valid stream specifier.
          */
-        public function setAudioQuality($quality)
+        public function setAudioQuality($quality, $stream_specifier=null)
         {
             $this->_blockSetOnInputFormat('audio quality');
             
+            if($stream_specifier !== null)
+            {
+                if(strpos($this->_format_to_command['quality'], ':index') === false)
+                {
+                    throw new \InvalidArgumentException('Your version of ffmpeg does not support stream specifiers. Please upgrade ffmpeg or remove the $stream_specifier argument.');
+                }
+                $stream_specifier = $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioQuality');
+            }
+            else
+            {
+                $stream_specifier = self::DEFAULT_STREAM_SPECIFIER;
+            }
+            
             if($quality === null)
             {
-                $this->_format['audio_quality'] = null;
+                if(is_array($this->_format['audio_quality']) === true)
+                {
+                    if($stream_specifier === self::DEFAULT_STREAM_SPECIFIER)
+                    {
+                        $this->_format['audio_quality'] = array();
+                    }
+                    else if(isset($this->_format['audio_quality'][$stream_specifier]) === true)
+                    {
+                        unset($this->_format['audio_quality'][$stream_specifier]);
+                    }
+                }
+                else
+                {
+                    $this->_format['audio_quality'] = null;
+                }
                 return $this;
             }
-            else if (is_int($quality) === false && is_float($quality) === false)
+    
+            if (is_int($quality) === false && is_float($quality) === false)
             {
                 throw new \InvalidArgumentException('The volume value must be an integer or float value.');
             }
@@ -394,7 +526,14 @@
                 throw new \InvalidArgumentException('Unrecognised quality "'.$quality.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioQuality. The quality value must be between 0 and 100.');
             }
             
-            $this->_format['audio_quality'] = $quality;
+            if(is_array($this->_format['quality']) === true)
+            {
+                $this->_format['audio_quality'][$stream_specifier] = $qscale;
+            }
+            else
+            {
+                $this->_format['audio_quality'] = $qscale;
+            }
             return $this;
         }
     }
