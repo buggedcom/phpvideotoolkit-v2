@@ -273,7 +273,7 @@
         {
             $this->_blockSetOnInputFormat('video codec');
             
-            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoCodec') : self::DEFAULT_STREAM_SPECIFIER;
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoCodec', array('integer'=>true, 'stream_type'=>false, 'program_id'=>false, 'stream_id'=>false, 'meta'=>false)) : self::DEFAULT_STREAM_SPECIFIER;
 
             if($video_codec === null)
             {
@@ -659,7 +659,7 @@
          */
         public function setVideoBitrate($bitrate, $stream_specifier=null)
         {
-            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoBitrate') : self::DEFAULT_STREAM_SPECIFIER;
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setVideoBitrate', array('integer'=>true, 'stream_type'=>false, 'program_id'=>false, 'stream_id'=>false, 'meta'=>false)) : self::DEFAULT_STREAM_SPECIFIER;
 
             if($bitrate === null)
             {

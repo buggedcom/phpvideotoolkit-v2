@@ -194,7 +194,7 @@
          */
         public function setAudioCodec($audio_codec, $stream_specifier=null)
         {
-            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioCodec') : self::DEFAULT_STREAM_SPECIFIER;
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioCodec', array('integer'=>true, 'stream_type'=>false, 'program_id'=>false, 'stream_id'=>false, 'meta'=>false)) : self::DEFAULT_STREAM_SPECIFIER;
 
             if($audio_codec === null)
             {
@@ -270,7 +270,7 @@
         {
             $this->_blockSetOnInputFormat('audio bitrate');
             
-            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioBitrate') : self::DEFAULT_STREAM_SPECIFIER;
+            $stream_specifier = $stream_specifier !== null ? $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioBitrate', array('integer'=>true, 'stream_type'=>false, 'program_id'=>false, 'stream_id'=>false, 'meta'=>false)) : self::DEFAULT_STREAM_SPECIFIER;
 
             if($bitrate === null)
             {
@@ -487,7 +487,7 @@
                 {
                     throw new \InvalidArgumentException('Your version of ffmpeg does not support stream specifiers. Please upgrade ffmpeg or remove the $stream_specifier argument.');
                 }
-                $stream_specifier = $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioQuality');
+                $stream_specifier = $this->_validateStreamSpecifier($stream_specifier, get_class($this).'::setAudioQuality', array('integer'=>true, 'stream_type'=>false, 'program_id'=>false, 'stream_id'=>false, 'meta'=>false));
             }
             else
             {
