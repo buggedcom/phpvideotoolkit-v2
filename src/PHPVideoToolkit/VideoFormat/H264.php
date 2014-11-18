@@ -30,11 +30,13 @@
                 'h264_preset' => null,
                 'h264_tune' => null,
                 'h264_constant_quantization' => null,
+                'h264_profile' => null
             ));
             $this->_format_to_command = array_merge($this->_format_to_command, array(
                 'h264_preset' => '-preset <setting>',
                 'h264_tune' => '-tune <setting>',
                 'h264_constant_quantization' => '-qp <setting>',
+                'h264_profile' => '-profile:v <setting>'
             ));
             
             $this->_restricted_video_presets = null;
@@ -85,6 +87,24 @@
             return $this;
         }
         
+        public function setH264Profile($profile=null)
+        {
+            $this->_blockSetOnInputFormat('h264 profile');
+            
+            if($profile === null)
+            {
+                $this->_format['h264_profile'] = null;
+                return $this;
+            }
+            
+            if(in_array($profile, array('baseline', 'main', 'high', 'high10', 'high422', 'high444')) === false)
+            {
+                throw new Exception('Unrecognised h264 profile "'.$profile.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setH264Profile');
+            }
+            
+            $this->_format['h264_profile'] = $profile;
+            return $this;
+        }
         public function enableH264LosslessEncoding()
         {
             $this->_format['h264_constant_quantization'] = 0;
