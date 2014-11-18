@@ -130,7 +130,7 @@
             }
 
             $this->_format_to_command = array(
-                'quality' => $quality,
+                'quality' => $quality_command,
                 'format'  => '-f <setting>',
                 'strictness'  => '-strict <setting>',
                 'preset_options_file'  => '-fpre <setting>',
