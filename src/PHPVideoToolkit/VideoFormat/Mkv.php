@@ -60,7 +60,7 @@
                     'pcm_u16le',
                     'pcm_u24le',
                     'pcm_u32le',
-                    'pcm_u8',
+                    'pcm_u8'
                 );
                 array_push($this->_restricted_video_codecs, 'rv10', 'rv20', 'rv30', 'rv40', 'mpeg1video', 'mpeg2video', 'theora', 'snow', 'mpeg4');
             }
