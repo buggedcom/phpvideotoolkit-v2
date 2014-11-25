@@ -129,6 +129,8 @@
         
         public function postProcessCreateAnimatedGif(array $output, Media $media, $save_path, $overwrite, $video_frame_rate, $gif_loop_count, $gif_frame_delay)
         {
+            $video_frame_rate = isset($video_frame_rate[Format::DEFAULT_STREAM_SPECIFIER]) === true ? $video_frame_rate[Format::DEFAULT_STREAM_SPECIFIER] : 1;
+
 //          create the gif
             $gif = AnimatedGif::createFrom($output, 1/$video_frame_rate, $gif_loop_count, $this->_config);
             

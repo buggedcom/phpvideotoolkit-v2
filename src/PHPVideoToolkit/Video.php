@@ -152,13 +152,13 @@
             if($this->_extracting_frame === true)
             {
 //              check for conflictions with a single frame extraction and a setting of the video frame rate output format
-                if($options['video_frame_rate'] !== null && $options['video_frame_rate'] !== 1)
+                if(empty($options['video_frame_rate']) === false && $options['video_frame_rate'][Format::DEFAULT_STREAM_SPECIFIER] !== 1)
                 {
                     // TODO change to log a warning instead
                     throw new \LogicException('You are attempting to extract a frame, however you have also specified a frame rate in the video output format. When extracting a frame you cannot set the frame rate of the output format. If you wish to extract multiple frames please use the extractFrames function instead.');
                 }
 //              check for conflictions with a max frames setting
-                else if($options['video_frame_rate'] !== null && $options['video_frame_rate'] !== 1)
+                else if(empty($options['video_max_frames']) === false && $options['video_max_frames'] !== 1)
                 {
                     // TODO change to log a warning instead
                     throw new \LogicException('You are attempting to extract a frame, however you have also specified a max frame limit in the video output format. When extracting a frame you cannot set the max frame limit of the output format. If you wish to extract multiple frames please use the extractFrames function instead.');
@@ -174,7 +174,7 @@
                 if($this->_extracting_frames !== true)
                 {
 //                  check for conflictions with a an output format frame raete being set.
-                    if($options['video_frame_rate'] !== null)
+                    if(empty($options['video_frame_rate']) === false)
                     {
                         // TODO change to log a warning instead
                         throw new \LogicException('You are attempting to extract multiple frames and force a frame rate, however you have also specified a frame rate in the video output format. When extracting multiple frames whilst specifying a forced frame rate you cannot set the frame rate of the output format.');
