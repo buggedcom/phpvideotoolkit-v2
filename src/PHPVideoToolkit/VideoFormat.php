@@ -259,36 +259,69 @@
             
 //          get codecs and add special case for copy as it is not included in the codec list but is valid
             $codecs = $this->getCodecs('video');
+//          special case for copy as it is not included in the codec list but is valid
             $codecs['copy'] = 1;
+
+            $codec_reference = $video_codec;
             
-//          work around for h264/libx264 codec names. Thanks to Jorrit Schippers for this one.
-            if(in_array($video_codec, array('h264', 'libx264')) === true)
+//          Does ffmpeg have the codec aliasing?
+            if(empty($codecs['_aliases']) === false)
             {
-                $video_codec = isset($codecs['libx264']) === true ? 'libx264' : 'h264';
+                if(isset($codecs['_aliases'][$video_codec]) === true)
+                {
+                    $codec_reference = $codecs['_aliases'][$video_codec];
+                    if(isset($codecs[$codec_reference]) === false)
+                    {
+                        throw new \InvalidArgumentException('Unrecognised video codec "'.$video_codec.' ('.$codec_reference.')" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
+                    }
+                    
+                    $codec = $codecs[$codec_reference];
+                    if(in_array($video_codec, $codec['alias']['encode']) === false)
+                    {
+                        if(empty($codec['alias']['encode']) === false)
+                        {
+                            throw new \InvalidArgumentException('The video codec "'.$video_codec.' ('.$codec_reference.')" is recognised, however it cannot be used to encode as it is a decoder codec. Valid encoding codecs are: "'.implode('", "', $codec['alias']['encode']).'". Set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
+                        }
+                        else
+                        {
+                            throw new \InvalidArgumentException('The video codec "'.$video_codec.' ('.$codec_reference.')" is recognised, however it cannot be used to encode as it is a decoder codec. Set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
+                        }
+                    }
+                    unset($codec);
+                }
             }
-//          work around for theora/libtheora names
-            else if(in_array($video_codec, array('theora', 'libtheora')) === true)
+//          otherwise we revert to the known conflicts.
+            else
             {
-                $video_codec = isset($codecs['libtheora']) === true ? 'libtheora' : 'theora';
+//              work around for h264/libx264 codec names. Thanks to Jorrit Schippers for this one.
+                if(in_array($video_codec, array('h264', 'libx264')) === true)
+                {
+                    $video_codec = $codec_reference = isset($codecs['libx264']) === true ? 'libx264' : 'h264';
+                }
+//              work around for theora/libtheora names
+                else if(in_array($video_codec, array('theora', 'libtheora')) === true)
+                {
+                    $video_codec = $codec_reference = isset($codecs['libtheora']) === true ? 'libtheora' : 'theora';
+                }
+//              work around for vp8/libvpx names
+                else if(in_array($video_codec, array('vp8', 'libvpx')) === true)
+                {
+                    $video_codec = $codec_reference = isset($codecs['libvpx']) === true ? 'libvpx' : 'vp8';
+                }
             }
-//          work around for vp8/libvpx names
-            else if(in_array($video_codec, array('vp8', 'libvpx')) === true)
-            {
-                $video_codec = isset($codecs['libvpx']) === true ? 'libvpx' : 'vp8';
-            }
-            
+
 //          validate the video codecs that are available from ffmpeg.
-            if(isset($codecs[$video_codec]) === false)
+            if(isset($codecs[$codec_reference]) === false)
             {
-                throw new \InvalidArgumentException('Unrecognised video codec "'.$video_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
+                throw new \InvalidArgumentException('Unrecognised video codec "'.$codec_reference.' ('.$video_codec.')" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec');
             }
             
 //          now check the class settings to see if restricted codecs have been set and have to be obeys
             if($this->_restricted_video_codecs !== null)
             {
-                if(in_array($video_codec, $this->_restricted_video_codecs) === false)
+                if(in_array($codec_reference, $this->_restricted_video_codecs) === false || in_array($video_codec, $this->_restricted_video_codecs) === false)
                 {
-                    throw new \LogicException('The video codec "'.$video_codec.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_video_codecs));
+                    throw new \LogicException('The video codec "'.$codec_reference.' ('.$video_codec.')" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_video_codecs));
                 }
             }
             

@@ -20,6 +20,9 @@
      */
     abstract class FfmpegParserAbstract extends Parser
     {
+        const ENCODER = 'E';
+        const DECODER = 'D';
+
         /**
          * Returns the raw codec data.
          *
@@ -447,12 +450,18 @@
             
 //          get the raw format information
             $raw_data = $this->getRawCodecData();
-            
+
 //          then match out the relevant data, clean and process.
             $data = array(
-                'video'     => array(), 
-                'audio'     => array(), 
-                'subtitle'  => array()
+                'video'     => array(
+                    '_aliases'  => array()
+                ), 
+                'audio'     => array(
+                    '_aliases'  => array()
+                ), 
+                'subtitle'  => array(
+                    '_aliases'  => array()
+                ), 
             );
             if(preg_match_all('/ ((?:[DEVAST ]{6})|(?:[DEVASTFB ]{8})|(?:[DEVASIL\.]{6})) ([A-Za-z0-9\_]+) (.+)/', $raw_data, $codec_matches) > 0)
             {
@@ -480,8 +489,29 @@
                     $options = preg_split('//', $codec_matches[1][$key], -1, PREG_SPLIT_NO_EMPTY);
                     if(empty($options) === false)
                     {
+//                      get the basics
+                        $fullname = trim($fullname);
                         $id = trim($codec_matches[2][$key]);
                         $type = $options[2] === 'V' ? 'video' : ($options[2] === 'A' ? 'audio' : 'subtitle');
+
+//                      get any specifier encoder decoder names.
+                        $encoders_aliases = array();
+                        $decoders_aliases = array();
+                        if(preg_match_all('/\((encoders|decoders): ([^\)]+)\)/', $fullname, $name_matches) > 0)
+                        {
+                            foreach ($name_matches[1] as $key => $mux_type)
+                            {
+                                ${$mux_type.'_aliases'} = explode(' ', trim($name_matches[2][$key]));
+                                foreach (${$mux_type.'_aliases'} as $alias)
+                                {
+                                    if($alias !== $id)
+                                    {
+                                        $data[$type]['_aliases'][$alias] = $id;
+                                    }
+                                }
+                            }
+                        }
+
                         switch ($options[2])
                         {
 //                          video
@@ -492,7 +522,11 @@
                                     'draw_horizontal_band'      => isset($options[3]) === true && $options[3] === 'S',
                                     'direct_rendering_method_1' => isset($options[4]) === true && $options[4] === 'D',
                                     'weird_frame_truncation'    => isset($options[5]) === true && $options[5] === 'T',
-                                    'fullname'                  => trim($fullname),
+                                    'fullname'                  => $fullname,
+                                    'alias'                     => array(
+                                        'encode'                => $encoders_aliases,
+                                        'decode'                => $decoders_aliases,
+                                    )
                                 );
                                 break;
 //                          audio and subtitles.
@@ -501,9 +535,13 @@
                                 $data[$type][$id] = array(
                                     'encode'    => isset($options[1]) === true && $options[1] === 'E',
                                     'decode'    => isset($options[0]) === true && $options[0] === 'D',
-                                    'fullname'  => trim($fullname),
+                                    'fullname'  => $fullname,
+                                    'alias'     => array(
+                                        'encode'=> $encoders_aliases,
+                                        'decode'=> $decoders_aliases,
+                                    )
                                 );
-                            break;
+                                break;
                         }
                     }
                 }

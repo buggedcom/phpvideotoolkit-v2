@@ -183,38 +183,70 @@
             }
             
 //          validate the audio codecs that are available from ffmpeg.
-            $codecs = array_keys($this->getCodecs('audio'));
+            $codecs = $this->getCodecs('audio');
 //          special case for copy as it is not included in the codec list but is valid
-            array_push($codecs, 'copy');
+            $codecs['copy'] = 1;
+
+            $codec_reference = $audio_codec;
+                        
+//          Does ffmpeg have the codec aliasing?
+            if(empty($codecs['_aliases']) === false)
+            {
+                if(isset($codecs['_aliases'][$audio_codec]) === true)
+                {
+                    $codec_reference = $codecs['_aliases'][$audio_codec];
+                    if(isset($codecs[$codec_reference]) === false)
+                    {
+                        throw new \InvalidArgumentException('Unrecognised audio codec "'.$audio_codec.' ('.$codec_reference.')" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec');
+                    }
+                    
+                    $codec = $codecs[$codec_reference];
+                    if(in_array($audio_codec, $codec['alias']['encode']) === false)
+                    {
+                        if(empty($codec['alias']['encode']) === false)
+                        {
+                            throw new \InvalidArgumentException('The audio codec "'.$audio_codec.' ('.$codec_reference.')" is recognised, however it cannot be used to encode as it is a decoder codec. Valid encoding codecs are: "'.implode('", "', $codec['alias']['encode']).'". Set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec');
+                        }
+                        else
+                        {
+                            throw new \InvalidArgumentException('The audio codec "'.$audio_codec.' ('.$codec_reference.')" is recognised, however it cannot be used to encode as it is a decoder codec. Set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec');
+                        }
+                    }
+                    unset($codec);
+                }
+            }
+//          otherwise we revert to the known conflicts.
+            else
+            {
+//              run a libmp3lame check as it require different mp3 codec
+//              updated. thanks to Varon for providing the research
+                if(in_array($audio_codec, array('mp3', 'libmp3lame')) === true)
+                {
+                    $audio_codec = $codec_reference = in_array('libmp3lame', $codecs) === true ? 'libmp3lame' : 'mp3';
+                }
+//              fix vorbis
+                else if($audio_codec === 'vorbis' || $audio_codec === 'libvorbis')
+                {
+                    $audio_codec = $codec_reference = in_array('libvorbis', $codecs) === true ? 'libvorbis' : 'vorbis';
+                }
+//              fix acc
+                else if($audio_codec === 'aac' || $audio_codec === 'libfdk_aac')
+                {
+                    $audio_codec = $codec_reference = in_array('libfdk_aac', $codecs) === true ? 'libfdk_aac' : 'aac';
+                }
+            }
             
-//          run a libmp3lame check as it require different mp3 codec
-//          updated. thanks to Varon for providing the research
-            if(in_array($audio_codec, array('mp3', 'libmp3lame')) === true)
+            if(isset($codecs[$codec_reference]) === false)
             {
-                $audio_codec = in_array('libmp3lame', $codecs) === true ? 'libmp3lame' : 'mp3';
-            }
-//          fix vorbis
-            else if($audio_codec === 'vorbis' || $audio_codec === 'libvorbis')
-            {
-                $audio_codec = in_array('libvorbis', $codecs) === true ? 'libvorbis' : 'vorbis';
-            }
-//          fix acc
-            else if($audio_codec === 'aac' || $audio_codec === 'libfdk_aac')
-            {
-                $audio_codec = in_array('libfdk_aac', $codecs) === true ? 'libfdk_aac' : 'aac';
-            }
-            
-            if(in_array($audio_codec, $codecs) === false)
-            {
-                throw new \InvalidArgumentException('Unrecognised audio codec "'.$audio_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec');
+                throw new \InvalidArgumentException('Unrecognised audio codec "'.$codec_reference.' ('.$audio_codec.')" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec');
             }
             
 //          now check the class settings to see if restricted pixel formats have been set and have to be obeyed
             if($this->_restricted_audio_codecs !== null)
             {
-                if(in_array($audio_codec, $this->_restricted_audio_codecs) === false)
+                if(in_array($codec_reference, $this->_restricted_audio_codecs) === false)
                 {
-                    throw new \InvalidArgumentException('The audio codec "'.$audio_codec.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_audio_codecs));
+                    throw new \InvalidArgumentException('The audio codec "'.$codec_reference.' ('.$audio_codec.')" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec. Please select one of the following codecs: '.implode(', ', $this->_restricted_audio_codecs));
                 }
             }
             
