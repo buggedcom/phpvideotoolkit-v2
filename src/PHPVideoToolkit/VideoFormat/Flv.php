@@ -44,7 +44,7 @@
 //          determine if we are to inject meta data into the flv
 //          remember doing so puts any save into blocking mode so if you are using ProgressHandlerPortable
 //          you must access the $process->getPortableId() before calling save or saveNonBlocking.
-            if($config && $config->force_enable_flv_meta === true)
+            if($this->_config && $this->_config->force_enable_flv_meta === true)
             {
                 $this->enableMetaDataInjection();
             }

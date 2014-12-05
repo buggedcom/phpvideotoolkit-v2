@@ -38,7 +38,7 @@
 //          determine if we are using qtfaststart from the config object.
 //          remember doing so puts any save into blocking mode so if you are using ProgressHandlerPortable
 //          you must access the $process->getPortableId() before calling save or saveNonBlocking.
-            if($config->force_enable_qtfaststart === true)
+            if($this->_config->force_enable_qtfaststart === true)
             {
                 $this->enableQtFastStart();
             }
