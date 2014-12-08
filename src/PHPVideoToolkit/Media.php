@@ -115,7 +115,7 @@
             
             $this->_process = new FfmpegProcessProgressable('ffmpeg', $this->_config);
         }
-        
+
         protected function _validateMedia($media_type)
         {
             $type = $this->readType();
@@ -934,6 +934,11 @@
                     $pathinfo = pathinfo($save_path);
                     $save_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-u_'.String::generateRandomString().'.'.$pathinfo['extension'];
                     break;
+
+//              this is purely in case the media object is "re-used", as if the command is already been set to overwrite
+//              but the subsequent save is not, we must remove any previous command so we don't get unwanted overwrites.
+                default : 
+                    $this->_process->removeCommand('-y');
             }
             $this->_output_path = 
             $this->_processing_path = $save_path;

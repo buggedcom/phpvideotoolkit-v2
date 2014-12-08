@@ -60,6 +60,35 @@
             return $this;
         }
         
+        protected function _remove(&$remove_from, $command, $argument=null)
+        {
+            $argument = $argument === false ? false : $argument;
+            
+            if(isset($remove_from[$command]) === true)
+            {
+                if(is_array($remove_from[$command]) === false)
+                {
+                    foreach ($remove_from[$command] as $key => $value)
+                    {
+                        if($value === $argument)
+                        {
+                            unset($remove_from[$command][$key]);
+                            break;
+                        }
+                    }
+                    if(empty($remove_from[$command]) === true)
+                    {
+                        unset($remove_from[$command]);
+                    }
+                }
+                else
+                {
+                    unset($remove_from[$command]);
+                }
+            }
+            return $this;
+        }
+        
         public function addCommands(array $commands)
         {
             if(empty($commands) === true)
@@ -91,6 +120,16 @@
         public function add($command)
         {
             array_push($this->_arguments, $command);
+            
+            return $this;
+        }
+
+        public function remove($command)
+        {
+            $index = array_search($command, $this->_arguments);
+            if($index !== false){
+                unset($this->_arguments[$index]);
+            }
             
             return $this;
         }

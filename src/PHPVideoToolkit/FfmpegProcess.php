@@ -343,6 +343,51 @@
         }
 
         /**
+         * Removes a command from the pre input command list.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param string $command The command to add.
+         * @param mixed $argument Any optional arguments to add. If none, false should be given.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         */
+        public function removePreInputCommand($command, $argument=false)
+        {
+            $this->_remove($this->_pre_input_commands, $command, $argument);
+            return $this;
+        }
+
+        /**
+         * Removes a command from the post input command list.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param string $command The command to add.
+         * @param mixed $argument Any optional arguments to add. If none, false should be given.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         */
+        public function removeCommand($command, $argument=false)
+        {
+            $this->_remove($this->_post_input_commands, $command, $argument);
+            return $this;
+        }
+
+        /**
+         * Removes a command from the post output command list.
+         *
+         * @access public
+         * @author: Oliver Lillie
+         * @param string $command The command to add.
+         * @param mixed $argument Any optional arguments to add. If none, false should be given.
+         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         */
+        public function removePostOutputCommand($command, $argument=false)
+        {
+            $this->_remove($this->_post_output_commands, $command, $argument);
+            return $this;
+        }
+
+        /**
          * Determines if the the command exits in the pre-input commands.
          *
          * @access public
