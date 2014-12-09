@@ -418,7 +418,7 @@
                         {
                             $matches[3] = rtrim($matches[3], '.');
                             $matches[3] = explode('_', $matches[3]);
-                            $timecode = new Timecode($matches[3][1], Timecode::INPUT_FORMAT_SECONDS, $matches[3][0]);
+                            $timecode = new Timecode((int) $matches[3][1], Timecode::INPUT_FORMAT_SECONDS, (float) $matches[3][0]);
                         }
                         else
                         {
