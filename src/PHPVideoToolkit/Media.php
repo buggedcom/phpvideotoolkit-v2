@@ -55,6 +55,8 @@
         
         protected $_process;
 
+        protected $_ignore_format;
+
         /**
          * Constructs a media object.
          *
@@ -87,6 +89,8 @@
             $this->_blocking = null;
             
             $this->_require_d_in_output = false;
+
+            $this->_ignore_format = false;
             
             // @see http://multimedia.cx/eggs/supplying-ffmpeg-with-metadata/
             // @see http://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata
@@ -993,9 +997,10 @@
 //              get the output commands and augment with the final output options.
                 $options = $output_format->getFormatOptions();
 
-//              set the split format if an output format has already been set.
+//              set the split format if an output format has already been set. and remove from the output format so that multiple "-f" formats are not given to the buffer
                 if(empty($options['format']) === false)
                 {
+                    $this->_ignore_format = true;
                     $this->_process->addCommand('-segment_format', $options['format']);
                 }
                 
@@ -1125,6 +1130,12 @@
                 {
                     foreach ($commands as $key => $value)
                     {
+                        // this is a special consideration as if the format is being segmented then any output
+                        // format must be ignored as it is already being set to -segment_format.
+                        if($this->_ignore_format === true && $key === '-f')
+                        {
+                            continue;
+                        }
                         $this->_process->addCommand($key, $value);
                     }
                 }
