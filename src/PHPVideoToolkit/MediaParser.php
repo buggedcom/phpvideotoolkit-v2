@@ -319,6 +319,11 @@
                     $data['pixel_aspect_ratio'] = $ratio_matches[1];
                     $data['display_aspect_ratio'] = $ratio_matches[2];
                 }
+                else if(preg_match('/[P|S]AR\s+([0-9\:\.]+)\s+DAR\s+([0-9\:\.]+)/', $matches[0], $ratio_matches) > 0)
+                {
+                    $data['pixel_aspect_ratio'] = $ratio_matches[1];
+                    $data['display_aspect_ratio'] = $ratio_matches[2];
+                }
                 
 //              get the dimension parts
                 if(preg_match('/([1-9][0-9]*)x([1-9][0-9]*)/', $matches[2], $dimensions_matches) > 0)
