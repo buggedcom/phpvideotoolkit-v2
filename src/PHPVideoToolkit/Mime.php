@@ -80,7 +80,6 @@
       
              if ((file_exists($fn = ini_get("mime_magic.magicfile")))
               or (file_exists($fn = "/usr/share/misc/magic.mime"))
-              or (file_exists($fn = PATH.'application'.DS.'binaries'.DS.'magic'))
               or (file_exists($fn = "/etc/mime-magic"))   )
              {  
                 $mime_magic_data = array();
