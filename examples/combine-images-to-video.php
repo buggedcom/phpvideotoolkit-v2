@@ -6,8 +6,8 @@
     
     try
     {
-        $video = new Audio($example_audio_path);
-        $process = $video->getProcess();
+        $audio = new Audio($example_audio_path);
+        $process = $audio->getProcess();
         $process->addPreInputCommand('-framerate', '1/5');
         $process->addPreInputCommand('-pattern_type', 'glob');
         $process->addPreInputCommand('-i', $example_images_dir.'*.jpg');
@@ -19,7 +19,7 @@
         $output_format->setVideoDimensions(320, 240);
 
     //  $process->setProcessTimelimit(1);
-        $process = $video->save('./output/my_homemade_video.mp4', $output_format, Media::OVERWRITE_EXISTING);
+        $process = $audio->save('./output/my_homemade_video.mp4', $output_format, Media::OVERWRITE_EXISTING);
         
         
         echo '<h1>Executed Command</h1>';
@@ -37,7 +37,7 @@
         echo '<h1>Error</h1>';
         Trace::vars($e);
 
-        $process = $video->getProcess();
+        $process = $audio->getProcess();
         if($process->isCompleted())
         {
             echo '<hr /><h2>Executed Command</h2>';
