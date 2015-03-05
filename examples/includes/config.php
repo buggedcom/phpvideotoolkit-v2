@@ -29,4 +29,18 @@
     $example_video_path = BASE.'examples/media/BigBuckBunny_320x180.mp4';
     $example_video_path1 = BASE.'examples/media/tc.mov';
     $example_audio_path = BASE.'examples/media/Ballad_of_the_Sneak.mp3';
+
+    $example_images_dir = BASE.'examples/media/images/';
+    $example_image_paths = array(
+        $example_images_dir.'P1110741.jpg',
+        $example_images_dir.'P1110742.jpg',
+        $example_images_dir.'P1110743.jpg',
+        $example_images_dir.'P1110744.jpg',
+        $example_images_dir.'P1110745.jpg',
+        $example_images_dir.'P1110746.jpg',
+        $example_images_dir.'P1110753.jpg',
+        $example_images_dir.'P1110754.jpg',
+        $example_images_dir.'P1110755.jpg',
+        $example_images_dir.'P1110756.jpg',
+    );
     
