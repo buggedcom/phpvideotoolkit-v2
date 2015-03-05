@@ -21,6 +21,7 @@ PHPVideoToolkit also provides FFmpeg-PHP emulation in pure PHP so you wouldn't n
 - [Extract Multiple Frames from a Segment of a Video](#extract-multiple-frames-from-a-segment-of-a-video)
 - [Extract Multiple Frames of a Video at 1 frame per second](#extract-multiple-frames-of-a-video-at-1-frame-per-second)
 - [Extract Multiple Frames of a Video at 1 frame every 'x' seconds](#extract-multiple-frames-of-a-video-at-1-frame-every-x-seconds)
+- [Combining Multiple Images and Audio to form a Video](#combining-multiple-images-and-audio-to-form-a-video)
 - [Caveats of Extracting Multiple Frames](#caveats-of-extracting-multiple-frames)
 - [Extracting an Animated Gif](#extracting-an-animated-gif)
 - [Resizing Video and Images](#resizing-video-and-images)
@@ -330,6 +331,28 @@ $video  = new Video('BigBuckBunny_320x180.mp4');
 $process = $video->extractFrames(new Timecode(40), new Timecode(50), '1/60')
 				->save('./output/big_buck_bunny_frame_%timecode.jpg');
 $output = $process->getOutput();
+```
+
+###Combining Multiple Images and Audio to form a Video
+
+Whilst PHPVideoToolkit does not natively support combing multiple images and audio into a video, it can still be achieved by add custom commands to the process object.
+
+```php
+$audio = new Audio('Ballad_of_the_Sneak.mp3');
+
+$process = $audio->getProcess();
+$process->addPreInputCommand('-framerate', '1/5');
+$process->addPreInputCommand('-pattern_type', 'glob');
+$process->addPreInputCommand('-i', 'images/*.jpg');
+$process->addCommand('-pix_fmt', 'yuv420p');
+$process->addCommand('-shortest', '');
+
+$output_format = new VideoFormat();
+$output_format->setVideoFrameRate('1/5');
+$output_format->setVideoDimensions(320, 240);
+
+$process = $audio->save('./output/my_homemade_video.mp4', $output_format, Media::OVERWRITE_EXISTING);
+
 ```
 
 ###Caveats of Extracting Multiple Frames
