@@ -6,9 +6,6 @@
     
     try
     {
-        $first_image = array_shift($example_image_paths);
-        $dimensions = getimagesize($first_image);
-
         $video = new Audio($example_audio_path);
         $process = $video->getProcess();
         $process->addPreInputCommand('-framerate', '1/5');
