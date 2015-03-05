@@ -120,11 +120,15 @@
 
             $ffmpeg = new FfmpegParser();
             $available_commands = $ffmpeg->getCommands();
-            if(isset($available_commands['q']) === true)
+            if(isset($available_commands['crf']))
+            {
+                $quality_command = '-crf <setting>';
+            }
+            else if(isset($available_commands['q']) === true)
             {
                 $quality_command = '-q <setting>';
             }
-            else
+            else 
             {
                 $quality_command = '-qscale <setting>';
             }
@@ -139,7 +143,7 @@
             );
             
 //          add default input/output commands
-            if($input_output_type === 'output')
+            if($input_output_type === self::OUTPUT)
             {
                 if($this->_config->set_default_output_format === true)
                 {
@@ -148,7 +152,7 @@
                          ->setQualityVsStreamabilityBalanceRatio(4);
                 }
             }
-            else if($input_output_type === 'input')
+            else if($input_output_type === self::INPUT)
             {
             }
             else

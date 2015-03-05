@@ -718,6 +718,8 @@
          */
         public function save($save_path=null, Format $output_format=null, $overwrite=Media::OVERWRITE_FAIL, ProgressHandlerAbstract &$progress_handler=null)
         {
+            $this->_saveAddInputFormatCommands($this->_media_input_format);
+
 //          set the input files.
             $this->_process->setInputPath($this->_media_file_path);
 
@@ -1137,6 +1139,29 @@
                             continue;
                         }
                         $this->_process->addCommand($key, $value);
+                    }
+                }
+            }
+        }
+        
+        /**
+         * Adds the input format commands from the Format object to the FfmpegProcess
+         *
+         * @access protected
+         * @author Oliver Lillie
+         * @param Format $output_format 
+         * @return void
+         */
+        protected function _saveAddInputFormatCommands(Format $input_format=null)
+        {
+            if($input_format !== null)
+            {
+                $commands = $input_format->getCommandsHash();
+                if(empty($commands) === false)
+                {
+                    foreach ($commands as $key => $value)
+                    {
+                        $this->_process->addPreInputCommand($key, $value);
                     }
                 }
             }

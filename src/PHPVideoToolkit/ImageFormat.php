@@ -26,9 +26,12 @@
         {
             parent::updateFormatOptions($save_path, $overwrite);
             
-            if($this->_max_frames_on_no_timecode === true && preg_match('/%timecode|%index|%[0-9]*d/', $save_path) === 0)
+            if($this->_type === Format::OUTPUT)
             {
-                $this->setVideoMaxFrames(1);
+                if($this->_max_frames_on_no_timecode === true && preg_match('/%timecode|%index|%[0-9]*d/', $save_path) === 0)
+                {
+                    $this->setVideoMaxFrames(1);
+                }
             }
             
             return $this;

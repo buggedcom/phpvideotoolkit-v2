@@ -77,6 +77,13 @@
                 'video_max_frames' => null,
                 'video_filters' => null,
             ));
+
+            $frame_rate_command = 'r';
+            if($input_output_type === Format::INPUT)
+            {
+                $frame_rate_command = 'framerate';
+            }
+
             $this->_format_to_command = array_merge($this->_format_to_command, array(
                 'disable_video'             => '-vn',
                 'video_quality'             => '-qscale:v <setting>',
@@ -85,7 +92,7 @@
                 'video_scale'               => '-vf scale=<width>:<height>',
                 'video_padding'             => '-vf pad=<width>:<height>:<x>:<y>:<colour>',
                 'video_aspect_ratio'        => '-aspect <ratio>',
-                'video_frame_rate'          => '-r <setting>',
+                'video_frame_rate'          => '-'.$frame_rate_command.' <setting>',
                 'video_bitrate'             => '-b:v <setting>',
                 'video_pixel_format'        => '-pix_fmt <setting>',
                 'video_rotation'            => '-vf transpose=<setting>',
@@ -413,6 +420,8 @@
          */
         public function setVideoPadding($top, $right, $bottom, $left, $width=null, $height=null, $colour='black')
         {
+            $this->_blockSetOnInputFormat('video padding');
+            
             if($top === null)
             {
                 $this->_format['video_padding'] = null;
@@ -544,6 +553,8 @@
          */
         public function setVideoMaxFrames($max_frame_count)
         {
+            $this->_blockSetOnInputFormat('video max frames');
+            
             // PEG1/2 does not support 5/1 fps
             if($max_frame_count === null)
             {
@@ -570,6 +581,8 @@
          */
         public function setVideoBitrate($bitrate)
         {
+            $this->_blockSetOnInputFormat('video bitrate');
+            
             if($bitrate === null)
             {
                 $this->_format['video_bitrate'] = null;
