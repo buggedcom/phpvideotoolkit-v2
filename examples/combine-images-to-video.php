@@ -15,9 +15,10 @@
         $process->addCommand('-shortest', '');
 
         $output_format = new VideoFormat();
-        $output_format->setVideoFrameRate('1/5');
-        $output_format->setVideoDimensions(320, 240);
-        $output_format->setAudioCodec('mp3');
+        $output_format->setVideoFrameRate('1/5')
+                      ->setVideoDimensions(320, 240)
+                      ->setAudioCodec('libfdk_aac')
+                      ->setVideoCodec('mpeg4');
 
     //  $process->setProcessTimelimit(1);
         $process = $audio->save('./output/my_homemade_video.mp4', $output_format, Media::OVERWRITE_EXISTING);
