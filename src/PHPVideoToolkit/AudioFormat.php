@@ -187,23 +187,35 @@
 //          special case for copy as it is not included in the codec list but is valid
             array_push($codecs, 'copy');
             
-//          run a libmp3lame check as it require different mp3 codec
-//          updated. thanks to Varon for providing the research
-            if(in_array($audio_codec, array('mp3', 'libmp3lame')) === true)
+//          check that the codec exists...
+            if(in_array($audio_codec, $codecs) === false)
             {
-                $audio_codec = in_array('libmp3lame', $codecs) === true ? 'libmp3lame' : 'mp3';
+//              ...otherwise best guess with related codecs in order of performance.
+//              https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
+                $codecs_in_preference_order = false;
+                if(in_array($audio_codec, array('mp3', 'libmp3lame', 'libshine')) === true)
+                {
+                    $codecs_in_preference_order = array('libmp3lame', 'libshine', 'mp3');
+                }
+//              fix vorbis
+                else if(in_array($audio_codec, array('vorbis', 'libvorbis')) === true)
+                {
+                    $codecs_in_preference_order = array('libvorbis', 'vorbis');
+                }
+//              fix acc
+                else if(in_array($audio_codec, array('libfdk_aac', 'libfaac', 'aac', 'libvo_aacenc')) === true)
+                {
+                    $codecs_in_preference_order = array('libfdk_aac', 'libfaac', 'aac', 'libvo_aacenc');
+                }
+
+                if($codecs_in_preference_order !== false){
+                    $audio_codec = array_shift($codecs_in_preference_order);
+                    while(in_array($audio_codec, $codecs) === false && count($codecs_in_preference_order) > 0){
+                        $audio_codec = array_shift($codecs_in_preference_order);
+                    }
+                }
             }
-//          fix vorbis
-            else if($audio_codec === 'vorbis' || $audio_codec === 'libvorbis')
-            {
-                $audio_codec = in_array('libvorbis', $codecs) === true ? 'libvorbis' : 'vorbis';
-            }
-//          fix acc
-            else if($audio_codec === 'aac' || $audio_codec === 'libfdk_aac')
-            {
-                $audio_codec = in_array('libfdk_aac', $codecs) === true ? 'libfdk_aac' : 'aac';
-            }
-            
+
             if(in_array($audio_codec, $codecs) === false)
             {
                 throw new \InvalidArgumentException('Unrecognised audio codec "'.$audio_codec.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioCodec');
