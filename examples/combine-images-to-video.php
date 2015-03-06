@@ -17,6 +17,7 @@
         $output_format = new VideoFormat();
         $output_format->setVideoFrameRate('1/5');
         $output_format->setVideoDimensions(320, 240);
+        $output_format->setAudioCodec('mp3');
 
     //  $process->setProcessTimelimit(1);
         $process = $audio->save('./output/my_homemade_video.mp4', $output_format, Media::OVERWRITE_EXISTING);
