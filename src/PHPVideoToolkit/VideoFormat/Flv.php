@@ -30,12 +30,12 @@
 //          default by forcing the audio codec to use mp3
             if($input_output_type === 'output')
             {
-                $this->setAudioCodec('mp3')
+                $this->setAudioCodec('libmp3lame')
                      ->setVideoCodec('flv1')
                      ->setFormat('flv');
             }
             
-            $this->_restricted_audio_codecs = array('mp3');
+            $this->_restricted_audio_codecs = array('libmp3lame', 'libshine', 'mp3');
             $this->_restricted_video_codecs = array('flv1');
             $this->_restricted_audio_sample_frequencies = array(44100, 22050, 11025);
 
