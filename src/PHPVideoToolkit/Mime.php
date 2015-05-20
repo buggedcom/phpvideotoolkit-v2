@@ -75,6 +75,8 @@
              return($type);
           }
       
+          $mime_magic_data = array();
+
           #-- read in magic data, when called for the very first time
           if (!isset($mime_content_type)) {
       
@@ -82,8 +84,6 @@
               or (file_exists($fn = "/usr/share/misc/magic.mime"))
               or (file_exists($fn = "/etc/mime-magic"))   )
              {  
-                $mime_magic_data = array();
-
                 #-- read in file
                 $f = fopen($fn, "r");
                 $fd = fread($f, 1<<20);
