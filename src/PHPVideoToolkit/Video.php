@@ -37,7 +37,7 @@
 //          validate this media file is a video file
             if($ensure_video_file === true && $this->_validateMedia('video') === false)
             {
-                throw new \LogicException('You cannot use an instance of '.get_class($this).' for "'.$video_file_path.'" as the file is not a video file. It is reported to be a '.$type);
+                throw new \LogicException('You cannot use an instance of '.get_class($this).' for "'.$video_file_path.'" as the file is not a video file. It is reported to be a '.$this->readType());
             }
             
             $this->_extracting_frames = false;

@@ -32,7 +32,7 @@
 //          validate this media file is a image file
             if($ensure_image_file === true && $this->_validateMedia('image') === false)
             {
-                throw new \LogicException('You cannot use an instance of '.get_class($this).' for "'.$image_file_path.'" as the file is not a image file. It is reported to be a '.$type);
+                throw new \LogicException('You cannot use an instance of '.get_class($this).' for "'.$video_file_path.'" as the file is not a image file. It is reported to be a '.$this->readType());
             }
         }
         
