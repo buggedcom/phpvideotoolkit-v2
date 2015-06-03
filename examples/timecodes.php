@@ -21,6 +21,8 @@
         echo 'new Timecode(\'00:01:42.34\', Timecode::INPUT_FORMAT_TIMECODE); = '.$timecode.'<br />';
         $timecode = new Timecode(60);
         echo 'new Timecode(60); = '.$timecode.'<br />';
+        $timecode = new Timecode(360);
+        echo 'new Timecode(360); = '.$timecode.'<br />';
         
         echo '<hr />';
         echo '<h2>Adjusting timecode values</h2>';
