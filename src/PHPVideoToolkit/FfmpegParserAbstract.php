@@ -816,7 +816,7 @@
                     $data_type = null;
                     if(preg_match_all('/(?:\s+<(int|string|binary|flags|int64|float|rational)>)/', $match[2], $data_type_matches) > 0)
                     {
-                        $data_type = trim($data_type_matches[2]);
+                        $data_type = trim($data_type_matches[0]);
                     }
                     
                     $args = trim($match[2]);
