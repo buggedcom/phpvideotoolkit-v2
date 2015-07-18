@@ -51,8 +51,6 @@
             }
             return $this->_get($key);
         }
-        
-        abstract public function isAvailable();
 
         abstract protected function _get($key);
 
