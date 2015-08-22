@@ -148,11 +148,20 @@
             
             if(empty($commands) === false)
             {
-                foreach ($commands as $argument)
-                {
-                    // the array ois a flag for a raw argument
-                    $command_string .= (is_array($argument) === true ? $argument : escapeshellarg($argument)).' ';
-                }
+				// Is windows?
+				if(strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+					foreach ($commands as $argument)
+					{
+						$command_string .= (is_array($argument) === true ? $argument : str_replace("===NXBYPASS===", "%", escapeshellarg(str_replace("%", "===NXBYPASS===", $argument)))).' ';
+					}					
+				} else {
+					foreach ($commands as $argument)
+					{
+						// the array ois a flag for a raw argument
+
+						$command_string .= (is_array($argument) === true ? $argument : escapeshellarg($argument)).' ';
+					}					
+				}
             }
             
             return trim($command_string);
