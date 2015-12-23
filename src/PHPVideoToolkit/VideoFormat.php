@@ -664,7 +664,7 @@
             }
             
 //          interpret quality into ffmpeg value
-            $quality = 31 - round(($quality / 100) * 31);
+            $quality = 32 - round(($quality * 30/99) + 1);
             if($quality > 31 || $quality < 1)
             {
                 throw new Exception('Unrecognised quality "'.$quality.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setQuality');
