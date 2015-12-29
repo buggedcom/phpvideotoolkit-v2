@@ -335,7 +335,7 @@
             {
                 throw new \InvalidArgumentException('The channels value must be an integer.');
             }
-            else if(in_array($channels, array(0, 1, 2, 6)) !== false)
+            else if(in_array($channels, array(0, 1, 2, 6)) === false)
             {
                 throw new \InvalidArgumentException('Unrecognised audio channels "'.$channels.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioChannels. The channels value must be one of the following values: 0, 1, 2, or 6.');
             }
