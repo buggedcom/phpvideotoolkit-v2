@@ -629,7 +629,7 @@
 //          now check the class settings to see if restricted pixel formats have been set and have to be obeyed
             if($this->_restricted_video_pixel_formats !== null)
             {
-                if(in_array($video_codec, $this->_restricted_video_pixel_formats) === false)
+                if(in_array($pixel_format, $this->_restricted_video_pixel_formats) === false)
                 {
                     throw new Exception('The video pixel format "'.$pixel_format.'" cannot be set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoPixelFormat. Please select one of the following pixel formats: '.implode(', ', $this->_restricted_video_pixel_formats));
                 }
