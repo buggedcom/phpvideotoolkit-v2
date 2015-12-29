@@ -203,6 +203,7 @@
             'v' => array('nc'),
             'nist' => array('nistsphere'),
             'sph' => array('nistsphere'),
+            'oga' => array('oga'),
             'ogg' => array('ogg'),
             'ogv' => array('ogg'),
             'spx' => array('ogg'),
