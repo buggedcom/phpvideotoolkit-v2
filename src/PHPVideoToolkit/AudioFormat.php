@@ -211,7 +211,7 @@
                 if($codecs_in_preference_order !== false){
                     $audio_codec = array_shift($codecs_in_preference_order);
                     while(in_array($audio_codec, $codecs) === false && count($codecs_in_preference_order) > 0){
-                        $audio_codec = array_shift($codecs_in_preference_order);
+                        array_push($codecs, $audio_codec);
                     }
                 }
             }
