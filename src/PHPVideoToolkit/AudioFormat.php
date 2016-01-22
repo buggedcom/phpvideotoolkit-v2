@@ -396,7 +396,7 @@
             }
             else if (is_int($quality) === false && is_float($quality) === false)
             {
-                throw new \InvalidArgumentException('The volume value must be an integer or float value.');
+                throw new \InvalidArgumentException('Audio quality value must be an integer or float value.');
             }
             
 //          interpret quality into ffmpeg value
