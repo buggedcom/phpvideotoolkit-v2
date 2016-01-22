@@ -605,6 +605,7 @@
             }
             
             $this->_format['video_bitrate'] = $bitrate;
+            $this->setQualityVsStreamabilityBalanceRatio(NULL);
             return $this;
             
             //throw new Exception('Unrecognised video bitrate "'.$bitrate.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVideoBitrate');
