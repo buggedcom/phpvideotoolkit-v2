@@ -119,6 +119,7 @@
             'nistsphere' => array('nist', 'sph'),
             'nut' => array('nut'),
             'ogg' => array('ogg', 'ogv', 'spx', 'opus'),
+            'oga' => array('oga'),
             'oma' => array('oma', 'omg', 'aa3'),
             'oma' => array('oma'),
             's16be' => array('sw'),

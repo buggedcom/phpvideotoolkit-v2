@@ -228,6 +228,10 @@
                 {
                     $data = 'image';
                 }
+                elseif(strpos(Mime::get($file_path), 'audio/') !== false)
+                {
+                    $data = 'audio';
+                }
                 else
                 {
                     $data = 'video';

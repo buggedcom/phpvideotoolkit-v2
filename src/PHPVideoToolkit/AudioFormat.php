@@ -335,7 +335,7 @@
             {
                 throw new \InvalidArgumentException('The channels value must be an integer.');
             }
-            else if(in_array($channels, array(0, 1, 2, 6)) !== false)
+            else if(in_array($channels, array(0, 1, 2, 6)) === false)
             {
                 throw new \InvalidArgumentException('Unrecognised audio channels "'.$channels.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioChannels. The channels value must be one of the following values: 0, 1, 2, or 6.');
             }
@@ -400,7 +400,7 @@
             }
             
 //          interpret quality into ffmpeg value
-            $quality = 31 - round(($quality / 100) * 31);
+            $quality = 32 - round(($quality * 30/99) + 1);
             if($quality > 31 || $quality < 1)
             {
                 throw new \InvalidArgumentException('Unrecognised quality "'.$quality.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setAudioQuality. The quality value must be between 0 and 100.');
