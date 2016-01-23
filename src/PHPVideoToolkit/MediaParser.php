@@ -57,7 +57,7 @@
                 'container' => $this->getFileContainerFormat($file_path, $read_from_cache),
                 'duration'  => $this->getFileDuration($file_path, $read_from_cache),
                 'bitrate'   => $this->getFileBitrate($file_path, $read_from_cache),
-                'volume'    => $this->getFileVolume($file_path, $read_from_cache),
+                'volume'    => $this->getFileVolumeComponent($file_path, $read_from_cache),
                 'start'     => $this->getFileStart($file_path, $read_from_cache),
                 'video'     => $this->getFileVideoComponent($file_path, $read_from_cache),
                 'audio'     => $this->getFileAudioComponent($file_path, $read_from_cache),
