@@ -1260,6 +1260,19 @@
         {
             return parent::getFileVideoComponent($this->_media_file_path, $read_from_cache);
         }
+
+        /**
+         * Returns mean and max volume information of the file.
+         *
+         * @access public
+         * @author Samar Rizvi
+         * @param boolean $read_from_cache
+         * @return mixed Returns an array of found data, otherwise returns null.
+         */
+        public function readVolumeComponent($read_from_cache=true)
+        {
+            return parent::getFileVolumeComponent($this->_media_file_path, $read_from_cache);
+        }
         
         /**
          * Returns any audio information about the file if available.
