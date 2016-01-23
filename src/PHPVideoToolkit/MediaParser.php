@@ -57,6 +57,7 @@
                 'container' => $this->getFileContainerFormat($file_path, $read_from_cache),
                 'duration'  => $this->getFileDuration($file_path, $read_from_cache),
                 'bitrate'   => $this->getFileBitrate($file_path, $read_from_cache),
+                'volume'    => $this->getFileVolume($file_path, $read_from_cache),
                 'start'     => $this->getFileStart($file_path, $read_from_cache),
                 'video'     => $this->getFileVideoComponent($file_path, $read_from_cache),
                 'audio'     => $this->getFileAudioComponent($file_path, $read_from_cache),
@@ -244,6 +245,55 @@
             else
             {
                 $data = null;
+            }
+
+            $this->_cacheSet($cache_key, $data);
+            return $data;
+        }
+
+        /**
+         * Returns the files mean volume and max volume if available, otherwise returns null.
+         *
+         * @access public
+         * @author Samar Rizvi
+         * @param string $file_path
+         * @param boolean $read_from_cache
+         * @return mixed Returns an array of found data, otherwise returns null.
+         */
+        public function getFileVolumeComponent($file_path, $read_from_cache=true)
+        {
+            $cache_key = 'media_parser/'.md5(realpath($file_path)).'_parsed_volume';
+            if($read_from_cache === true && ($data = $this->_cacheGet($cache_key, -1)) !== -1)
+            {
+                return $data;
+            }
+
+//          get the raw data
+            $raw_data = $this->getFileRawInformation($file_path, $read_from_cache);
+
+//          grab the volume
+            $data = null;
+
+            if(preg_match_all ('/^.*(mean_volume)(:)(\s+)([+-]?\d*\.\d+)(?![-+0-9\.])( )(dB)/im', $raw_data, $matches) > 0)
+            {
+                $data = array();
+
+                $float1=$matches[4][0];
+                $word_unit=$matches[6][0];
+
+                $data['mean_volume'] = $float1 . $word_unit;
+            }
+
+            if(preg_match_all ('/^.*(max_volume)(:)(\s+)([+-]?\d*\.\d+)(?![-+0-9\.])( )(dB)/im', $raw_data, $matches) > 0)
+            {
+                if(!is_array($data)) {
+                    $data = array();
+                }
+
+                $float1=$matches[4][0];
+                $word_unit=$matches[6][0];
+
+                $data['max_volume'] = $float1 . $word_unit;
             }
 
             $this->_cacheSet($cache_key, $data);
@@ -687,11 +737,20 @@
                 return $data;
             }
 
+            $isWindowsPlatform = defined('PHP_WINDOWS_VERSION_BUILD');
+
 //          execute the ffmpeg lookup
             $exec = new FfmpegProcess('ffmpeg', $this->_config);
-            $raw_data = $exec->setInputPath($real_file_path)
-                             ->execute()
-                             ->getBuffer();
+            $exec_cmd = $exec->setInputPath($real_file_path)
+                             ->addCommand('-af', 'volumedetect')
+                             ->addCommand('-f', 'NULL');
+
+            if($isWindowsPlatform) {
+                $exec_cmd = $exec_cmd->addCommand('NUL');
+            }
+
+            $raw_data = $exec_cmd->execute()
+                                 ->getBuffer();
             
 //          check the process for any errors.
             if($exec->hasError() === true && ($last_line = $exec->getLastLine()) !== 'At least one output file must be specified')
