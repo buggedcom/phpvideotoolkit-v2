@@ -351,7 +351,7 @@
          * @author Oliver Lillie
          * @param integer $volume The level of the volumn. Must be higher than or euqal to 0.
          * @return PHPVideoToolkit\AudioFormat Returns the current object.
-         * @throws \InvalidArgumentException If $volume value is not an integer.
+         * @throws \InvalidArgumentException If $volume value neither ends in 'dB' nor is an integer or float.
          * @throws \InvalidArgumentException If $volume is less than 0.
          */
         public function setVolume($volume)
@@ -362,11 +362,13 @@
                 return $this;
             }
             
-            if(is_int($volume) === false)
+            //Volume can also end in dB, and can be float as well as integer
+            if(preg_match('/db$/i', $volume) === false && is_numeric($volume) === false)
             {
-                throw new \InvalidArgumentException('The volumne value must be an integer.');
+                throw new \InvalidArgumentException('The volume value must be an integer or float or end in "dB".');
             }
-            else if($volume < 0)
+            //Make sure that volume is not less than 0 even if it ends in dB
+            else if(preg_replace('/db$/i',"",$volume) < 0)
             {
                 throw new \InvalidArgumentException('Unrecognised volume value "'.$volume.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVolume. The value must be higher than or equal to 0.');
             }
