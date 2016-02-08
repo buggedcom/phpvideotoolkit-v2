@@ -373,7 +373,7 @@
                 throw new \InvalidArgumentException('Unrecognised volume value "'.$volume.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setVolume. The value must be higher than or equal to 0.');
             }
             
-            $this->_format['audio_volume'] = $volume;
+            $this->_format['audio_volume'] = str_replace('db', 'dB', $volume);
             return $this;
         }
         
