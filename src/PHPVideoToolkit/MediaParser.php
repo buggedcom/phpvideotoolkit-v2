@@ -747,6 +747,8 @@
 
             if($isWindowsPlatform) {
                 $exec_cmd = $exec_cmd->addCommand('NUL');
+            } else {
+                $exec_cmd = $exec_cmd->addCommand('/dev/null');
             }
 
             $raw_data = $exec_cmd->execute()
