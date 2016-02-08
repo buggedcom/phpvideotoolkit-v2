@@ -944,7 +944,7 @@
         {
             if(in_array($buffer_output, array(null, self::DEV_NULL, self::TEMP)) === false)
             {
-                $dir = dirname($buffer_ouput);
+                $dir = dirname($buffer_output);
                 if(is_dir($dir) === false)
                 {
                     throw new \InvalidArgumentException('Buffer output parent directory "'.$dir.'" is not a directory.');
