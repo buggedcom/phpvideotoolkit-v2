@@ -71,7 +71,7 @@
                     'input' => '-request_channels <setting>',
                     'output' => '-ac <setting>',
                 ),
-                'audio_volume'              => '-af "volume=<setting>"',
+                'audio_volume'              => '-af volume=<setting>',
             ));
             
             $this->_restricted_audio_bitrates = null;
