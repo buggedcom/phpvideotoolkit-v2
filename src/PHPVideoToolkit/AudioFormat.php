@@ -270,6 +270,7 @@
             }
             
             $this->_format['audio_bitrate'] = $bitrate;
+            $this->setQualityVsStreamabilityBalanceRatio(NULL);
             return $this;
         }
         
