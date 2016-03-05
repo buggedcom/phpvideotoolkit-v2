@@ -199,7 +199,7 @@
 //                  insert a unique id into the save path
                     case Media::OVERWRITE_UNIQUE :
                         $pathinfo = pathinfo($save_path);
-                        $save_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-u_'.String::generateRandomString().'.'.$pathinfo['extension'];
+                        $save_path = $pathinfo['dirname'].DIRECTORY_SEPARATOR.$pathinfo['filename'].'-u_'.Str::generateRandomString().'.'.$pathinfo['extension'];
                         break;
                 }
             }
