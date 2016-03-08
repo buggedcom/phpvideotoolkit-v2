@@ -18,7 +18,7 @@
      * @author Oliver Lillie
      * @package default
      */
-    class String
+    class Str
     {
         /**
          * Generates a random string.

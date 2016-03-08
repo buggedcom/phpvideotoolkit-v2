@@ -117,7 +117,7 @@
 //              update the pathway to include indexed output so that it outputs multiple frames.
                 $original_save_path = $save_path;
                 $ext = pathinfo($save_path, PATHINFO_EXTENSION);
-                $filename = 'phpvideotoolkit_anigif_'.String::generateRandomAlphaString(5).'_'.basename(substr_replace($save_path, '%12index.png', -(strlen($ext)+1)));
+                $filename = 'phpvideotoolkit_anigif_'.Str::generateRandomAlphaString(5).'_'.basename(substr_replace($save_path, '%12index.png', -(strlen($ext)+1)));
                 $save_path = $this->_config->temp_directory.DIRECTORY_SEPARATOR.$filename;
                 
 //              register the post process to combine the images into an animated gif
