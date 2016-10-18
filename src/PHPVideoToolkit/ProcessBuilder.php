@@ -151,7 +151,7 @@
                 foreach ($commands as $argument)
                 {
                     // the array ois a flag for a raw argument
-                    $command_string .= (is_array($argument) === true ? $argument : escapeshellarg($argument)).' ';
+                    $command_string .= (is_array($argument) === true ? $argument : ProcessUtils::escapeArgument($argument)).' ';
                 }
             }
             
