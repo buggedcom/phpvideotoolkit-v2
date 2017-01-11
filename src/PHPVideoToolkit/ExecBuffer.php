@@ -341,7 +341,7 @@
 
 //          do the execution.
             $this->_running = true;
-            $this->_start_time = time()+microtime();
+            $this->_start_time = time()+microtime(true);
             exec($this->_executed_command, $buffer, $err); // note error cannot be replied upon because of the output options.
             $buffer = implode(PHP_EOL, $buffer);
             $this->_error_code = $err;
@@ -368,7 +368,7 @@
             
             if($this->_blocking === true)
             {
-                $this->_end_time = time()+microtime();
+                $this->_end_time = time()+microtime(true);
             }
             
 //          this is the final callback
@@ -445,7 +445,7 @@
             }
             else
             {
-                $end = time()+microtime();
+                $end = time()+microtime(true);
             }
             
             return $end - $this->_start_time;
