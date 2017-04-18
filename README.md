@@ -85,6 +85,7 @@ $config = new Config(array(
 Take special note of the second parameter ```true```. If set as true then the related Config object is set as the default config instance. This means that once set as the default instance you do not need to supply the Config object to the other PHPVideoToolkit class constructors. If a config object is not defined and supplied to the PHPVideoToolkit classes, then a default Config object is created and assigned to the class.
 
 Every example below assumes that the Config object has been set as the default config object prior in the execution so there is no need to supply config to each example.
+
 ### Accessing Data About FFmpeg
 
 Simple demonstration about how to access information about FfmpegParser object.
