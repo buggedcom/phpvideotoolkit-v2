@@ -1,4 +1,4 @@
-#PHPVideoToolkit V2...
+# PHPVideoToolkit V2...
 
 ...is a set of PHP classes aimed to provide a modular, object oriented and accessible interface for interacting with videos and audio through FFmpeg.
 
@@ -6,7 +6,7 @@ PHPVideoToolkit also provides FFmpeg-PHP emulation in pure PHP so you wouldn't n
 
 **IMPORTANT** PHPVideoToolkit has only been tested with v1.1.2 of FFmpeg. Whilst the majority of functionality should work regardless of your version of FFmpeg I cannot guarantee it. If you find a bug or have a patch please open a ticket or submit a pull request on https://github.com/buggedcom/phpvideotoolkit-v2
 
-###Table of Contents
+### Table of Contents
 
 - [License](#license)
 - [Documentation](#documentation)
@@ -39,7 +39,7 @@ PHPVideoToolkit also provides FFmpeg-PHP emulation in pure PHP so you wouldn't n
 - [Imposing a processing time limit](#imposing-a-processing-time-limit)
 - [Forcing a specific output format whilst using a silly file extension](#forcing-a-specific-output-format-whilst-using-a-silly-file-extension)
 
-##License
+## License
 
 PHPVideoToolkit Copyright (c) 2008-2014 Oliver Lillie
 
@@ -47,11 +47,11 @@ DUAL Licensed under MIT and GPL v2
 
 See LICENSE.md for more details.
 
-##Documentation
+## Documentation
 
 Extensive documentation and examples are bundled with the download and is available in the documentation directory.
 
-##Latest Changes
+## Latest Changes
 
 **[2.2.0-beta]** [10.04.2014]
 
@@ -61,11 +61,11 @@ WARNING: Potential code breaking changes across the board. Please do not upgrade
 
 [Full changelog](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/CHANGELOG.md)
 
-##Usage
+## Usage
 
 Whilst the extensive documentation covers just about everything (to be honest there are only a few pages in the documentation as I'm too busy to write too much of it - but the examples below are pretty good), here are a few examples of what you can do.
 
-###Configuring PHPVideoToolkit
+### Configuring PHPVideoToolkit
 
 PHPVideoToolkit requires some basic configuration and is one through the Config class. The Config class is then used in the constructor of most PHPVideoToolkit classes. Any child object initialised within an already configured class will inherit the configuration options of the parent.
 
@@ -85,7 +85,8 @@ $config = new Config(array(
 Take special note of the second parameter ```true```. If set as true then the related Config object is set as the default config instance. This means that once set as the default instance you do not need to supply the Config object to the other PHPVideoToolkit class constructors. If a config object is not defined and supplied to the PHPVideoToolkit classes, then a default Config object is created and assigned to the class.
 
 Every example below assumes that the Config object has been set as the default config object prior in the execution so there is no need to supply config to each example.
-###Accessing Data About FFmpeg
+
+### Accessing Data About FFmpeg
 
 Simple demonstration about how to access information about FfmpegParser object.
 
@@ -97,7 +98,7 @@ $is_available = $ffmpeg->isAvailable(); // returns boolean
 $ffmpeg_version = $ffmpeg->getVersion(); // outputs something like - array('version'=>1.0, 'build'=>null)
 	
 ```
-###Accessing Data About media files
+### Accessing Data About media files
 
 Simple demonstration about how to access information about media files using the MediaParser object.
 
@@ -109,7 +110,7 @@ $data = $parser->getFileInformation('BigBuckBunny_320x180.mp4');
 echo '<pre>'.print_r($data, true).'</pre>';
 	
 ```
-###PHPVideoToolkit Timecodes
+### PHPVideoToolkit Timecodes
 PHPVideoToolkit utilises Timecode objects when extracting data such as duration or start points, or when extracting portions of a media file. They are fairly simple to understand. All of the example timecodes created below are the same time. 
 
 ```php
@@ -148,7 +149,7 @@ echo $timecode->seconds; // Outputs 39
 
 It's very important to note, as in the last example, that there is a massive difference between accessing ```$timecode->seconds``` and ```$timecode->total_seconds```. `seconds` is the number of seconds in the remaining minute of the timecode. `total_seconds` is the total number of seconds of the timecode. The same logic applies to minutes, hours, milliseconds and their total_ prefixed counterparts.
 
-###PHPVideoToolkit Output Formats
+### PHPVideoToolkit Output Formats
 
 PHPVideoToolkit contains a base class `Format`. This class is extended by three other important base classes called `AudioFormat`, `VideoFormat` and `ImageFormat`. They extend as follows: Format > AudioFormat > VideoFormat > ImageFormat. This allows each of the later formats to inherit functionality from the previous format.
 
@@ -244,7 +245,7 @@ $video->save('output.mp4', $output_format);
 ```
 
 
-###Forcing a specific output format whilst using a silly file extension
+### Forcing a specific output format whilst using a silly file extension
 
 Because of the advanced nature of the input and output formatters, if supplied you can encode a specific output, but use a silly (or custom) file extension. Not really sure why you would want to but it is possible.
 
@@ -256,7 +257,7 @@ $video->save('output.my_silly_custom_file_extension', new ImageFormat_Jpeg());
 				
 ```
 
-###Extract a Single Frame of a Video
+### Extract a Single Frame of a Video
 
 The code below extracts a frame from the video at the 40 second mark.
 
@@ -268,7 +269,7 @@ $process = $video->extractFrame(new Timecode(40))
 				->save('./output/big_buck_bunny_frame.jpg');
 $output = $process->getOutput();
 ```
-###Extract Multiple Frames from a Segment of a Video
+### Extract Multiple Frames from a Segment of a Video
 
 The code below extracts frames at the parent videos' frame rate from between 40 and 50 seconds. If the parent video has a frame rate of 24 fps then 240 images would be extracted from this code.
 
@@ -281,7 +282,7 @@ $process = $video->extractFrames(new Timecode(40), new Timecode(50))
 $output = $process->getOutput();
 ```
 
-###Extract Multiple Frames of a Video at 1 frame per second
+### Extract Multiple Frames of a Video at 1 frame per second
 
 There are two ways you can export at a differing frame rate from that of the parent video. The first is to use an output format to set the video frame rate.
 
@@ -320,7 +321,7 @@ $process = $video->extractFrames(new Timecode(50), null, 1) // if null then the 
 $output = $process->getOutput();
 ```
 
-###Extract Multiple Frames of a Video at 1 frame every 'x' seconds
+### Extract Multiple Frames of a Video at 1 frame every 'x' seconds
 
 The code below uses the ```$force_frame_rate``` argument for ```$video->extractFrames()```, however the same 1/n notation can be used on ```$video_format->setFrameRate()```. This example will output 1 frame every 60 seconds of video.
 
@@ -333,7 +334,7 @@ $process = $video->extractFrames(new Timecode(40), new Timecode(50), '1/60')
 $output = $process->getOutput();
 ```
 
-###Caveats of Extracting Multiple Frames
+### Caveats of Extracting Multiple Frames
 
 ***IMPORTANT:*** It is important to note that if you exporting multiple frames a video you will not always get the expected amount of frames you would expect. This is down to the way FFmpeg treats timecodes. Take the example below into consideration.
 
@@ -363,7 +364,7 @@ while(current < end)
 
 So if we require 10 frames you must actually set your end timecode to a little over 20 seconds like so ```$video->extractSegment(new \PHPVideoToolkit\Timecode(10), new \PHPVideoToolkit\Timecode(20.1))```
 
-###Combining Multiple Images and Audio to form a Video
+### Combining Multiple Images and Audio to form a Video
 
 Whilst PHPVideoToolkit does not natively support combing multiple images and audio into a video, it can still be achieved by add custom commands to the process object.
 
@@ -385,7 +386,7 @@ $process = $audio->save('./output/my_homemade_video.mp4', $output_format, Media:
 
 ```
 
-###Extracting an Animated Gif
+### Extracting an Animated Gif
 Now, FFmpeg's animated gif support is a pile of doggy do do. I can't understand why. However what PHPVideoToolkit does is bypass the native gif exporting of FFmpeg and provide it's own much better alternative.
 
 There are several options available to you when exporting an animated gif. You can use Gifsicle, Imagemagicks convert, or native PHP GD with the symbio/gif-creator composer library.
@@ -474,7 +475,7 @@ $process = $video->extractSegment(new Timecode(10), new Timecode(20))
 $output = $process->getOutput();
 ```
 
-###Resizing Video and Images
+### Resizing Video and Images
 
 In order to resize output video and imagery output you need to supply an [output format](#phpvideotoolkit-output-formats) to the save function you call. The below snippet is an example of resizing a video, however you would use same function call to `setVideoDimensions` just instead of a `VideoFormat` object you would use an `ImageFormat` object.
 
@@ -491,7 +492,7 @@ $video->save('BigBuckBunny_160x120.3gp', $output_format);
 
 ```
 
-###Extracting Audio or Video Channels from a Video
+### Extracting Audio or Video Channels from a Video
 
 ```php
 namespace PHPVideoToolkit;
@@ -503,7 +504,7 @@ $process = $video->extractAudio()->save('./output/big_buck_bunny.mp3');
 $output = $process->getOutput();
 ```
 
-###Extracting a Segment of an Audio or Video file
+### Extracting a Segment of an Audio or Video file
 
 The code below extracts a portion of the video at the from 2 minutes 22 seconds to 3 minutes (ie 180 seconds). *Note the different settings for constructing a timecode.* The timecode object can accept different formats to create a timecode from.
 
@@ -515,7 +516,7 @@ $process = $video->extractSegment(new Timecode('00:02:22.0', Timecode::INPUT_FOR
 				->save('./output/big_buck_bunny.mp4');
 $output = $process->getOutput();
 ```
-###Splitting a Audio or Video file into multiple parts
+### Splitting a Audio or Video file into multiple parts
 
 There are multiple ways you can configure the split parameters. If an array is supplied as the first argument. It must be an array of either, all Timecode instances detailing the timecodes at which you wish to split the media, or all integers. If integers are supplied the integers are treated as frame numbers you wish to split at. You can however also split at even intervals by suppling a single integer as the first parameter. That integer is treated as the number of seconds that you wish to split at. If you have a video that is 3 minutes 30 seconds long and set the split to 60 seconds, you will get 4 videos. The first three will be 60 seconds in length and the last would be 30 seconds in length.
 
@@ -529,7 +530,7 @@ $process = $video->split(45)
 				->save('./output/big_buck_bunny_%timecode.mp4');
 $output = $process->getOutput();
 ```
-###Purging and then adding Meta Data
+### Purging and then adding Meta Data
 
 Unfortunately there is no way using FFmpeg to add meta data without re-encoding the file. There are other tools that can do that though, however if you wish to write meta data to the media during encoding you can do so using code like the example below.
 
@@ -542,7 +543,7 @@ $process = $video->purgeMetaData()
 				->save('./output/big_buck_bunny.mp4');
 $output = $process->getOutput();
 ```
-###Changing Codecs of the audio or video stream
+### Changing Codecs of the audio or video stream
 
 By default PHPVideoToolkit uses the file extension of the output file to automatically generate the required ffmpeg settings (if any) of your desired file format. However if you want to specify different codecs or settings, it is ncessesary to specify them within an output format container. There are three different format objects you can use, depending on the format of your output. They are AudioFormat, VideoFormat and ImageFormat.
 
@@ -577,7 +578,7 @@ $process = $video->save($output_path, $output_format);
 
 $output = $process->getOutput();
 ```
-###Non-Blocking Saves
+### Non-Blocking Saves
 
 The default/main save() function blocks PHP until the encoding process has completed. This means that depending on the size of the media you are encoding it could leave your script running for a long time. To combat this you can call saveNonBlocking() to start the encoding process without blocking PHP.
 
@@ -614,7 +615,7 @@ else
 
 ```
 
-###Encoding with Progress Handlers
+### Encoding with Progress Handlers
 
 Whilst the code above from Non-Blocking Saves looks like it is a progress handler (and it is in a sense, but it doesn't provide data on the encode), progress handlers provide much more detailed information about the current encoding process.
 
@@ -892,7 +893,7 @@ This value is either a) a path value as a string if the above 'input_count' is 1
 
 This is a path string pointing to the current process file that the progress handler is using to read the data from.
 
-###Encoding Multiple Output Files
+### Encoding Multiple Output Files
 
 FFmpeg allows you to [encode multiple output formats from a single command](https://trac.ffmpeg.org/wiki/Creating%20multiple%20outputs). PHPVideoToolkit allows you to perform this functionality as well. This functionality is essentially the same process as performing multiple saves, however has the added benefit of lower overhead because the input file only has to be read into memory once before the encoding takes place. It is recommended that you use this method if you are outputting more than one version of the media. There are of course several caveats when using this method however. 
 
@@ -923,7 +924,7 @@ All progress handlers also work with multiple output, however the caveats outlin
 
 **IMPORTANT** Whilst this is technically possibly, depending on your server and the number of outputs you are generating, it can be quicker to simply chain the requests together instead. See the [chaining processes example](https://github.com/buggedcom/phpvideotoolkit-v2/blob/master/examples/chaining-processes.php) for more information on method chaining.
 
-###Accessing Executed Commands and the Command Line Buffer
+### Accessing Executed Commands and the Command Line Buffer
 
 There may be instances where things go wrong and PHPVideoToolkit hasn't correctly prevented or reported any encoding/decoding errors, or, you may just want to log what is going on. You can access any executed commands and the command lines output fairly simply as the example below shows.
 
@@ -952,7 +953,7 @@ echo 'Actual Command Line Buffer<br />';
 echo '<pre>'.$process->getRawBuffer().'</pre>';
 ```
 
-###Supplying custom commands
+### Supplying custom commands
 
 Because FFmpeg has a specific order in which certain commands need to be added there are a few functions you should be aware of. First of the code below shows you how to access the code FfmpegProcess object. The process object is itself a wrapper around the ProcessBuilder (helps to build queries) and ExceBuffer (executes and controls the query) objects.
 
@@ -999,7 +1000,7 @@ HOWEVER, there is an important caveat you need to be aware of, the above command
 ((/opt/local/bin/ffmpeg '-custom-command' '-i' '/your/input/file.mp4' '-custom-command-with-arg' 'arg value' '-y' '-qscale' '4' '-f' 'mp4' '-strict' 'experimental' '-threads' '1' '-acodec' 'mp3' '-vcodec' 'h264' '/your/output/file.mp4' '-output-command' 'another value' && echo '<c-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>') || echo '<f-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>' '<c-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>' '<e-219970-52ea5f8c9ca9d-da39f7c51d495967dfec435dc91e2879>'$?) 2>&1 > '/tmp/phpvideotoolkit_lvsukB' 2>&1 &
 ```
 
-###Imposing a processing timelimit
+### Imposing a processing timelimit
 
 You may wish to impose a processing timelimit on encoding. There are various reasons for doing this and should be self explanatory. FFmpeg supplies a command to be able to do this and can be invoked like so...
 
