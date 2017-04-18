@@ -1,9 +1,9 @@
-#[2.2.0-beta] [10.04.2014]
+# [2.2.0-beta] [10.04.2014]
 WARNING: Potential code breaking changes across the board. Please do not upgrade existing stable scripts to this codebase. Please use 2.1.5 or below for stability.
 - merged in multi-output branch so that the master branch now supports multi output from ffmpeg.
 - fixed far too many other bugs to mention.
 
-#[2.1.7-beta] [09.04.2014]
+# [2.1.7-beta] [09.04.2014]
 WARNING: Potential code breaking change from Media->save. save() no longer returns the output path if saved in blocking mode. It returns as non-blocking mode does the FfmpegProcess object. So to return the output path of what has been outputed you must call $process->getOutput(). Please use 2.1.5 or below for stability.
 Fixed several bugs:
 - fixed issues in portability progress handler where parsing of image only output data would fail.
@@ -11,41 +11,41 @@ Fixed several bugs:
 - fixed issues where using %timecode or %index in the output would not correctly get renamed unless calling getOutput from the process object. #22
 - fixed issues with animated gifs not following the overwrite setting of the save function call
 
-#[2.1.6-beta] [08.04.2014]
+# [2.1.6-beta] [08.04.2014]
 By default image rotation does not automatically modify the aspect ratio settings of rotated output, however this patch fixes that. If an aspect ratio is not already set and a rotation means that the aspect ratio is not the same as the current ratio then a new ratio will be applied.
 This patch also provides automated functionality where if the aspect ratio does not match the width and height, the ratio corrected width and height and height are returned instead of the actual width and height. This will mean that any output processed from a mis matching file will be as expected.
 Relates to issue #22.
 Marked as beta as it may have unintended consequences that could result in errors.
 
-#[2.1.5] [31.03.2014]
+# [2.1.5] [31.03.2014]
 Replaced _run recursive call with a while loop.
 Provides exactly the same functionality with the benefits of no longer gradually increasing memory usage of the PHP process while transcoding. No longer trips up on xdebug.max_nesting_level setting.
 Thanks petewatts.
 
-#[2.1.4] [19.03.2014]
+# [2.1.4] [19.03.2014]
 Bug fix point release. The AudioFormat class was incorrectly checking a comparison via isset rather than in_array. This fixes that problem and potentially any issues you may have had with mp3/vorbis audio encoding.
 
-#[2.1.3] [17.03.2014]
+# [2.1.3] [17.03.2014]
 A bug fix point release for systems when realpath returns false on some systems and thus the configsetexceptions thrown have no path set in the message.
 If you already successfully have PHPVideoToolkit installed or are on a system where realpath returns the directory regardless of whether it exists or not then you can skip this version.
 
-#[2.1.2] [20.02.2014]
+# [2.1.2] [20.02.2014]
 	- Fixes for missing protected config variable
 
-#[2.1.1-dev] [31.01.2014]
+# [2.1.1-dev] [31.01.2014]
 	- Updates to examples and minor fixes to missing probe data
 
-#[2.1.0] [30.01.2014]
+# [2.1.0] [30.01.2014]
 	- Added ProgressHandlerPortable to provide portable accessibility to encoding 
 	  progress information
 
-#[2.0.0] [22.11.2013]
+# [2.0.0] [22.11.2013]
 		- Fixed various bugs
 
-#[2.0.0] [25.03.2013]
+# [2.0.0] [25.03.2013]
 		- Updated codebase to v2. Main repo is now on github https://github.com/buggedcom/phpvideotoolkit-v2
 
-#[0.1.5] [06.06.2008] 
+# [0.1.5] [06.06.2008] 
 	- REMOVED dependancy on buffering the exec calls to a file, parsing the file and
 	  then unlinking the file. Cuts down considerably of the impact of the class on
 	  the server. Thanks Varon. http://www.buggedcom.co.uk/discuss/viewtopic.php?id=10
@@ -60,7 +60,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	  distributed under a BSD License. The full package can be downloaded from:
 	  http://sourceforge.net/project/showfiles.php?group_id=223120
 
-#[0.1.4] [10.04.2008] 
+# [0.1.4] [10.04.2008] 
 	- ADDED phpvideotoolkit.php4.php and renamed the php5 class 
 	  phpvideotoolkit.php5.php, however the adapter classes will remain php5 only
 	  for the time being. Allow the adapters are php5 it would be very simple for
@@ -79,7 +79,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	  incompatible with the BSD license. Now integrated with php-reader 
 	  http://code.google.com/p/php-reader/ which is licensed under a New BSD license.
 
-#[0.1.3] [04.04.2008] 
+# [0.1.3] [04.04.2008] 
 	- RENAMED primary class to PHPVideoToolkit to avoid any confusion with 
 	  ffmpeg-php
 	- THANKS to Istvan Szakacs, and Rob Coenen for providing some valuable feedback, 
@@ -121,7 +121,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	- CHANGED the functionality of example04.php to show usage of addGDWatermark
 	  if vhooking is not enabled.
 	
-#[0.1.2] [03.04.2008] 
+# [0.1.2] [03.04.2008] 
 	- FIXED bug in PHPVideoToolkit::getFileInfo() that in some instances didn't return 
 	  the correct information, such as dimensions and frame rate. Thanks to
 	  Istvan Szakacs for pointing out the error.
@@ -158,7 +158,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	- UPDATED PHPVideoToolkit::_combineCommands so commands can be ordered in the exec
 	  string.
 
-#[0.1.1] [29.03.2008] 
+# [0.1.1] [29.03.2008] 
 	- FIXED bug in the post processing of exporting a series of image frames.
 	  With thanks to Rob Coenen.
 	- FIXED bug in PHPVideoToolkit::getFileInfo() that returned the incorrect frame
@@ -187,7 +187,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	  to be generated more than one in the same script it only gets generated 
 	  once.
 
-#[0.1.0] [02.03.2008] 
+# [0.1.0] [02.03.2008] 
 	- ADDED new constant PHPVideoToolkit::SIZE_SAS. Which stands for Same As Source,  
 	  meaning ffmpeg will automatically convert the movie to a whatever format   
 	  but preserve the size of the original movie.
@@ -242,7 +242,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	  translation/changes.
 	- CHANGED moveLog functionality to use rename instead of copy and unlink.
 
-#[0.0.9] [12.02.2008] 
+# [0.0.9] [12.02.2008] 
 	- Added new definition FFMPEG_MENCODER_BINARY to point to the mencoder 
 	  binary.
 	- Changed the behavior of setVideoOutputDimensions. it now accepts class
@@ -269,7 +269,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	- Fixed bug in setFormat error message.
 	- Fixed bug in execute.
 
-#[0.0.8] [07.08.2007] 
+# [0.0.8] [07.08.2007] 
 	- Added public functions secondsToTimecode & timecodeToSeconds. Translates
 	  seconds into a timecode and visa versa.
 	  ie. 82 => 00:01:22 & 00:01:22 => 82
@@ -277,7 +277,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	  frames are re-stamped with the frames timecode if true.
 	- Fixed bug in setOutput.
 
-#[0.0.7] [01.08.2007] 
+# [0.0.7] [01.08.2007] 
 	- Added FFMPEG_FORMAT_Y4MP format (yuv4mpegpipe).
 	- Added extra information to install.txt
 	- Added public function hasCommand.
@@ -289,7 +289,7 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	  image extension then and no %d is found then an error is raised.
 	- Changed all booleans from upper to lower case.
 	
-#[0.0.5] [12.03.2007] 
+# [0.0.5] [12.03.2007] 
 	- Added FFMPEG_FORMAT_JPG format (mjpeg). Thanks Matthias.
 	- Changed the behavior of extractFrames. It now accepts a boolean FALSE
 	  argument for $extract_end_timecode. 
@@ -301,5 +301,5 @@ If you already successfully have PHPVideoToolkit installed or are on a system wh
 	  makes specific useage of vhook. If your ffmpeg binary has not been
 	  compiled with --enable-vhook then this will not work.
 	
-#[0.0.1] [02.03.2007] 
+# [0.0.1] [02.03.2007] 
 	- Initial version released

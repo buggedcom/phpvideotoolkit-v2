@@ -724,7 +724,7 @@ exit;
 
 **2**: When outputting files using %timecode or %index and using the ProgressHandlerPortable system it is not possible to currently automatically renaming the resulting temporary file output to their correct output filenames.
 
-###Information Available to the Progress Handlers
+### Information Available to the Progress Handlers
 All of the progress handlers outlined above returned the same information, albeit there are some minor differences as when some of the data is available, however the difference is negligle and for the purposes of this document they really do not matter. Below is a sample output of the data available from ```$progress_handler->probe();```
 
 ```
