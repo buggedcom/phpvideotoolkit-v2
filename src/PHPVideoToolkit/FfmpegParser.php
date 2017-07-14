@@ -29,7 +29,7 @@
          *
          * @access public
          * @author: Oliver Lillie
-         * @param  PHPVideoToolkit\Config $config The config object.
+         * @param  Config $config The config object.
          */
         public function __construct(Config $config=null)
         {

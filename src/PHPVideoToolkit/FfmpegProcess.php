@@ -23,7 +23,7 @@
         /**
          * Variable placeholder for containing the ExecBuffer object.
          * @access protected
-         * @var PHPVideoToolkit\ExecBuffer
+         * @var ExecBuffer
          */
         protected $_exec;
 
@@ -72,7 +72,7 @@
         /**
          * Variable placeholder for the progress handler, if any, that is attached to the process.
          * @access protected
-         * @var PHPVideoToolkit\ProgressHandlerAbstract
+         * @var ProgressHandlerAbstract
          */
         protected $_progress_handler;
 
@@ -91,7 +91,7 @@
          * @author Oliver Lillie
          * @param string $program The programme to call. Note this is not the path. If you wish to call ffmpeg/aconv you should jsut
          *  supply 'ffmpeg' and then set the aconv path as the ffmpeg configuration option in Config.   
-         * @param PHPVideoToolkit\Config $config The config object.
+         * @param Config $config The config object.
          */
         public function __construct($program, Config $config=null)
         {
@@ -114,7 +114,7 @@
          * @access public
          * @author Oliver Lillie
          * @param integer $index The index integer to set the output index to.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          * @throws \InvalidArgumentException If the $index is not an integer.
          */
         public function setOutputIndex($index)
@@ -138,7 +138,7 @@
          * @param integer $index The index to which the input is being added. If null then the input is just appended to the
          *  list of input media. If a positive index then it is set at the given index, it will overwrite anything already in that
          *  position. If -1 then the input is shifted onto the beinging of the input array.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          * @throws \InvalidArgumentException If the input path does not exist.
          * @throws \InvalidArgumentException If the $index is not an integer.
          */
@@ -224,7 +224,7 @@
          * @access public
          * @author Oliver Lillie
          * @param string $output The path to where the output media is to be saved to from ffmpeg.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          */
         public function setOutputPath($output)
         {
@@ -292,7 +292,7 @@
          * @param mixed $argument Any optional arguments to add. If none, false should be given.
          * @param boolean $allow_command_repetition If this command can only be added once then set this to true to prevent
          *  it from being added again.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          */
         public function addPreInputCommand($command, $argument=false, $allow_command_repetition=false)
         {
@@ -311,7 +311,7 @@
          * @param mixed $argument Any optional arguments to add. If none, false should be given.
          * @param boolean $allow_command_repetition If this command can only be added once then set this to true to prevent
          *  it from being added again.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          */
         public function addCommand($command, $argument=false, $allow_command_repetition=false)
         {
@@ -334,7 +334,7 @@
          * @param mixed $argument Any optional arguments to add. If none, false should be given.
          * @param boolean $allow_command_repetition If this command can only be added once then set this to true to prevent
          *  it from being added again.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          */
         public function addPostOutputCommand($command, $argument=false, $allow_command_repetition=false)
         {
@@ -349,7 +349,7 @@
          * @author: Oliver Lillie
          * @param string $command The command to add.
          * @param mixed $argument Any optional arguments to add. If none, false should be given.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          */
         public function removePreInputCommand($command, $argument=false)
         {
@@ -364,7 +364,7 @@
          * @author: Oliver Lillie
          * @param string $command The command to add.
          * @param mixed $argument Any optional arguments to add. If none, false should be given.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          */
         public function removeCommand($command, $argument=false)
         {
@@ -379,7 +379,7 @@
          * @author: Oliver Lillie
          * @param string $command The command to add.
          * @param mixed $argument Any optional arguments to add. If none, false should be given.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          */
         public function removePostOutputCommand($command, $argument=false)
         {
