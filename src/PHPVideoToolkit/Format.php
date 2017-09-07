@@ -95,7 +95,7 @@
          * @author: Oliver Lillie
          * @param  constant $input_output_type Either Format::INPUT or Format::OUTPUT. Defaults to OUTPUT. It determines the format
          *  mode used to set various commands in the final ffmpeg exec call.
-         * @param  PHPVideoToolkit\Config $config The config object.
+         * @param  Config $config The config object.
          * @throws \InvalidArgumentException If the $input_output_type is not valid.
          */
         public function __construct($input_output_type=Format::OUTPUT, Config $config=null)
@@ -161,7 +161,7 @@
             }
             
         }
-        
+
         /**
          * Gets a default format for the related path.
          * If a default format is not found then the fallback_format_class is used.
@@ -169,16 +169,17 @@
          * @access public
          * @static
          * @author Oliver Lillie
-         * @param string $path The file path to get the format for.
-         * @param  PHPVideoToolkit\Config $config The config object.
-         * @param string $fallback_format_class The fallback class to use of the format for the given path cannot be automatically determined.
+         * @param string  $path The file path to get the format for.
+         * @param  Config $config The config object.
+         * @param string  $fallback_format_class The fallback class to use of the format for the given path cannot be automatically determined.
          *  If null is given then a RuntimeException is thrown.
-         * @param  constant $input_output_type Either Format::INPUT or Format::OUTPUT. Defaults to OUTPUT. It determines the format
+         * @param string  $type
+         * @return Format Returns an object extended from the PHPVideToolkit\Format class.
+         * @throws \LogicException
+         * @throws \RuntimeException
+         * @throws \InvalidArgumentException
+         * @internal param constant $input_output_type Either Format::INPUT or Format::OUTPUT. Defaults to OUTPUT. It determines the format
          *  mode used to set various commands in the final ffmpeg exec call.
-         * @return PHPVideToolkit\Format Returns an object extended from the PHPVideToolkit\Format class.
-         * @throws \InvalidArgumentException If the $input_output_type is not valid.
-         * @throws \InvalidArgumentException If the specified fallback class is attempted to be used but is not found.
-         * @throws \LogicException If the generated class does not extend from PHPVideToolkit\Format.
          */
         public static function getFormatFor($path, $config, $fallback_format_class='Format', $type=Format::OUTPUT)
         {
@@ -261,8 +262,8 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @param PHPVideoToolkit\Media $media 
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @param Media $media
+         * @return Format Returns the current object.
          */
         public function setMedia(Media $media)
         {
@@ -296,7 +297,7 @@
          *
          * @access public
          * @author Oliver Lillie
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @return Format Returns the current object.
          * @throws \LogicException If the media object has not yet been set into the current format object.
          */
         public function updateFormatOptions(&$save_path, $overwrite)
@@ -536,7 +537,7 @@
          * @author Oliver Lillie
          * @param  constant $type Either Format::INPUT or Format::OUTPUT. Defaults to OUTPUT. It determines the format
          *  mode used to set various commands in the final ffmpeg exec call.
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @return Format Returns the current object.
          * @throws \InvalidArgumentException If the type is not a valid type.
          */
         public function setType($type)
@@ -560,7 +561,7 @@
          * @author Oliver Lillie
          * @link http://ffmpeg.org/ffmpeg.html#toc-Preset-files
          * @param string $preset_file_path 
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @return Format Returns the current object.
          * @throws \InvalidArgumentException of the file does not exist.
          * @throws \InvalidArgumentException of the file is not readable.
          */
@@ -595,7 +596,7 @@
          * @author Oliver Lillie
          * @param constant $strictness One of the following values. Format::STRICTNESS_VERY, Format::STRICTNESS_STRICT, 
          *  Format::STRICTNESS_NORMAL, Format::STRICTNESS_UNOFFICIAL, Format::STRICTNESS_EXPERIMENTAL
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @return Format Returns the current object.
          * @throws \InvalidArgumentException If an unrecognised strictness value is returned.
          */
         public function setStrictness($strictness)
@@ -621,7 +622,7 @@
          * @access public
          * @author Oliver Lillie
          * @param string $format One of the values returned from FfmpegParser::getFormats.
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @return Format Returns the current object.
          * @throws \InvalidArgumentException If the format requested is "segment". This is a special ffmpeg format to split a file, however PHPVideoToolkit
          *  has a special function to segment files. 
          * @throws \InvalidArgumentException If an unregognised format is given.
@@ -662,7 +663,7 @@
          * @param integer $stream_index Between 0-48. If specified then the threads option is given a stream specifier to 
          *  specify a particular audiovideo stream, i.e. -threads:1 4. If a previous setThreads has been called without specifiying
          *  a stream_index, then the 
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @return Format Returns the current object.
          * @throws \InvalidArgumentException If the threads value is not an integer.
          * @throws \InvalidArgumentException If the threads value is not between 1-64.
          */
@@ -716,7 +717,7 @@
          * @author Oliver Lillie
          * @see http://www.kilobitspersecond.com/2007/05/24/ffmpeg-quality-comparison/
          * @param integer $qscale Between 1-31
-         * @return PHPVideoToolkit\Format Returns the current object.
+         * @return Format Returns the current object.
          * @throws \InvalidArgumentException If the qscale value is not an integer.
          * @throws \InvalidArgumentException If the qscale value is not between 1-64.
          */

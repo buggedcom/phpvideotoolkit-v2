@@ -27,8 +27,8 @@
          * @access public
          * @author Oliver Lillie
          * @param  string $save_path The path to save the animated gif to.
-         * @return PHPVideoToolkit\Image Returns a new instance of PHPVideoToolkit\Image with the new animated gif as the src.
-         * @throws PHPVideoToolkit\AnimatedGifException If the convert process encounters an error.
+         * @return Image Returns a new instance of PHPVideoToolkit\Image with the new animated gif as the src.
+         * @throws AnimatedGifException If the convert process encounters an error.
          */
         public function save($save_path)
         {
@@ -85,7 +85,7 @@
          * @access public
          * @static
          * @author Oliver Lillie
-         * @param  PHPVideoToolkit\Config $config The configuration object.
+         * @param  Config $config The configuration object.
          * @return boolean Returns true if this engine can be used, otherwise false.
          */
         public static function available(Config $config)
