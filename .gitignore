@@ -5,4 +5,4 @@ vendor
 *.sql.gz
 examples/output/*
 examples/tmp/*
-/.idea/
+.idea

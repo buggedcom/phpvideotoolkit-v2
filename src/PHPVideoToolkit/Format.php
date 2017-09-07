@@ -118,7 +118,7 @@
                 'threads_indexed' => null,
             );
 
-            $ffmpeg = new FfmpegParser();
+            $ffmpeg = new FfmpegParser($config);
             $available_commands = $ffmpeg->getCommands();
             if(isset($available_commands['crf']))
             {
