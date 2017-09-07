@@ -33,7 +33,7 @@
          * @author Stig Bakken <ssb@php.net>
          * @author Oliver Lillie
          * @throws \RuntimeException If it's not possible to guess the enviroment paths.
-         * @throws PHPVideoToolkit\BinaryLocateException If it is not possible to locate the specific programme.
+         * @throws BinaryLocateException If it is not possible to locate the specific programme.
          */
         public static function locate($program, $fallback=null)
         {

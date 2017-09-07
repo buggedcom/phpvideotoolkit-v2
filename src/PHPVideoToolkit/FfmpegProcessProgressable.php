@@ -49,7 +49,7 @@
          * @author: Oliver Lillie
          * @param string $program The programme to call. Note this is not the path. If you wish to call ffmpeg/aconv you should jsut
          *  supply 'ffmpeg' and then set the aconv path as the ffmpeg configuration option in Config.   
-         * @param PHPVideoToolkit\Config $config The config object.
+         * @param Config $config The config object.
          */
         public function __construct($programme, Config $config=null)
         {
@@ -66,8 +66,8 @@
          * @access public
          * @author Oliver Lillie
          * @param integer $timelimit_in_seconds The timelimit to impose in seconds.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
-         * @throws PHPVideoToolkit\FfmpegProcessCommandUnavailableException If the timelimit command is not available on the configured ffmpeg.
+         * @return FfmpegProcess Returns the current object.
+         * @throws FfmpegProcessCommandUnavailableException If the timelimit command is not available on the configured ffmpeg.
          * @throws \InvalidArgumentException If the timelimit is not an integer.
          * @throws \InvalidArgumentException If the timelimit is less than or equal to 0.
          */
@@ -102,7 +102,7 @@
          * @access public
          * @author Oliver Lillie
          * @param mixed $callback Can be a callable callback, or an object that extends PHPVideoToolkit\ProgressHandlerAbstract
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          * @throws \InvalidArgumentException If the callback is an object and is not a subclass of PHPVideoToolkit\ProgressHandlerAbstract
          * @throws \InvalidArgumentException If the callback is not callable if not an object.
          */
@@ -158,7 +158,7 @@
          * @access public
          * @author Oliver Lillie
          * @param mixed $callback If given it must be a valid function that is callable.
-         * @return PHPVideoToolkit\FfmpegProcess Returns the current object.
+         * @return FfmpegProcess Returns the current object.
          * @throws \InvalidArgumentException If the callback is not callable.
          */
         public function execute($callback=null)

@@ -52,7 +52,7 @@
          * @access public
          * @author Oliver Lillie
          * @param  mixed $gif_path If a gif is given then the string path, otherwise if a gif is to be generated, null.
-         * @param  PHPVideoToolkit\Config $config The PHPVideoToolkit\Config object
+         * @param  Config $config The PHPVideoToolkit\Config object
          * @throws \RuntimeException If the gif path is set but doesn't exist.
          * @throws \RuntimeException If the gif is not readable.
          * @throws \InvalidArgumentException If the image supplied is not an image.
@@ -171,8 +171,8 @@
          * @param  array $image_object_array An array of PHPVideoToolkit\Image objects to use to create the animated gif.
          * @param  mixed $frame_delay An integer or float value to determine the delay between gif frames.  
          * @param  integer $loop_count The number of times the animated gif should loop. Specify -1 for an endless loop.
-         * @param  PHPVideoToolkit\Config $config The PHPVideoToolkit\Config object.
-         * @return PHPVideoToolkit\AnimatedGif Returns a PHPVideoToolkit\AnimatedGif object.
+         * @param  Config $config The PHPVideoToolkit\Config object.
+         * @return AnimatedGif Returns a PHPVideoToolkit\AnimatedGif object.
          * @throws \InvalidArgumentException If the $image_object_array is empty.
          * @throws \InvalidArgumentException If the $frame_delay is less than 0 or not an integer or float.
          * @throws \InvalidArgumentException If any of the values within $image_object_array is not an instance of PHPVideoToolkit\Image.
