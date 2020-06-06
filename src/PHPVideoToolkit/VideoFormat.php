@@ -283,6 +283,11 @@
             {
                 $video_codec = isset($codecs['libvpx']) === true ? 'libvpx' : 'vp8';
             }
+//          work around for hevc/libx265 names
+            else if(in_array($video_codec, array('libx265', 'hevc', 'h265')) === true)
+            {
+                $video_codec = isset($codecs['libx265']) === true ? 'libx265' : 'hevc';
+            }
             
 //          validate the video codecs that are available from ffmpeg.
             if(isset($codecs[$video_codec]) === false)
