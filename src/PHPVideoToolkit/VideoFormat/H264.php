@@ -30,13 +30,15 @@
                 'h264_preset' => null,
                 'h264_tune' => null,
                 'h264_constant_quantization' => null,
-                'h264_profile' => null
+                'h264_profile' => null,
+                'h264_level' => null,
             ));
             $this->_format_to_command = array_merge($this->_format_to_command, array(
                 'h264_preset' => '-preset <setting>',
                 'h264_tune' => '-tune <setting>',
                 'h264_constant_quantization' => '-qp <setting>',
-                'h264_profile' => '-profile:v <setting>'
+                'h264_profile' => '-profile:v <setting>',
+                'h264_level' => '-level <setting>',
             ));
             
             $this->_restricted_video_presets = null;
@@ -103,6 +105,27 @@
             }
             
             $this->_format['h264_profile'] = $profile;
+            return $this;
+        }
+        
+        public function setH264Level($level=null)
+        {
+            $this->_blockSetOnInputFormat('h264 level');
+            
+            if($level === null)
+            {
+                $this->_format['h264_level'] = null;
+                return $this;
+            }
+            
+            // Levels are described in Annex A of H.264 standard
+            // https://www.itu.int/rec/dologin_pub.asp?lang=e&id=T-REC-H.264-200305-S!!PDF-E&type=items
+            if(in_array($level, array(1, 1.1, 1.2, 1.3, 2, 2.1, 2.2, 3, 3.1, 3.2, 4, 4.1, 4.2, 5, 5.1)) === false)
+            {
+                throw new Exception('Unrecognised h264 level "'.$level.'" set in \\PHPVideoToolkit\\'.get_class($this).'::setH264Level');
+            }
+            
+            $this->_format['h264_level'] = sprintf('%.1f', $level);
             return $this;
         }
         
